@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - نظام الأسطول</title>
+    <link rel="stylesheet" href="fleet-style.css">
+    <link rel="stylesheet" href="fleet-components.css">
+</head>
+<body>
+
+    <header class="system-header">
+        <div class="header-container">
+            <div class="logo-wrapper"><img src="logo.png" alt="Logo" class="logo" onerror="this.style.display='none'"></div>
+            <div class="header-actions">
+                <div class="clock" id="liveClock">جاري التحميل...</div>
+                <button class="lang-btn" onclick="toggleDashboardLanguage()" id="dashLangBtn">English</button>
+                <span id="roleBadge" class="role-badge"></span>
+            </div>
+        </div>
+    </header>
+
+    <div class="tabs-container">
+        <button class="tab-btn active" data-tab="overview" onclick="window.switchTab('overview')" id="tabOverview">📊 الإحصائيات</button>
+        <button class="tab-btn" data-tab="vehicles" onclick="window.switchTab('vehicles')" id="tabVehicles">🚗 الأسطول</button>
+        <button class="tab-btn" data-tab="drivers" onclick="window.switchTab('drivers')" id="tabDrivers">👤 السائقين</button>
+        <button class="tab-btn" data-tab="users" onclick="window.switchTab('users')" id="tabUsers" style="display:none;">👑 المشرفين</button>
+    </div>
+
+    <div class="main-content">
+        <div id="panelOverview" class="tab-panel active">
+            <div class="stats-grid">
+                <div class="stat-card"><h3 id="statTotalLabel">إجمالي المركبات</h3><div class="value" id="statTotal">0</div></div>
+                <div class="stat-card"><h3 id="statValidLabel">صالحة</h3><div class="value" id="statValid" style="color:#10b981;">0</div></div>
+                <div class="stat-card"><h3 id="statWarningLabel">قريبة للانتهاء</h3><div class="value" id="statWarning" style="color:#f59e0b;">0</div></div>
+                <div class="stat-card"><h3 id="statExpiredLabel">منتهية</h3><div class="value" id="statExpired" style="color:#ef4444;">0</div></div>
+            </div>
+            <div class="action-bar"><h3 id="criticalTitle">🚨 تنبيهات المركبات</h3></div>
+            <div id="criticalList"></div>
+        </div>
+
+        <div id="panelVehicles" class="tab-panel">
+            <div class="action-bar"><h3 id="vehiclesTitle">🚗 سجل المركبات</h3><button class="btn-add" onclick="window.showAddVehicleModal()" id="addVehicleBtn">➕ إضافة مركبة</button></div>
+            <div id="vehiclesList"></div>
+        </div>
+
+        <div id="panelDrivers" class="tab-panel">
+            <div class="action-bar"><h3 id="driversTitle">👤 سجل السائقين</h3><button class="btn-add" onclick="window.showAddDriverModal()" id="addDriverBtn">➕ إضافة سائق</button></div>
+            <div id="driversList"></div>
+        </div>
+
+        <div id="panelUsers" class="tab-panel">
+            <div class="action-bar"><h3 id="usersTitle">👑 إدارة المشرفين والمستخدمين</h3><button class="btn-add" onclick="window.Admin?.showAddUserModal()" id="addUserBtn">➕ إضافة مستخدم</button></div>
+            <div id="usersList"></div>
+        </div>
+    </div>
+
+    <footer class="system-footer"><span>mohamed saad © 2026</span></footer>
+    <div id="notificationContainer"></div>
+
+    <script type="module" src="fleet-firebase.js"></script>
+    <script src="fleet-logger.js"></script>
+    <script src="fleet-auth.js"></script>
+    <script src="fleet-core.js"></script>
+    <script src="fleet-admin.js"></script>
+
+    <script>
+        const dashTexts = {
+            ar: { tabOverview: "📊 الإحصائيات", tabVehicles: "🚗 الأسطول", tabDrivers: "👤 السائقين", tabUsers: "👑 المشرفين",
+                  statTotalLabel: "إجمالي المركبات", statValidLabel: "صالحة", statWarningLabel: "قريبة للانتهاء", statExpiredLabel: "منتهية",
+                  criticalTitle: "🚨 تنبيهات المركبات", vehiclesTitle: "🚗 سجل المركبات", driversTitle: "👤 سجل السائقين", usersTitle: "👑 إدارة المشرفين",
+                  addVehicleBtn: "➕ إضافة مركبة", addDriverBtn: "➕ إضافة سائق", addUserBtn: "➕ إضافة مستخدم", langBtn: "English" },
+            en: { tabOverview: "📊 Statistics", tabVehicles: "🚗 Fleet", tabDrivers: "👤 Drivers", tabUsers: "👑 Admins",
+                  statTotalLabel: "Total Vehicles", statValidLabel: "Valid", statWarningLabel: "Expiring Soon", statExpiredLabel: "Expired",
+                  criticalTitle: "🚨 Vehicle Alerts", vehiclesTitle: "🚗 Vehicle Records", driversTitle: "👤 Driver Records", usersTitle: "👑 User Management",
+                  addVehicleBtn: "➕ Add Vehicle", addDriverBtn: "➕ Add Driver", addUserBtn: "➕ Add User", langBtn: "العربية" }
+        };
+        function applyDashboardLanguage(lang) {
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.lang = lang;
+            const t = dashTexts[lang];
+            for (let id in t) { let el = document.getElementById(id); if (el) el.textContent = t[id]; }
+        }
+        function toggleDashboardLanguage() {
+            const current = localStorage.getItem('lang') || 'ar';
+            const next = current === 'ar' ? 'en' : 'ar';
+            localStorage.setItem('lang', next);
+            applyDashboardLanguage(next);
+            if (window.Core) { window.Core.loadStats(); window.Core.loadCriticalVehicles(); window.Core.loadAllVehicles(); window.Core.loadAllDrivers(); }
+            if (window.Admin && document.getElementById('panelUsers').classList.contains('active')) window.Admin.loadAllUsers();
+        }
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('lang') || 'ar';
+            applyDashboardLanguage(savedLang);
+            if (window.AuthEngine) window.AuthEngine.enforceGuard();
+        });
+    </script>
+</body>
+</html>
