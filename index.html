@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fleet System - Login</title>
+    <style>
+        /* تصميم عصري وأزرق فاتح */
+        :root { --primary: #3b82f6; --bg: #f1f5f9; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .login-box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        img { height: 60px; margin-bottom: 20px; }
+        h2 { color: var(--primary); margin-bottom: 25px; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
+        button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: 0.2s; }
+        button:hover { background: #2563eb; }
+        #err { color: #ef4444; font-size: 0.9rem; margin-bottom: 10px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <img src="logo.png" alt="Logo">
+        <h2>تسجيل الدخول</h2>
+        <div id="err"></div>
+        <form id="fLogin">
+            <input type="email" id="txtEmail" placeholder="البريد الإلكتروني" required>
+            <input type="password" id="txtPass" placeholder="كلمة المرور" required>
+            <button type="submit">دخول</button>
+        </form>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script>
+        // 1. التهيئة
+        const firebaseConfig = {
+            apiKey: "AIzaSyDBHHGY_gVpm3NlXThqsC6ojTL9Je4xQ9w",
+            authDomain: "car-moving-8b59e.firebaseapp.com",
+            databaseURL: "https://car-moving-8b59e-default-rtdb.firebaseio.com",
+            projectId: "car-moving-8b59e",
+            storageBucket: "car-moving-8b59e.firebasestorage.app",
+            messagingSenderId: "332747318494",
+            appId: "1:332747318494:web:d5d61cd53f322a182f0e4f"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // 2. مراقبة الحالة (توجيه فوري إذا مسجل)
+        auth.onAuthStateChanged(user => {
+            if(user) window.location.href = "dashboard.html";
+        });
+
+        // 3. تسجيل الدخول
+        document.getElementById('fLogin').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('txtEmail').value;
+            const pass = document.getElementById('txtPass').value;
+            const errDiv = document.getElementById('err');
+            errDiv.style.display = 'none';
+
+            try {
+                const { user } = await auth.signInWithEmailAndPassword(email, pass);
+                // التحقق من وجود سجل في DB
+                const snap = await db.ref(`system_users/${user.uid}`).get();
+                
+                if (snap.exists()) {
+                    // إذا مدير أو مشرف مسجل
+                    localStorage.setItem('user_role', snap.val().role);
+                    window.location.href = "dashboard.html";
+                } else {
+                    // إذا المدير الرئيسي لأول مرة (Auto Seed)
+                    if (email === "saad323m@gmail.com") {
+                        await db.ref(`system_users/${user.uid}`).set({ 
+                            email: email, role: "admin", status: "active", name: "SAAD", title: "مدير النظام" 
+                        });
+                        localStorage.setItem('user_role', 'admin');
+                        window.location.href = "dashboard.html";
+                    } else {
+                        // مستخدم موجود في Auth ولكن لا يملك صلاحية في DB
+                        errDiv.textContent = "عذراً، حسابك غير مفعل.";
+                        errDiv.style.display = 'block';
+                        auth.signOut();
+                    }
+                }
+            } catch (error) {
+                // معالجة محاولة إنشاء حساب المدير إذا لم يكن موجوداً
+                if (error.code === 'auth/user-not-found' && email === "saad323m@gmail.com") {
+                    try {
+                        const { user } = await auth.createUserWithEmailAndPassword(email, pass);
+                        await db.ref(`system_users/${user.uid}`).set({ 
+                            email: email, role: "admin", status: "active", name: "SAAD", title: "مدير النظام" 
+                        });
+                        localStorage.setItem('user_role', 'admin');
+                        window.location.href = "dashboard.html";
+                    } catch (e) { 
+                        errDiv.textContent = e.message; 
+                        errDiv.style.display = 'block'; 
+                    }
+                } else {
+                    errDiv.textContent = "بيانات الدخول غير صحيحة أو الحساب غير موجود.";
+                    errDiv.style.display = 'block';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
