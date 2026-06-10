@@ -149,6 +149,3 @@ window.systemAuthEngine = {
     enforceSystemRouteGuard, 
     showFormError 
 };
-
-// ربط المعالج العالمي
-window.handleSystemLoginWrapper = handleSystemLogin;
