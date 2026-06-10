@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fleet Management System</title>
+    <style>
+        /* ====== التصميم الكامل (CSS) ====== */
+        :root { --primary: #3b82f6; --primary-dark: #1d4ed8; --bg: #f8fafc; --white: #ffffff; --text: #1e293b; --muted: #64748b; --border: #e2e8f0; --success: #22c55e; --warning: #f59e0b; --danger: #ef4444; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* Header */
+        .hdr { background: var(--white); height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+        .logo { height: 40px; }
+        .hdr-l { display: flex; align-items: center; gap: 15px; }
+        .clk { background: #eff6ff; color: var(--primary-dark); padding: 8px 15px; border-radius: 20px; font-weight: 600; font-size: 0.85rem; }
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+        .btn-p { background: var(--primary); color: white; }
+        .btn-o { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
+        .btn-d { background: var(--danger); color: white; }
+
+        /* Layout */
+        .layout { display: flex; flex: 1; }
+        .side { width: 220px; background: var(--white); border-left: 1px solid var(--border); padding: 20px 10px; }
+        .nav-i { display: block; padding: 12px 15px; margin-bottom: 5px; color: var(--muted); text-decoration: none; border-radius: 6px; cursor: pointer; }
+        .nav-i.active, .nav-i:hover { background: #eff6ff; color: var(--primary-dark); font-weight: 700; }
+        .main { flex: 1; padding: 20px; }
+
+        /* Cards & Items */
+        .crd { background: var(--white); border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 15px; overflow: hidden; border-left: 4px solid var(--primary); }
+        .crd.warn { border-left-color: var(--warning); }
+        .crd.danger { border-left-color: var(--danger); }
+        .crd.success { border-left-color: var(--success); }
+        
+        .crd-hd { padding: 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .crd-bd { padding: 15px; border-top: 1px solid var(--border); background: #fafafa; display: none; }
+        .crd-bd.show { display: block; }
+
+        /* Abu Dhabi Plate */
+        .plate { display: inline-flex; direction: ltr; border: 2px solid #000; border-radius: 4px; height: 32px; background: #fff; overflow: hidden; }
+        .plate-c { background: #ef4444; color: white; padding: 0 10px; display: flex; align-items: center; font-weight: bold; border-right: 2px solid #000; min-width: 35px; justify-content: center; }
+        .plate-n { color: #000; padding: 0 15px; display: flex; align-items: center; font-weight: bold; font-size: 1.1rem; min-width: 60px; justify-content: center; }
+
+        /* Modals */
+        .mod { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .mod-bx { background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 500px; position: relative; }
+        .cls { position: absolute; top: 10px; left: 10px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); }
+        .frm-grp { margin-bottom: 15px; }
+        .frm-lbl { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; }
+        .frm-inp { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; }
+
+        /* Stats */
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .st-bx { background: var(--white); padding: 20px; border-radius: 8px; border-top: 3px solid var(--primary); }
+        .st-bx h4 { font-size: 0.8rem; color: var(--muted); margin-bottom: 5px; }
+        .st-bx p { font-size: 1.6rem; font-weight: 800; }
+
+        /* Utilities */
+        .flex { display: flex; gap: 10px; align-items: center; }
+        .hide { display: none !important; }
+        .ftr { text-align: center; padding: 15px; color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--border); margin-top: auto; }
+        
+        /* Print */
+        @media print { body { background: white; } .side, .hdr-l, .btn, .mod { display: none !important; } .layout { display: block; } .crd-bd { display: block !important; border: none; } }
+    </style>
+</head>
+<body>
+
+    <header class="hdr">
+        <img src="logo.png" class="logo" alt="Logo">
+        <div class="hdr-l">
+            <div id="clk" class="clk">--:--</div>
+            <button class="btn btn-o" onclick="toggleLang()">English</button>
+            <button class="btn btn-d" onclick="logout()">خروج</button>
+        </div>
+    </header>
+
+    <div class="layout">
+        <aside class="side">
+            <div class="nav-i active" onclick="swTab('stats')">الإحصائيات</div>
+            <div class="nav-i" onclick="swTab('vehicles')">المركبات</div>
+            <div class="nav-i" onclick="swTab('drivers')">السائقين</div>
+            <div class="nav-i hide" id="mnuUsers" onclick="swTab('users')">المستخدمين</div>
+            <div class="nav-i hide" id="mnuLogs" onclick="swTab('logs')">السجلات</div>
+        </aside>
+
+        <main class="main">
+            <!-- Stats -->
+            <div id="p-stats" class="page">
+                <div class="stats">
+                    <div class="st-bx"><h4>المركبات</h4><p id="sV">0</p></div>
+                    <div class="st-bx" style="border-color:var(--success)"><h4>السائقين</h4><p id="sD">0</p></div>
+                    <div class="st-bx" style="border-color:var(--danger)"><h4>منتهية</h4><p id="sE">0</p></div>
+                </div>
+            </div>
+
+            <!-- Vehicles -->
+            <div id="p-vehicles" class="page hide">
+                <div class="flex" style="margin-bottom:15px;">
+                    <input type="text" id="srcV" class="frm-inp" style="max-width:300px" placeholder="بحث برقم اللوحة..." onkeyup="if(event.key==='Enter') loadV()">
+                    <button class="btn btn-p" onclick="openMod('mV')">إضافة سيارة</button>
+                </div>
+                <div id="lstV"></div>
+                <div style="text-align:center; margin-top:15px;"><button class="btn btn-o hide" id="moreV" onclick="loadV(true)">عرض المزيد</button></div>
+            </div>
+
+            <!-- Drivers -->
+            <div id="p-drivers" class="page hide">
+                <div style="margin-bottom:15px;"><button class="btn btn-p" onclick="openMod('mD')">إضافة سائق</button></div>
+                <div id="lstD"></div>
+            </div>
+
+            <!-- Users (Admin Only) -->
+            <div id="p-users" class="page hide">
+                <h2>المستخدمين</h2><br>
+                <div id="lstU"></div>
+            </div>
+
+            <!-- Logs (Admin Only) -->
+            <div id="p-logs" class="page hide">
+                <h2>سجل النظام</h2><br>
+                <div id="lstL" style="background:white; padding:15px; border-radius:8px;"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add Vehicle -->
+    <div id="mV" class="mod"><div class="mod-bx">
+        <button class="cls" onclick="closeMod('mV')">&times;</button>
+        <h3>إضافة سيارة</h3>
+        <form onsubmit="saveV(event)" style="margin-top:15px;">
+            <div class="frm-grp"><label>رقم اللوحة</label><input type="text" id="vNum" class="frm-inp" required></div>
+            <div class="frm-grp"><label>رمز اللوحة</label><input type="text" id="vCd" class="frm-inp" required></div>
+            <div class="frm-grp"><label>المالك</label><input type="text" id="vOwn" class="frm-inp" required></div>
+            <div class="frm-grp"><label>VIN</label><input type="text" id="vVin" class="frm-inp" required></div>
+            <div class="frm-grp"><label>النوع</label><input type="text" id="vTyp" class="frm-inp" required></div>
+            <div class="frm-grp"><label>السنة</label><input type="number" id="vYr" class="frm-inp" value="2024" required></div>
+            <div class="frm-grp"><label>انتهاء الترخيص</label><input type="date" id="vReg" class="frm-inp" required></div>
+            <div class="frm-grp"><label>انتهاء التأمين</label><input type="date" id="vIns" class="frm-inp" required></div>
+            <button class="btn btn-p" style="width:100%">حفظ</button>
+        </form>
+    </div></div>
+
+    <!-- Add Driver -->
+    <div id="mD" class="mod"><div class="mod-bx">
+        <button class="cls" onclick="closeMod('mD')">&times;</button>
+        <h3>إضافة سائق</h3>
+        <form onsubmit="saveD(event)" style="margin-top:15px;">
+            <div class="frm-grp"><label>الاسم</label><input type="text" id="dNm" class="frm-inp" required></div>
+            <div class="frm-grp"><label>الهاتف</label><input type="text" id="dPh" class="frm-inp" required></div>
+            <div class="frm-grp"><label>الرخصة</label><input type="text" id="dLic" class="frm-inp" required></div>
+            <button class="btn btn-p" style="width:100%">حفظ</button>
+        </form>
+    </div></div>
+
+    <!-- Assign Custody -->
+    <div id="mC" class="mod"><div class="mod-bx">
+        <button class="cls" onclick="closeMod('mC')">&times;</button>
+        <h3>ربط العهدة</h3>
+        <input type="hidden" id="cVid">
+        <div class="frm-grp" style="margin-top:15px;"><label>اختر السائق</label><select id="cSel" class="frm-inp"></select></div>
+        <button class="btn btn-p" style="width:100%; margin-top:10px;" onclick="setCustody()">تأكيد</button>
+    </div></div>
+
+    <footer class="ftr">mohamed saad &copy; 2025</footer>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script>
+        // ==== 1. الإعدادات والتهيئة ====
+        const firebaseConfig = {
+            apiKey: "AIzaSyDBHHGY_gVpm3NlXThqsC6ojTL9Je4xQ9w",
+            authDomain: "car-moving-8b59e.firebaseapp.com",
+            databaseURL: "https://car-moving-8b59e-default-rtdb.firebaseio.com",
+            projectId: "car-moving-8b59e",
+            storageBucket: "car-moving-8b59e.firebasestorage.app",
+            messagingSenderId: "332747318494",
+            appId: "1:332747318494:web:d5d61cd53f322a182f0e4f"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
+        
+        let role = 'supervisor';
+        let lang = 'ar';
+        let lastKeyV = null; // للتنقل بين الصفحات
+
+        // ==== 2. المراقبة والتهيئة الأولية ====
+        auth.onAuthStateChanged(async (u) => {
+            if (!u) { window.location.href = "index.html"; return; }
+            
+            // جلب الدور
+            const snap = await db.ref(`system_users/${u.uid}`).get();
+            if (snap.exists()) {
+                role = snap.val().role;
+                localStorage.setItem('role', role);
+                if (role === 'admin') {
+                    document.getElementById('mnuUsers').classList.remove('hide');
+                    document.getElementById('mnuLogs').classList.remove('hide');
+                }
+            }
+            updClk();
+            setInterval(updClk, 1000);
+            swTab('stats');
+        });
+
+        // ==== 3. الوظائف المساعدة (Time, Lang, Utils) ====
+        function updClk() {
+            const now = new Date();
+            const uae = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Dubai"}));
+            const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            let str = uae.toLocaleDateString(lang === 'ar' ? 'ar-AE' : 'en-US', opts);
+            if (lang === 'ar') str += (uae.getHours() >= 12 ? ' مساءً' : ' صباحاً');
+            document.getElementById('clk').innerText = str;
+        }
+
+        function toggleLang() {
+            lang = lang === 'ar' ? 'en' : 'ar';
+            localStorage.setItem('lang', lang);
+            location.reload();
+        }
+
+        function logout() { auth.signOut(); }
+
+        function swTab(t) {
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hide'));
+            document.getElementById('p-' + t).classList.remove('hide');
+            document.querySelectorAll('.nav-i').forEach(n => n.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (t === 'stats') loadStats();
+            if (t === 'vehicles') loadV();
+            if (t === 'drivers') loadD();
+            if (t === 'users') loadU();
+            if (t === 'logs') loadL();
+        }
+
+        function checkExp(d) {
+            if(!d) return '';
+            const diff = (new Date(d) - new Date()) / (86400000);
+            if (diff < 0) return 'danger';
+            if (diff <= 15) return 'warn';
+            return 'success';
+        }
+
+        function daysLeft(d) {
+            if(!d) return '-';
+            const diff = Math.ceil((new Date(d) - new Date()) / (86400000));
+            return diff < 0 ? `منتهي منذ ${Math.abs(diff)}` : `متبقي ${diff}`;
+        }
+
+        // ==== 4. السيارات (Vehicles) ====
+        async function loadV(more = false) {
+            const container = document.getElementById('lstV');
+            if (!more) { container.innerHTML = '<p>جاري التحميل...</p>'; lastKeyV = null; }
+            
+            let q = db.ref('vehicles').orderByKey();
+            if (lastKeyV) q = q.startAfter(lastKeyV);
+            q = q.limitToFirst(10);
+
+            const snap = await q.get();
+            if (!more) container.innerHTML = '';
+            
+            if (!snap.exists()) { 
+                if(!more) container.innerHTML = '<p style="text-align:center">لا توجد بيانات</p>';
+                document.getElementById('moreV').classList.add('hide');
+                return; 
+            }
+
+            snap.forEach(v => {
+                lastKeyV = v.key;
+                const d = v.val();
+                const st = checkExp(d.regExpiry);
+                const st2 = checkExp(d.insExpiry);
+                const cls = (st === 'danger' || st2 === 'danger') ? 'danger' : ((st === 'warn' || st2 === 'warn') ? 'warn' : 'success');
+                
+                const html = `
+                <div class="crd ${cls}" id="v-${v.key}">
+                    <div class="crd-hd" onclick="this.nextElementSibling.classList.toggle('show')">
+                        <div>
+                            <div class="plate"><div class="plate-c">${d.plateCategory||'-'}</div><div class="plate-n">${d.plateNumber||'0'}</div></div>
+                            <div style="margin-top:5px; font-size:0.85rem; color:var(--muted)">${d.vehicleId} | ${d.type}</div>
+                        </div>
+                        <div class="flex"><span class="status-dot ${cls}"></span></div>
+                    </div>
+                    <div class="crd-bd">
+                        <p style="margin-bottom:5px"><strong>المالك:</strong> ${d.owner}</p>
+                        <p style="margin-bottom:5px"><strong>المستخدم:</strong> <span id="drv-${v.key}">${d.currentDriverName || 'بدون'}</span></p>
+                        <p style="margin-bottom:5px"><strong>الترخيص:</strong> ${d.regExpiry} (${daysLeft(d.regExpiry)})</p>
+                        <p style="margin-bottom:5px"><strong>التأمين:</strong> ${d.insExpiry} (${daysLeft(d.insExpiry)})</p>
+                        <div class="flex" style="margin-top:10px;">
+                            <button class="btn btn-o btn-sm" onclick="printIt('v-${v.key}')">طباعة</button>
+                            <button class="btn btn-p btn-sm" onclick="openCustody('${v.key}', '${d.currentDriverId || 'NONE'}')">إدارة العهدة</button>
+                        </div>
+                    </div>
+                </div>`;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+            document.getElementById('moreV').classList.remove('hide');
+        }
+
+        async function saveV(e) {
+            e.preventDefault();
+            const counter = await db.ref('system_counters/vehicles').get();
+            let next = counter.exists() ? counter.val() + 1 : 1;
+            const id = `UAE ${String(next).padStart(4, '0')}`;
+            
+            const data = {
+                vehicleId: id,
+                plateNumber: document.getElementById('vNum').value,
+                plateCategory: document.getElementById('vCd').value,
+                owner: document.getElementById('vOwn').value,
+                vin: document.getElementById('vVin').value,
+                type: document.getElementById('vTyp').value,
+                year: document.getElementById('vYr').value,
+                regExpiry: document.getElementById('vReg').value,
+                insExpiry: document.getElementById('vIns').value,
+                currentDriverId: "NONE",
+                currentDriverName: "NONE"
+            };
+            
+            await db.ref(`vehicles/${id}`).set(data);
+            await db.ref('system_counters/vehicles').set(next);
+            
+            // Log
+            await log({ vehicleId: id, actionType: "ADD_VEHICLE", details: data.plateNumber });
+            
+            closeMod('mV');
+            loadV();
+            loadStats();
+        }
+
+        // ==== 5. السائقين (Drivers) ====
+        async function loadD() {
+            const c = document.getElementById('lstD'); c.innerHTML = 'جاري التحميل...';
+            const snap = await db.ref('system_drivers').limitToFirst(20).get();
+            c.innerHTML = '';
+            if(!snap.exists()){ c.innerHTML='<p style="text-align:center">لا يوجد</p>'; return;}
+            snap.forEach(d => {
+                const data = d.val();
+                c.innerHTML += `
+                <div class="crd success">
+                    <div class="crd-hd" onclick="this.nextElementSibling.classList.toggle('show')">
+                        <div><h3>${data.driverName}</h3><small style="color:var(--muted)">${data.mobile}</small></div>
+                    </div>
+                    <div class="crd-bd">
+                        <p><strong>المعرف:</strong> ${data.driverId}</p>
+                        <p><strong>الرخصة:</strong> ${data.licenseNumber}</p>
+                        <button class="btn btn-o btn-sm" onclick="printIt(this.closest('.crd'))">طباعة</button>
+                    </div>
+                </div>`;
+            });
+        }
+
+        async function saveD(e) {
+            e.preventDefault();
+            const id = 'DRV_' + Date.now();
+            const data = {
+                driverId: id,
+                driverName: document.getElementById('dNm').value,
+                mobile: document.getElementById('dPh').value,
+                licenseNumber: document.getElementById('dLic').value
+            };
+            await db.ref(`system_drivers/${id}`).set(data);
+            await log({ driverId: id, actionType: "ADD_DRIVER", details: data.driverName });
+            closeMod('mD');
+            loadD();
+        }
+
+        // ==== 6. العهدة (Custody) ====
+        async function openCustody(vId, currentD) {
+            document.getElementById('cVid').value = vId;
+            const snap = await db.ref('system_drivers').get();
+            let opts = '<option value="NONE">بدون سائق</option>';
+            snap.forEach(d => {
+                const data = d.val();
+                opts += `<option value="${data.driverId}" ${data.driverId === currentD ? 'selected' : ''}>${data.driverName}</option>`;
+            });
+            document.getElementById('cSel').innerHTML = opts;
+            openMod('mC');
+        }
+
+        async function setCustody() {
+            const vId = document.getElementById('cVid').value;
+            const dId = document.getElementById('cSel').value;
+            const dName = document.getElementById('cSel').selectedOptions[0].text;
+            
+            await db.ref(`vehicles/${vId}`).update({ currentDriverId: dId, currentDriverName: dName });
+            await log({ vehicleId: vId, driverId: dId, actionType: "CUSTODY_CHANGE", details: `Assigned to ${dName}` });
+            
+            closeMod('mC');
+            loadV();
+        }
+
+        // ==== 7. المستخدمين والسجلات (Admin) ====
+        async function loadU() {
+            if (role !== 'admin') return;
+            const c = document.getElementById('lstU'); c.innerHTML = '';
+            const snap = await db.ref('system_users').get();
+            snap.forEach(u => {
+                const d = u.val();
+                c.innerHTML += `<div class="crd" style="padding:15px;"><strong>${d.name}</strong> (${d.role}) - ${d.email}</div>`;
+            });
+        }
+
+        async function loadL() {
+            if (role !== 'admin') return;
+            const c = document.getElementById('lstL'); c.innerHTML = '';
+            const snap = await db.ref('system_logs').limitToLast(20).get();
+            snap.forEach(l => {
+                const d = l.val();
+                c.innerHTML += `<div style="padding:8px; border-bottom:1px solid #eee;"><small>${d.timestamp}</small> <strong>${d.actionType}</strong> - ${d.details || ''} <em>(${d.operator})</em></div>`;
+            });
+        }
+
+        async function loadStats() {
+            const v = await db.ref('vehicles').get();
+            const d = await db.ref('system_drivers').get();
+            let exp = 0;
+            if(v.exists()) v.forEach(x => { if(checkExp(x.val().regExpiry) === 'danger') exp++; });
+            document.getElementById('sV').innerText = v.exists() ? v.numChildren() : 0;
+            document.getElementById('sD').innerText = d.exists() ? d.numChildren() : 0;
+            document.getElementById('sE').innerText = exp;
+        }
+
+        // ==== 8. أدوات مساعدة ====
+        function openMod(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeMod(id) { document.getElementById(id).style.display = 'none'; }
+        function printIt(el) {
+            const win = window.open('', '', 'width=800');
+            win.document.write(`<html><body dir='rtl' style='font-family:sans-serif; padding:20px;'>${document.getElementById(el).innerHTML || el.innerHTML}</body></html>`);
+            win.print(); win.close();
+        }
+        
+        // Triple Logger
+        async function log(payload) {
+            const now = new Date();
+            const uae = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Dubai"}));
+            const data = {
+                ...payload,
+                timestamp: uae.toLocaleString('ar-AE'),
+                operator: auth.currentUser.email
+            };
+            // 1. System Log
+            db.ref('system_logs').push(data);
+            // 2. Vehicle Log
+            if(payload.vehicleId) db.ref(`vehicles/${payload.vehicleId}/history`).push(data);
+            // 3. Driver Log
+            if(payload.driverId && payload.driverId !== 'NONE') db.ref(`system_drivers/${payload.driverId}/history`).push(data);
+        }
+    </script>
+</body>
+</html>
