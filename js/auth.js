@@ -3,32 +3,26 @@
    حقوق المطور: mohamed saad
    ========================================================================== */
 
-const { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } = window.firebaseAuth;
-const { ref, set, get, child } = window.dbTools;
-
-// مفتاح الأمان الإضافي الثاني لحماية حساب سعد من أي اختراق أو وصول غير مصرح
 const MASTER_SECOND_FACTOR_KEY = "Saad@2026#Secure";
 
 const authMessages = {
     ar: {
-        emptyFields: "عذراً، يرجى ملء حقول البريد الإلكتروني وكلمة المرور أولاً لإتمام العملية.",
-        invalidEmail: "صيغة البريد الإلكتروني غير صحيحة، يرجى كتابته بشكل سليم.",
-        wrongCredentials: "بيانات الدخول غير مطابقة! يرجى التأكد والمحاولة مجدداً.",
-        userDisabled: "تنبيه أمني: تم حظر حساب المشرف هذا من قبل مدير النظام.",
-        networkError: "فشل الاتصال بالسيرفر، يرجى التحقق من جودة شبكة الإنترنت.",
-        unknownError: "حدث خطأ غير متوقع أثناء معالجة البيانات.",
-        unauthorizedAccess: "غير مصرح لك! تم طردك وإعادتك لصفحة الدخول لمحاولتك تخطي رتبتك.",
-        wrongMasterKey: "خطأ أمني حرج: مفتاح الأمان الإضافي الثاني غير صحيح! تم رفض عملية الدخول."
+        emptyFields: "عذراً، يرجى ملء حقول البريد الإلكتروني وكلمة المرور أولاً.",
+        invalidEmail: "صيغة البريد الإلكتروني غير صحيحة.",
+        wrongCredentials: "بيانات الدخول غير صحيحة! يرجى المحاولة مجدداً.",
+        userDisabled: "تنبيه أمني: تم حظر حساب المشرف هذا.",
+        networkError: "فشل الاتصال بالسيرفر، يرجى التحقق من الشبكة.",
+        unknownError: "حدث خطأ غير متوقع.",
+        wrongMasterKey: "خطأ أمني: مفتاح الأمان الإضافي غير صحيح!"
     },
     en: {
-        emptyFields: "Sorry, please fill in both email and password fields.",
-        invalidEmail: "The email format is invalid. Please check again.",
-        wrongCredentials: "Invalid credentials! Please check your inputs.",
+        emptyFields: "Please fill in both email and password fields.",
+        invalidEmail: "The email format is invalid.",
+        wrongCredentials: "Invalid credentials! Please try again.",
         userDisabled: "Security Alert: This supervisor account has been suspended.",
         networkError: "Server connection failed. Please check your internet.",
         unknownError: "An unexpected error occurred.",
-        unauthorizedAccess: "Unauthorized access! Redirected to authentication page.",
-        wrongMasterKey: "Critical Security Error: Invalid second-factor Master Key! Access Denied."
+        wrongMasterKey: "Security Error: Invalid second-factor Master Key!"
     }
 };
 
@@ -38,7 +32,7 @@ function showFormError(errorCode, customText = "") {
     const errorMessageText = document.getElementById('errorMessageText');
     if (!errorContainer || !errorMessageText) return;
     let message = customText || authMessages[currentLang][errorCode] || authMessages[currentLang]['unknownError'];
-    errorMessageText.textContent = message.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+    errorMessageText.textContent = message;
     errorContainer.classList.remove('hidden');
 }
 
@@ -47,7 +41,6 @@ function hideFormError() {
     if (errorContainer) errorContainer.classList.add('hidden');
 }
 
-// معالج الدخول الموحد المطبق لنظام التحقق الثنائي التلقائي (Dual-Factor Auto-Seed) لمدير النظام
 async function handleSystemLogin(event) {
     event.preventDefault();
     hideFormError();
@@ -61,15 +54,20 @@ async function handleSystemLogin(event) {
     const email = emailInput.value.trim();
     const password = passwordInput.value;
 
-    if (!email || !password) { showFormError('emptyFields'); return; }
+    if (!email || !password) {
+        showFormError('emptyFields');
+        return;
+    }
+
     if (submitButton) submitButton.disabled = true;
 
     try {
-        // [شرط حماية العقد]: إجبار حساب سعد على إدخال مفتاح الهوية الثاني قبل لمس السيرفر
+        // مفتاح الأمان الثنائي لحساب المدير
         if (email === "saad323m@gmail.com") {
-            const promptTitle = localStorage.getItem('sys_lang') === 'ar' 
-                ? 'تنبيه أمني حرج: برجاء إدخال مفتاح الأمان الإضافي الثاني لترخيص صلاحياتك المطلقة:' 
-                : 'Security Alert: Enter the secondary Master Security Key to authorize admin rights:';
+            const currentLang = localStorage.getItem('sys_lang') || 'ar';
+            const promptTitle = currentLang === 'ar' 
+                ? 'تنبيه أمني: أدخل مفتاح الأمان الإضافي الثاني:' 
+                : 'Security Alert: Enter the secondary Master Security Key:';
             
             const userSecondaryKey = prompt(promptTitle);
             
@@ -82,14 +80,14 @@ async function handleSystemLogin(event) {
 
         let userCredential;
         try {
-            userCredential = await signInWithEmailAndPassword(window.firebaseAuth, email, password);
+            userCredential = await window.signInWithEmailAndPassword(window.firebaseAuth, email, password);
         } catch (authError) {
-            // تفعيل محرك الـ Auto-Seed الذكي لإنشاء حسابك تلقائياً دون دخول لوحة تحكم فايربيس
+            // Auto-Seed: إنشاء حساب المدير تلقائياً
             if (email === "saad323m@gmail.com" && (authError.code === 'auth/user-not-found' || authError.code === 'auth/invalid-credential')) {
-                console.log("Admin account not initialized. Initiating Auto-Seed Engine...");
-                userCredential = await createUserWithEmailAndPassword(window.firebaseAuth, email, password);
+                console.log("Admin account not found. Creating automatically...");
+                userCredential = await window.createUserWithEmailAndPassword(window.firebaseAuth, email, password);
                 
-                await set(ref(window.firebaseDB, 'system_users/' + userCredential.user.uid), {
+                await window.dbTools.set(window.dbTools.ref(window.firebaseDB, 'system_users/' + userCredential.user.uid), {
                     email: email,
                     role: "admin",
                     status: "active",
@@ -102,27 +100,23 @@ async function handleSystemLogin(event) {
         }
 
         const user = userCredential.user;
-        const dbRef = ref(window.firebaseDB);
-        const snapshot = await get(child(dbRef, `system_users/${user.uid}`));
+        const dbRef = window.dbTools.ref(window.firebaseDB);
+        const snapshot = await window.dbTools.get(window.dbTools.child(dbRef, `system_users/${user.uid}`));
 
-        if (user.email === "saad323m@gmail.com") {
-            window.location.href = "dashboard.html";
-        } else if (snapshot.exists()) {
+        if (snapshot.exists()) {
             const userData = snapshot.val();
             if (userData.status === "blocked") {
-                await signOut(window.firebaseAuth);
+                await window.signOut(window.firebaseAuth);
                 showFormError('userDisabled');
                 if (submitButton) submitButton.disabled = false;
                 return;
             }
-            window.location.href = "dashboard.html";
-        } else {
-            await signOut(window.firebaseAuth);
-            showFormError('wrongCredentials');
         }
 
+        window.location.href = "dashboard.html";
+
     } catch (error) {
-        console.error("Auth Engine Catch Error:", error.code);
+        console.error("Login Error:", error.code);
         if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
             showFormError('wrongCredentials');
         } else if (error.code === 'auth/network-request-failed') {
@@ -135,9 +129,8 @@ async function handleSystemLogin(event) {
     }
 }
 
-// جدار الحماية الصارم للروابط والصفحات
 function enforceSystemRouteGuard() {
-    onAuthStateChanged(window.firebaseAuth, async (user) => {
+    window.onAuthStateChanged(window.firebaseAuth, async (user) => {
         const currentPath = window.location.pathname;
         if (!user) {
             if (!currentPath.includes('index.html')) window.location.href = "index.html";
@@ -150,4 +143,12 @@ function enforceSystemRouteGuard() {
     });
 }
 
-window.systemAuthEngine = { handleSystemLogin, enforceSystemRouteGuard, showFormError };
+// تصدير الوظائف للنطاق العام
+window.systemAuthEngine = { 
+    handleSystemLogin, 
+    enforceSystemRouteGuard, 
+    showFormError 
+};
+
+// ربط المعالج العالمي
+window.handleSystemLoginWrapper = handleSystemLogin;
