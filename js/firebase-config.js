@@ -25,19 +25,13 @@ setPersistence(auth, browserLocalPersistence)
     .then(() => console.log("System Connection Secured: 30-Days Persistence Active."))
     .catch((err) => console.error("Persistence Configuration Failure:", err));
 
-// ============================================================
-// تصدير جميع الوظائف إلى window للاستخدام في الملفات الأخرى
-// ============================================================
 window.firebaseAuth = auth;
 window.firebaseDB = db;
-
-// دوال المصادقة
 window.signInWithEmailAndPassword = signInWithEmailAndPassword;
 window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
 window.signOut = signOut;
 window.onAuthStateChanged = onAuthStateChanged;
 
-// دوال قاعدة البيانات
 window.dbTools = { 
     ref, set, get, child, push, query, orderByChild, equalTo, limitToFirst 
 };
