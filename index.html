@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fleet Management - Login</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- يمكن إضافة مكونات CSS هنا أو دمجها في style.css -->
+    <style>
+        .auth-body {
+            background-color: var(--bg-body);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .auth-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .auth-card {
+            background: var(--bg-white);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            width: 100%;
+            max-width: 400px;
+            border-top: 5px solid var(--primary-color);
+        }
+        .auth-card h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+        }
+        .auth-logo {
+            display: block;
+            margin: 0 auto 20px;
+            height: 80px;
+        }
+    </style>
+</head>
+<body class="auth-body">
+
+    <header class="system-header">
+        <div class="header-container">
+            <div class="logo-wrapper">
+                <img src="logo.png" alt="Logo" class="main-logo">
+            </div>
+            <div class="header-right-side">
+                <div class="clock-box" id="uaeClock">--:--</div>
+                <button class="btn-lang" onclick="toggleLanguage()">
+                    <span id="langText">English</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <img src="logo.png" alt="Logo" class="auth-logo">
+            <h2 id="loginHeaderTitle">تسجيل الدخول للنظام</h2>
+            
+            <div id="errorMsgBox" style="display:none; background:#fef2f2; color:#ef4444; padding:10px; margin-bottom:15px; border-radius:4px; text-align:center;"></div>
+
+            <form onsubmit="window.authEngine.handleLogin(event)">
+                <div class="form-group">
+                    <label for="loginEmail" data-trans="email">البريد الإلكتروني</label>
+                    <input type="email" id="loginEmail" required placeholder="email@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword" data-trans="pass">كلمة المرور</label>
+                    <input type="password" id="loginPassword" required placeholder="********">
+                </div>
+                <button type="submit" class="btn-action btn-primary" style="width: 100%;" data-trans="submit">دخول</button>
+            </form>
+        </div>
+    </div>
+
+    <footer class="system-footer">
+        <div class="footer-content">
+            <span class="developer-credits">Developed by Mohamed Saad</span>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script type="module" src="js/firebase-config.js"></script>
+    <script src="js/logger.js"></script>
+    <script src="js/auth.js"></script>
+    
+    <script>
+        // تهيئة الصفحة
+        window.addEventListener('DOMContentLoaded', () => {
+            // حماية الصفحة (إذا كان مسجل يدخل للوحة التحكم مباشرة)
+            if(window.authEngine) window.authEngine.enforceRouteGuard();
+            
+            // تحديث الساعة
+            if(window.systemLoggerEngine) {
+                setInterval(() => {
+                    document.getElementById('uaeClock').innerText = window.systemLoggerEngine.getOfficialUAETimestamp().displayString;
+                }, 1000);
+            }
+        });
+    </script>
+</body>
+</html>
