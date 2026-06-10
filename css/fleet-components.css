@@ -1,0 +1,149 @@
+/* ==========================================================================
+   نظام إدارة الأسطول والسائقين - المكونات الإضافية (الإصدار النهائي)
+   ========================================================================== */
+
+/* ==================== Auth Wrapper ==================== */
+.auth-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+.auth-card {
+    background: var(--white);
+    border: 3px solid var(--navy);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 450px;
+    padding: 35px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+.auth-title {
+    color: var(--navy);
+    font-size: 1.5rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+/* ==================== Error Container ==================== */
+.error-container {
+    background: #fef2f2;
+    border: 1.5px solid var(--danger);
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    color: var(--danger);
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-align: center;
+}
+.error-container.hidden { display: none; }
+
+/* ==================== Buttons ==================== */
+.btn-navy {
+    width: 100%;
+    background: var(--navy);
+    color: var(--white);
+    border: 2px solid var(--navy);
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.btn-navy:hover { background: var(--white); color: var(--navy); }
+.btn-navy:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ==================== Form Inputs ==================== */
+.form-group { margin-bottom: 20px; }
+.form-group label {
+    display: block;
+    font-weight: 700;
+    color: var(--navy-light);
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+}
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--navy-light);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    background: var(--white);
+    transition: 0.2s;
+}
+.form-group input:focus, .form-group select:focus {
+    border-color: var(--navy);
+    outline: none;
+    background: var(--bg);
+}
+
+/* ==================== System Cards ==================== */
+.system-card {
+    background: var(--white);
+    border: 2px solid var(--navy);
+    border-radius: 8px;
+    margin-bottom: 15px;
+    overflow: hidden;
+}
+.system-card.border-success { border-color: var(--success); }
+.system-card.border-warning { border-color: var(--warning); }
+.system-card.border-danger { border-color: var(--danger); }
+.card-header-clickable {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* ==================== Plate Display (Abu Dhabi) ==================== */
+.v-plate-fixed-container {
+    display: inline-flex;
+    direction: ltr !important;
+    border: 2px solid #000;
+    border-radius: 4px;
+    height: 34px;
+    background: white;
+    overflow: hidden;
+    font-weight: 900;
+}
+.v-plate-category-box {
+    background: #ef4444;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+    font-size: 0.85rem;
+    border-right: 2px solid #000;
+    min-width: 40px;
+}
+.v-plate-number-box {
+    color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 14px;
+    font-size: 1rem;
+    letter-spacing: 1px;
+}
+
+/* ==================== Icons ==================== */
+.icon-svg { width: 18px; height: 18px; }
+.icon-navy { color: var(--navy); }
+.icon-red { color: var(--danger); }
+
+/* ==================== Print ==================== */
+@media print {
+    .system-header, .tabs-container, .action-bar, .system-footer, .btn-add, .modal-overlay {
+        display: none !important;
+    }
+    body { background: white; color: black; }
+    .vehicle-card, .driver-card { break-inside: avoid; border: 1px solid #ccc; }
+}
