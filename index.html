@@ -65,6 +65,9 @@
     <script src="js/auth.js"></script>
 
     <script>
+        // ============================================================
+        // وظائف اللغة والساعة (منفصلة عن باقي الملفات)
+        // ============================================================
         const dictionary = {
             ar: {
                 pageTitle: "نظام إدارة الأسطول والسائقين - تسجيل الدخول",
@@ -84,32 +87,28 @@
             }
         };
 
-        function initLanguage() {
-            let currentLang = localStorage.getItem('sys_lang') || 'ar';
-            applyLanguage(currentLang);
-        }
-
-        function toggleLanguage() {
-            let targetLang = localStorage.getItem('sys_lang') === 'ar' ? 'en' : 'ar';
-            localStorage.setItem('sys_lang', targetLang);
-            applyLanguage(targetLang);
-            updateClock();
-        }
-
         function applyLanguage(lang) {
             const htmlTag = document.documentElement;
-            if (lang === 'ar') {
-                htmlTag.setAttribute('lang', 'ar');
-                htmlTag.setAttribute('dir', 'rtl');
-            } else {
-                htmlTag.setAttribute('lang', 'en');
-                htmlTag.setAttribute('dir', 'ltr');
-            }
+            htmlTag.setAttribute('lang', lang);
+            htmlTag.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+            
             for (let id in dictionary[lang]) {
                 const el = document.getElementById(id);
                 if (el) el.textContent = dictionary[lang][id];
             }
         }
+
+        function initLanguage() {
+            let currentLang = localStorage.getItem('sys_lang') || 'ar';
+            applyLanguage(currentLang);
+        }
+
+        window.toggleLanguage = function() {
+            let targetLang = localStorage.getItem('sys_lang') === 'ar' ? 'en' : 'ar';
+            localStorage.setItem('sys_lang', targetLang);
+            applyLanguage(targetLang);
+            updateClock();
+        };
 
         function updateClock() {
             const clockElement = document.getElementById('uaeClock');
@@ -142,14 +141,16 @@
                 ? `${dayName} ${dayNum} ${monthName} ${yearNum} الساعة ${hoursStr}:${minutes} ${ampm}`
                 : `${dayName}, ${monthName} ${dayNum}, ${yearNum} - ${hoursStr}:${minutes} ${ampm}`;
             
-            clockElement.textContent = clockText.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+            clockElement.textContent = clockText;
         }
 
         window.addEventListener('DOMContentLoaded', () => {
             initLanguage();
             updateClock();
             setInterval(updateClock, 1000);
-            if (window.systemAuthEngine) window.systemAuthEngine.enforceSystemRouteGuard();
+            if (window.systemAuthEngine) {
+                window.systemAuthEngine.enforceSystemRouteGuard();
+            }
         });
     </script>
 </body>
