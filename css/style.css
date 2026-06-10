@@ -1,0 +1,231 @@
+/* ==========================================================================
+   نظام إدارة الأسطول - الهوية البصرية الجديدة (الأزرق الفاتح)
+   ========================================================================== */
+
+:root {
+    /* تغيير الألوان الأساسية */
+    --primary-color: #2563EB; /* أزرق فاتح وقوي (Tailwind Blue 600) */
+    --primary-hover: #1D4ED8; /* أزرق داكن قليلاً عند المرور */
+    --primary-light: #DBEAFE; /* خلفية زرقاء فاتحة جداً */
+    
+    /* ألوان ثابتة */
+    --bg-body: #F3F4F6;
+    --bg-white: #FFFFFF;
+    --text-main: #1F2937;
+    --text-muted: #6B7280;
+    
+    /* ألوان الحالات */
+    --color-success: #10B981;
+    --color-warning: #F59E0B;
+    --color-danger: #EF4444;
+    
+    /* أخرى */
+    --border-radius: 8px;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --transition: all 0.2s ease-in-out;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+body {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* الترويسة */
+.system-header {
+    background-color: var(--bg-white);
+    border-bottom: 2px solid var(--primary-color);
+    padding: 15px 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: var(--shadow-sm);
+}
+
+.header-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.main-logo { height: 55px; }
+
+.header-right-side { display: flex; align-items: center; gap: 15px; }
+
+.clock-box {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    padding: 8px 16px;
+    border-radius: var(--border-radius);
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-lang {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.btn-lang:hover { background-color: var(--primary-hover); }
+
+/* المحتوى الرئيسي */
+.main-content-area {
+    flex: 1;
+    padding: 30px 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* التذييل */
+.system-footer {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 20px;
+    text-align: center;
+    margin-top: auto;
+}
+
+/* أزرار الإجراءات (مشاركة، طباعة، إضافة) */
+.action-toolbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.btn-action {
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    cursor: pointer;
+    border: 2px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition);
+    font-size: 0.95rem;
+}
+
+.btn-primary { background-color: var(--primary-color); color: white; }
+.btn-primary:hover { background-color: var(--primary-hover); }
+.btn-outline { background-color: transparent; border-color: var(--primary-color); color: var(--primary-color); }
+.btn-outline:hover { background-color: var(--primary-light); }
+.btn-danger { background-color: var(--color-danger); color: white; }
+.btn-success { background-color: var(--color-success); color: white; }
+
+/* بطاقات الإحصائيات المتقدمة */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: var(--bg-white);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    border-left: 5px solid var(--primary-color);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.stat-card.success { border-left-color: var(--color-success); }
+.stat-card.warning { border-left-color: var(--color-warning); }
+.stat-card.danger { border-left-color: var(--color-danger); }
+
+.stat-value { font-size: 2rem; font-weight: 800; color: var(--primary-color); }
+.stat-label { font-size: 0.9rem; color: var(--text-muted); margin-top: 5px; }
+
+/* قوائم البيانات والبطاقات */
+.data-list-container { display: flex; flex-direction: column; gap: 15px; }
+
+.record-card {
+    background: var(--bg-white);
+    border: 1px solid #E5E7EB;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: var(--transition);
+}
+.record-card:hover { box-shadow: var(--shadow-md); border-color: var(--primary-color); }
+
+.record-header {
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    border-bottom: 1px solid #F3F4F6;
+}
+
+.record-body {
+    padding: 20px;
+    background-color: #F9FAFB;
+    display: none; /* يتم إظهارها عبر JS */
+}
+.record-body.active { display: block; }
+
+/* أدوات التحكم داخل الكارت */
+.card-actions { display: flex; gap: 10px; }
+.btn-sm { padding: 5px 10px; font-size: 0.85rem; }
+
+/* نظام البحث */
+.search-filter-box {
+    background: var(--bg-white);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    margin-bottom: 25px;
+    border: 1px solid #E5E7EB;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.search-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #D1D5DB;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+}
+.search-input:focus { outline: none; border-color: var(--primary-color); }
+
+/* زر تحميل المزيد */
+.load-more-wrapper { text-align: center; margin-top: 20px; }
+
+/* تنسيقات الطباعة (Print Styles) */
+@media print {
+    body { background: white; }
+    .system-header, .system-footer, .btn-action, .search-filter-box, .load-more-wrapper, .btn-lang { display: none !important; }
+    .record-body { display: block !important; border: 1px solid #ddd; margin-bottom: 10px; }
+    .record-card { page-break-inside: avoid; }
+}
+
+/* استجابة الشاشات */
+@media (max-width: 768px) {
+    .header-container { flex-direction: column; gap: 10px; }
+    .action-toolbar { width: 100%; }
+    .btn-action { width: 100%; justify-content: center; }
+}
