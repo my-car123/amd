@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fleet Management</title>
+    <style>
+        /* التصميم الكامل */
+        :root { --primary: #2563eb; --primary-dark: #1e40af; --bg: #f8fafc; --white: #ffffff; --text: #1e293b; --muted: #64748b; --danger: #ef4444; --success: #10b981; --warning: #f59e0b; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* Header */
+        .header { background: var(--white); padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .logo { height: 40px; }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .clock { background: #eff6ff; color: var(--primary); padding: 8px 15px; border-radius: 20px; font-weight: 600; font-size: 0.85rem; }
+        .btn-logout { background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+        /* Layout */
+        .container { display: flex; flex: 1; width: 100%; max-width: 1400px; margin: 0 auto; }
+        
+        /* Sidebar */
+        .sidebar { width: 220px; background: var(--white); padding: 20px 10px; border-left: 1px solid #e2e8f0; }
+        .nav-item { display: block; width: 100%; padding: 12px 15px; margin-bottom: 5px; background: none; border: none; text-align: right; cursor: pointer; border-radius: 6px; color: var(--muted); font-weight: 500; transition: 0.2s; }
+        .nav-item:hover { background: var(--bg); }
+        .nav-item.active { background: #eff6ff; color: var(--primary); font-weight: 700; }
+
+        /* Main Content */
+        .main { flex: 1; padding: 20px; }
+        .page { display: none; }
+        .page.active { display: block; }
+        
+        /* Cards */
+        .card { background: var(--white); border-radius: 8px; padding: 20px; margin-bottom: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .btn-add { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-add:hover { background: var(--primary-dark); }
+
+        /* Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-box { background: var(--white); padding: 20px; border-radius: 8px; border-top: 3px solid var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .stat-box h4 { font-size: 0.8rem; color: var(--muted); margin-bottom: 5px; }
+        .stat-box p { font-size: 1.5rem; font-weight: 800; }
+
+        /* List Items */
+        .list-item { border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 10px; }
+        .item-head { padding: 15px; display: flex; justify-content: space-between; cursor: pointer; background: var(--white); border-radius: 8px; }
+        .item-head:hover { background: #f8fafc; }
+        .item-body { padding: 15px; border-top: 1px solid #e2e8f0; display: none; background: #fafafa; }
+        .item-body.active { display: block; }
+        .plate-tag { background: #000; color: #fff; padding: 4px 10px; border-radius: 4px; font-family: monospace; }
+        
+        /* Modal */
+        .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-box { background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 500px; position: relative; }
+        .modal-close { position: absolute; top: 10px; left: 10px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
+        .form-control { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+
+        /* Utility */
+        .flex-gap { display: flex; gap: 10px; }
+        .btn-sm { padding: 5px 10px; border-radius: 4px; border: 1px solid #ccc; cursor: pointer; }
+        .btn-print { background: var(--muted); color: white; border: none; }
+        .admin-only { display: none; } /* JS will handle this */
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <img src="logo.png" class="logo" alt="Logo">
+        <div class="header-left">
+            <div id="clockDisplay" class="clock">جاري التحميل...</div>
+            <button class="btn-logout" onclick="logout()">خروج</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <button class="nav-item active" onclick="showPage('stats')">الإحصائيات</button>
+            <button class="nav-item" onclick="showPage('vehicles')">المركبات</button>
+            <button class="nav-item" onclick="showPage('drivers')">السائقين</button>
+            <button class="nav-item admin-only" onclick="showPage('users')">المستخدمين</button>
+        </aside>
+
+        <main class="main">
+            
+            <!-- صفحة الإحصائيات -->
+            <div id="page-stats" class="page active">
+                <div class="stats-grid">
+                    <div class="stat-box"><h4>المركبات</h4><p id="s-vehicles">0</p></div>
+                    <div class="stat-box" style="border-color:var(--success)"><h4>السائقين</h4><p id="s-drivers">0</p></div>
+                    <div class="stat-box" style="border-color:var(--danger)"><h4>منتهية الصلاحية</h4><p id="s-expired">0</p></div>
+                </div>
+            </div>
+
+            <!-- صفحة المركبات -->
+            <div id="page-vehicles" class="page">
+                <div class="card-header">
+                    <h2>سجل المركبات</h2>
+                    <button class="btn-add" onclick="openModal('vehicle')">إضافة سيارة</button>
+                </div>
+                <div id="list-vehicles"></div>
+            </div>
+
+            <!-- صفحة السائقين -->
+            <div id="page-drivers" class="page">
+                <div class="card-header">
+                    <h2>سجل السائقين</h2>
+                    <button class="btn-add" onclick="openModal('driver')">إضافة سائق</button>
+                </div>
+                <div id="list-drivers"></div>
+            </div>
+
+            <!-- صفحة المستخدمين -->
+            <div id="page-users" class="page">
+                <div class="card-header">
+                    <h2>المستخدمين</h2>
+                    <button class="btn-add" onclick="openModal('user')">إضافة مشرف</button>
+                </div>
+                <div id="list-users"></div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Modal Container -->
+    <div id="modalWrap" class="modal-bg">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <script>
+        // ========== إعدادات النظام ==========
+        const firebaseConfig = {
+            apiKey: "AIzaSyDBHHGY_gVpm3NlXThqsC6ojTL9Je4xQ9w",
+            authDomain: "car-moving-8b59e.firebaseapp.com",
+            databaseURL: "https://car-moving-8b59e-default-rtdb.firebaseio.com",
+            projectId: "car-moving-8b59e",
+            storageBucket: "car-moving-8b59e.firebasestorage.app",
+            messagingSenderId: "332747318494",
+            appId: "1:332747318494:web:d5d61cd53f322a182f0e4f"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
+
+        let role = 'supervisor';
+
+        // ========== التهيئة ==========
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) { window.location.href = "index.html"; return; }
+            
+            // جلب الدور
+            const snap = await db.ref(`system_users/${user.uid}`).get();
+            if(snap.exists()) {
+                role = snap.val().role;
+                localStorage.setItem('user_role', role);
+                if(role === 'admin') document.querySelectorAll('.admin-only').forEach(e => e.style.display = 'block');
+            }
+            
+            loadStats();
+            loadVehicles();
+            loadDrivers();
+            if(role === 'admin') loadUsers();
+        });
+
+        // ========== الوقت والتاريخ ==========
+        function updateClock() {
+            const now = new Date();
+            // توقيت الإمارات GMT+4
+            const uaeTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Dubai"}));
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            document.getElementById('clockDisplay').innerText = uaeTime.toLocaleDateString('ar-AE', options);
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // ========== التنقل ==========
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function logout() { auth.signOut(); }
+
+        // ========== المركبات ==========
+        async function loadVehicles() {
+            const container = document.getElementById('list-vehicles');
+            container.innerHTML = 'جاري التحميل...';
+            const snap = await db.ref('vehicles').once('value');
+            container.innerHTML = '';
+            
+            if(!snap.exists()) { container.innerHTML = '<p style="text-align:center">لا توجد مركبات</p>'; return; }
+
+            snap.forEach(v => {
+                const d = v.val();
+                const isExpired = checkDate(d.regExpiry);
+                const html = `
+                <div class="list-item">
+                    <div class="item-head" onclick="this.nextElementSibling.classList.toggle('active')">
+                        <div><span class="plate-tag">${d.plateNumber} ${d.plateCategory}</span> - ${d.type}</div>
+                        <span style="color:${isExpired ? 'var(--danger)' : 'var(--success)'}">${isExpired ? 'منتهية' : 'سارية'}</span>
+                    </div>
+                    <div class="item-body">
+                        <p><b>VIN:</b> ${d.vin}</p>
+                        <p><b>المالك:</b> ${d.owner}</p>
+                        <p><b>انتهاء الترخيص:</b> ${d.regExpiry}</p>
+                        <p><b>انتهاء التأمين:</b> ${d.insExpiry}</p>
+                        <div style="margin-top:10px;">
+                            <button class="btn-sm btn-print" onclick="printItem(this.parentElement.parentElement.innerHTML)">طباعة</button>
+                            ${role === 'admin' ? `<button class="btn-sm" style="background:var(--danger); color:white;" onclick="deleteNode('vehicles', '${v.key}')">حذف</button>` : ''}
+                        </div>
+                    </div>
+                </div>`;
+                container.innerHTML += html;
+            });
+        }
+
+        // ========== السائقين ==========
+        async function loadDrivers() {
+            const container = document.getElementById('list-drivers');
+            container.innerHTML = 'جاري التحميل...';
+            const snap = await db.ref('system_drivers').once('value');
+            container.innerHTML = '';
+            
+            if(!snap.exists()) { container.innerHTML = '<p style="text-align:center">لا يوجد سائقين</p>'; return; }
+
+            snap.forEach(v => {
+                const d = v.val();
+                const html = `
+                <div class="list-item">
+                    <div class="item-head" onclick="this.nextElementSibling.classList.toggle('active')">
+                        <div>${d.driverName}</div>
+                        <span style="color:var(--muted)">${d.mobile}</span>
+                    </div>
+                    <div class="item-body">
+                        <p><b>المعرف:</b> ${d.driverId}</p>
+                        <p><b>الرخصة:</b> ${d.licenseNumber}</p>
+                        <div style="margin-top:10px;">
+                            <button class="btn-sm btn-print" onclick="printItem(this.parentElement.parentElement.innerHTML)">طباعة</button>
+                            ${role === 'admin' ? `<button class="btn-sm" style="background:var(--danger); color:white;" onclick="deleteNode('system_drivers', '${v.key}')">حذف</button>` : ''}
+                        </div>
+                    </div>
+                </div>`;
+                container.innerHTML += html;
+            });
+        }
+
+        // ========== المستخدمين ==========
+        async function loadUsers() {
+            const container = document.getElementById('list-users');
+            if(role !== 'admin') return;
+            const snap = await db.ref('system_users').once('value');
+            container.innerHTML = '';
+            snap.forEach(u => {
+                const d = u.val();
+                container.innerHTML += `<div class="list-item" style="padding:15px"><b>${d.email}</b> (${d.role})</div>`;
+            });
+        }
+
+        // ========== الإحصائيات ==========
+        async function loadStats() {
+            const vSnap = await db.ref('vehicles').once('value');
+            const dSnap = await db.ref('system_drivers').once('value');
+            let vCount = vSnap.exists() ? vSnap.numChildren() : 0;
+            let dCount = dSnap.exists() ? dSnap.numChildren() : 0;
+            let expCount = 0;
+
+            if(vSnap.exists()) {
+                vSnap.forEach(v => {
+                    if(checkDate(v.val().regExpiry)) expCount++;
+                });
+            }
+
+            document.getElementById('s-vehicles').innerText = vCount;
+            document.getElementById('s-drivers').innerText = dCount;
+            document.getElementById('s-expired').innerText = expCount;
+        }
+
+        // ========== النوافذ المنبثقة (Modals) ==========
+        function openModal(type) {
+            const content = document.getElementById('modalContent');
+            let html = '';
+
+            if(type === 'vehicle') {
+                html = `
+                    <h3>إضافة مركبة</h3><br>
+                    <div class="form-group"><label>رقم اللوحة</label><input type="text" id="v_plate" class="form-control"></div>
+                    <div class="form-group"><label>فئة اللوحة</label><input type="text" id="v_cat" class="form-control"></div>
+                    <div class="form-group"><label>VIN</label><input type="text" id="v_vin" class="form-control"></div>
+                    <div class="form-group"><label>النوع</label><input type="text" id="v_type" class="form-control"></div>
+                    <div class="form-group"><label>السنة</label><input type="number" id="v_year" class="form-control" value="2024"></div>
+                    <div class="form-group"><label>انتهاء الترخيص</label><input type="date" id="v_reg" class="form-control"></div>
+                    <div class="form-group"><label>انتهاء التأمين</label><input type="date" id="v_ins" class="form-control"></div>
+                    <button class="btn-add" style="width:100%" onclick="saveVehicle()">حفظ</button>
+                `;
+            } else if(type === 'driver') {
+                html = `
+                    <h3>إضافة سائق</h3><br>
+                    <div class="form-group"><label>الاسم</label><input type="text" id="d_name" class="form-control"></div>
+                    <div class="form-group"><label>الهاتف</label><input type="text" id="d_phone" class="form-control"></div>
+                    <div class="form-group"><label>رقم الرخصة</label><input type="text" id="d_lic" class="form-control"></div>
+                    <button class="btn-add" style="width:100%" onclick="saveDriver()">حفظ</button>
+                `;
+            } else if(type === 'user') {
+                 html = `
+                    <h3>إضافة مشرف</h3><br>
+                    <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="u_email" class="form-control"></div>
+                    <div class="form-group"><label>كلمة المرور</label><input type="text" id="u_pass" class="form-control"></div>
+                    <button class="btn-add" style="width:100%" onclick="saveUser()">حفظ</button>
+                `;
+            }
+            content.innerHTML = html;
+            document.getElementById('modalWrap').style.display = 'flex';
+        }
+
+        function closeModal() { document.getElementById('modalWrap').style.display = 'none'; }
+
+        // ========== الحفظ والمعالجة ==========
+        async function saveVehicle() {
+            const id = 'VH_' + Date.now();
+            const data = {
+                vehicleId: id,
+                plateNumber: document.getElementById('v_plate').value,
+                plateCategory: document.getElementById('v_cat').value,
+                vin: document.getElementById('v_vin').value,
+                type: document.getElementById('v_type').value,
+                year: document.getElementById('v_year').value,
+                regExpiry: document.getElementById('v_reg').value,
+                insExpiry: document.getElementById('v_ins').value,
+                owner: "System"
+            };
+            if(!data.plateNumber) return alert("البيانات ناقصة");
+            await db.ref('vehicles/' + id).set(data);
+            closeModal();
+            loadVehicles();
+            loadStats();
+            alert("تم الحفظ");
+        }
+
+        async function saveDriver() {
+            const id = 'DR_' + Date.now();
+            const data = {
+                driverId: id,
+                driverName: document.getElementById('d_name').value,
+                mobile: document.getElementById('d_phone').value,
+                licenseNumber: document.getElementById('d_lic').value
+            };
+            if(!data.driverName) return alert("البيانات ناقصة");
+            await db.ref('system_drivers/' + id).set(data);
+            closeModal();
+            loadDrivers();
+            alert("تم الحفظ");
+        }
+
+        async function saveUser() {
+            // في النسخة الحالية نضيفهم كبيانات فقط (تسجيل دخولهم يتطلب حل آخر أو اضافتهم يدوياً في Firebase Auth)
+            // هذا مثال بسيط لاضافة سجل صلاحية
+            const email = document.getElementById('u_email').value;
+            const id = 'USR_' + Date.now();
+            await db.ref('system_users/' + id).set({ email: email, role: 'supervisor', status: 'active' });
+            closeModal();
+            loadUsers();
+            alert("تم اضافة المشرف (يجب انشاء حساب دخول لهم في Firebase Auth اولاً)");
+        }
+
+        async function deleteNode(path, id) {
+            if(!confirm("هل أنت متأكد؟")) return;
+            await db.ref(path + '/' + id).remove();
+            if(path === 'vehicles') loadVehicles();
+            if(path === 'system_drivers') loadDrivers();
+        }
+
+        function printItem(content) {
+            const win = window.open('', '', 'width=800,height=600');
+            win.document.write(`<html><body dir='rtl' style='font-family:sans-serif'><h2>Fleet System</h2><hr>${content}</body></html>`);
+            win.print();
+            win.close();
+        }
+
+        function checkDate(dateStr) {
+            if(!dateStr) return false;
+            return new Date(dateStr) < new Date();
+        }
+
+    </script>
+</body>
+</html>
