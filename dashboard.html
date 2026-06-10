@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fleet Management System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header class="header">
+        <img src="logo.png" class="logo" alt="Logo">
+        <div class="header-actions">
+            <div id="clockWidget" class="clock-widget">--:--</div>
+            <button class="btn btn-outline" onclick="toggleLang()">English</button>
+            <button class="btn btn-danger" onclick="logout()">خروج</button>
+        </div>
+    </header>
+
+    <div class="layout-container">
+        <!-- القائمة الجانبية -->
+        <aside class="sidebar">
+            <div class="nav-link active" onclick="switchTab('stats')">الإحصائيات</div>
+            <div class="nav-link" onclick="switchTab('vehicles')">المركبات</div>
+            <div class="nav-link" onclick="switchTab('drivers')">السائقين</div>
+            <div class="nav-link admin-only" onclick="switchTab('users')">المستخدمين</div>
+            <div class="nav-link admin-only" onclick="switchTab('logs')">سجل النظام</div>
+        </aside>
+
+        <!-- المحتوى الرئيسي -->
+        <main class="main-content">
+            
+            <!-- قسم الإحصائيات -->
+            <section id="panel-stats" class="page-panel">
+                <div class="stats-grid">
+                    <div class="stat-card"><h4>إجمالي المركبات</h4><p id="statVehicles">0</p></div>
+                    <div class="stat-card"><h4>إجمالي السائقين</h4><p id="statDrivers">0</p></div>
+                    <div class="stat-card" style="border-left-color:var(--danger)"><h4>منتهية الصلاحية</h4><p id="statExpired">0</p></div>
+                </div>
+            </section>
+
+            <!-- قسم المركبات -->
+            <section id="panel-vehicles" class="page-panel" style="display:none;">
+                <div class="toolbar">
+                    <input type="text" id="searchVehicles" class="form-input" style="max-width:300px" placeholder="بحث برقم اللوحة..." onkeyup="if(event.key==='Enter') searchVehicles()">
+                    <button class="btn btn-primary" onclick="openModal('modalAddVehicle')">إضافة سيارة</button>
+                </div>
+                <div id="vehiclesList" class="data-list"></div>
+                <div style="text-align:center; margin-top:20px;">
+                    <button id="loadMoreVehicles" class="btn btn-outline" style="display:none" onclick="loadVehicles(true)">عرض المزيد</button>
+                </div>
+            </section>
+
+            <!-- قسم السائقين -->
+            <section id="panel-drivers" class="page-panel" style="display:none;">
+                <div class="toolbar">
+                    <button class="btn btn-primary" onclick="openModal('modalAddDriver')">إضافة سائق</button>
+                </div>
+                <div id="driversList" class="data-list"></div>
+            </section>
+
+            <!-- قسم المستخدمين -->
+            <section id="panel-users" class="page-panel admin-only" style="display:none;">
+                <h2>إدارة المشرفين</h2>
+                <div style="margin-bottom:20px;">
+                    <button class="btn btn-primary" onclick="openModal('modalAddUser')">إضافة مشرف جديد</button>
+                </div>
+                <div id="usersList"></div>
+            </section>
+
+            <!-- قسم السجلات -->
+            <section id="panel-logs" class="page-panel admin-only" style="display:none;">
+                <h2>سجل النظام الكامل</h2>
+                <div id="logsList" class="data-list" style="background:white; padding:20px; border-radius:8px;"></div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- نافذة إضافة سيارة -->
+    <div id="modalAddVehicle" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('modalAddVehicle')">&times;</button>
+            <h3>إضافة سيارة جديدة</h3>
+            <form id="formAddVehicle" onsubmit="saveVehicle(event)" style="margin-top:15px;">
+                <div class="form-group"><label>رقم اللوحة</label><input type="text" id="v_plate" class="form-input" required></div>
+                <div class="form-group"><label>رمز اللوحة</label><input type="text" id="v_cat" class="form-input" required placeholder="مثال: 5 أو A.AA"></div>
+                <div class="form-group"><label>المالك</label><input type="text" id="v_owner" class="form-input" required></div>
+                <div class="form-group"><label>رقم القاعدة (VIN)</label><input type="text" id="v_vin" class="form-input" required></div>
+                <div class="form-group"><label>النوع</label><input type="text" id="v_type" class="form-input" required></div>
+                <div class="form-group"><label>سنة الصنع</label><input type="number" id="v_year" class="form-input" required value="2024"></div>
+                <div class="form-group"><label>انتهاء الترخيص</label><input type="date" id="v_reg" class="form-input" required></div>
+                <div class="form-group"><label>انتهاء التأمين</label><input type="date" id="v_ins" class="form-input" required></div>
+                <div class="form-group"><label>ملاحظات</label><textarea id="v_notes" class="form-input"></textarea></div>
+                <button type="submit" class="btn btn-primary" style="width:100%">حفظ السيارة</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- نافذة إضافة سائق -->
+    <div id="modalAddDriver" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('modalAddDriver')">&times;</button>
+            <h3>إضافة سائق</h3>
+            <form id="formAddDriver" onsubmit="saveDriver(event)" style="margin-top:15px;">
+                <div class="form-group"><label>الاسم</label><input type="text" id="d_name" class="form-input" required></div>
+                <div class="form-group"><label>الهاتف</label><input type="text" id="d_phone" class="form-input" required placeholder="05xxxxxxxx"></div>
+                <div class="form-group"><label>رقم الرخصة</label><input type="text" id="d_lic" class="form-input" required></div>
+                <button type="submit" class="btn btn-primary" style="width:100%">حفظ</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- نافذة إدارة العهدة -->
+    <div id="modalCustody" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('modalCustody')">&times;</button>
+            <h3>ربط السيارة بسائق</h3>
+            <input type="hidden" id="custodyVehicleId">
+            <div class="form-group" style="margin-top:15px;">
+                <label>اختر السائق</label>
+                <select id="custodyDriverSelect" class="form-input"></select>
+            </div>
+            <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="updateCustody()">تأكيد الربط</button>
+        </div>
+    </div>
+
+    <!-- نافذة إضافة مشرف (Admin Only) -->
+    <div id="modalAddUser" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('modalAddUser')">&times;</button>
+            <h3>إضافة مشرف جديد</h3>
+            <p style="font-size:0.8rem; color:red;">ملاحظة: يجب إنشاء الحساب في Firebase Authentication أولاً بنفس البريد وكلمة المرور.</p>
+            <form onsubmit="saveUser(event)" style="margin-top:15px;">
+                <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="u_email" class="form-input" required></div>
+                <div class="form-group"><label>الاسم</label><input type="text" id="u_name" class="form-input" required></div>
+                <button type="submit" class="btn btn-primary" style="width:100%">إضافة</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- الفوتر -->
+    <footer class="footer-copy">
+        mohamed saad &copy; 2025
+    </footer>
+
+    <!-- السكريبتات -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    
+    <!-- ملفات النظام (يجب وضع الأكواد التالية في ملفات منفصلة وربطها هنا) -->
+    <!-- لراحتك سأقوم بدمج المنطق هنا لضمان العمل الفوري -->
+    <script src="js/app.js"></script>
+    <script>
+        // تهيئة Firebase داخل app.js أو هنا مباشرة إذا أردت
+        // تأكد أن ملف app.js يحتوي على التهيئة التي أرسلتها لك سابقاً
+    </script>
+</body>
+</html>
