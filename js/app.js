@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import { getDatabase, ref, set, get, remove, update, onValue, push, runTransaction } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+import { getDatabase, ref, set, get, remove, update, onValue, push, runTransaction, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDBHHGY_gVpm3NlXThqsC6ojTL9Je4xQ9w",
@@ -18,102 +18,119 @@ const auth = getAuth(app);
 const secondaryApp = initializeApp(firebaseConfig, "Secondary");
 const secondaryAuth = getAuth(secondaryApp);
 
-// --- i18n ---
+// --- Strict UAE Time & English Numerals ---
+function getUaeTime(dateObj = new Date()) {
+    return new Date(dateObj.toLocaleString('en-US', { timeZone: 'Asia/Dubai' }));
+}
+function fmtDate(d) {
+    if (!d) return '-'; 
+    return getUaeTime(new Date(d)).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
+}
+function fmtDateTime(d) {
+    if (!d) return '-'; 
+    return getUaeTime(new Date(d)).toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+}
+
+// --- Comprehensive i18n ---
 const translations = {
-    ar: { loginTitle: "تسجيل الدخول", loginBtn: "دخول", navStats: "الإحصائيات", navCars: "السيارات", navDrivers: "السائقون", navMods: "المشرفون", navLogs: "السجل", statActive: "سيارات سارية", statWarn: "قاربت على الانتهاء", statExp: "منتهية", statDrivers: "سائقين", statMods: "مشرفين", addCar: "إضافة سيارة", addDriver: "إضافة سائق", addMod: "إضافة مشرف", modManagement: "إدارة المشرفين", systemLogs: "سجل النظام الدقيق", pinTitle: "التحقق من الرمز السري", pinDesc: "أدخل رمز PIN للمتابعة" },
-    en: { loginTitle: "Login", loginBtn: "Login", navStats: "Stats", navCars: "Cars", navDrivers: "Drivers", navMods: "Mods", navLogs: "Logs", statActive: "Active Cars", statWarn: "Warning", statExp: "Expired", statDrivers: "Drivers", statMods: "Mods", addCar: "Add Car", addDriver: "Add Driver", addMod: "Add Mod", modManagement: "Moderators", systemLogs: "System Logs", pinTitle: "PIN Verification", pinDesc: "Enter PIN to continue" }
+    ar: { loginTitle: "تسجيل الدخول", loginBtn: "دخول", navStats: "الإحصائيات", navCars: "السيارات", navDrivers: "السائقون", navMods: "المشرفون", navLogs: "السجل", statActive: "سيارات سارية", statWarn: "قاربت على الانتهاء", statExp: "منتهية", statDrivers: "سائقين", statMods: "مشرفين", addCar: "إضافة سيارة", addDriver: "إضافة سائق", addMod: "إضافة مشرف", modManagement: "إدارة المشرفين", systemLogs: "سجل النظام الدقيق", pinTitle: "التحقق من الرمز السري", pinDesc: "أدخل رمز PIN للمتابعة", confirm: "تأكيد", loadMore: "عرض المزيد", searchCar: "بحث (لوحة، قاعدة، مالك)...", searchDriver: "بحث (اسم، هاتف)...", owner: "المالك", plateNumber: "رقم اللوحة", plateCode: "الرمز", emirate: "الإمارة", carType: "النوع", carYear: "سنة الصنع", vin: "رقم القاعدة (VIN)", licenseExpiry: "انتهاء الترخيص", insuranceExpiry: "انتهاء التأمين", notes: "ملاحظات", violations: "مخالفات", save: "حفظ", driverName: "اسم السائق", driverContact: "رقم الموبايل", assignCustody: "ربط عهدة", selectDriver: "اختر السائق", confirmAssign: "تأكيد الربط", car: "السيارة", modName: "اسم المستخدم", email: "البريد الإلكتروني", password: "كلمة المرور", custodyHistory: "سجل العهدات", startTime: "البداية", endTime: "النهاية", logTime: "التوقيت", logUser: "المستخدم", logAction: "الإجراء", logDetails: "التفاصيل", active: "فعال", suspended: "معلق", assign: "ربط", unassign: "فك", edit: "تعديل", delete: "حذف", print: "طباعة", share: "مشاركة", history: "سجل", resetPass: "إعادة كلمة المرور", noDriver: "بدون سائق", activeStatus: "سارية", warnStatus: "قاربت على الانتهاء", expiredStatus: "منتهية", currentlyWith: "مع", untilNow: "حتى الآن", loginError: "خطأ في الدخول", pinError: "رمز PIN خاطئ!", dupVin: "VIN مكرر!", dupPlate: "اللوحة مكررة!", confirmDeleteCar: "حذف السيارة؟", confirmDeleteDriver: "حذف السائق؟", confirmUnassign: "فك الربط؟", unassignFirst: "افك العهدة أولاً", resetPassSent: "تم إرسال رابط إعادة التعيين للبريد", none: "لا توجد بيانات" },
+    en: { loginTitle: "Login", loginBtn: "Login", navStats: "Stats", navCars: "Cars", navDrivers: "Drivers", navMods: "Mods", navLogs: "Logs", statActive: "Active Cars", statWarn: "Warning", statExp: "Expired", statDrivers: "Drivers", statMods: "Mods", addCar: "Add Car", addDriver: "Add Driver", addMod: "Add Mod", modManagement: "Moderators", systemLogs: "System Logs", pinTitle: "PIN Verification", pinDesc: "Enter PIN to continue", confirm: "Confirm", loadMore: "Load More", searchCar: "Search (Plate, VIN, Owner)...", searchDriver: "Search (Name, Phone)...", owner: "Owner", plateNumber: "Plate Number", plateCode: "Code", emirate: "Emirate", carType: "Type", carYear: "Year", vin: "VIN", licenseExpiry: "License Expiry", insuranceExpiry: "Insurance Expiry", notes: "Notes", violations: "Violations", save: "Save", driverName: "Driver Name", driverContact: "Phone", assignCustody: "Assign Custody", selectDriver: "Select Driver", confirmAssign: "Confirm Assign", car: "Car", modName: "Display Name", email: "Email", password: "Password", custodyHistory: "Custody History", startTime: "Start", endTime: "End", logTime: "Time", logUser: "User", logAction: "Action", logDetails: "Details", active: "Active", suspended: "Suspended", assign: "Assign", unassign: "Unassign", edit: "Edit", delete: "Delete", print: "Print", share: "Share", history: "History", resetPass: "Reset Pass", noDriver: "No Driver", activeStatus: "Active", warnStatus: "Warning", expiredStatus: "Expired", currentlyWith: "With", untilNow: "Until Now", loginError: "Login Error", pinError: "Wrong PIN!", dupVin: "Duplicate VIN!", dupPlate: "Duplicate Plate!", confirmDeleteCar: "Delete Car?", confirmDeleteDriver: "Delete Driver?", confirmUnassign: "Unassign?", unassignFirst: "Unassign first", resetPassSent: "Reset link sent to email", none: "No data" }
 };
 let currentLang = 'ar';
+function t(key) { return translations[currentLang][key] || key; }
 function setLanguage(lang) {
     currentLang = lang;
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = lang;
     document.getElementById('lang-toggle').textContent = lang === 'ar' ? 'EN' : 'AR';
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (translations[lang][key]) el.textContent = translations[lang][key];
-    });
+    document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if (translations[lang][key]) el.textContent = translations[lang][key]; });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { const key = el.getAttribute('data-i18n-placeholder'); if (translations[lang][key]) el.placeholder = translations[lang][key]; });
 }
 document.getElementById('lang-toggle').addEventListener('click', () => setLanguage(currentLang === 'ar' ? 'en' : 'ar'));
 
-// --- Auth & Role Management ---
+// --- Auth & Role ---
 let isAdmin = false;
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(auth, user => {
     if (user) {
         isAdmin = user.email === 'saad323m@gmail.com';
         document.getElementById('login-section').style.display = 'none';
         document.getElementById('app-section').style.display = 'flex';
-        document.getElementById('user-display-name').textContent = isAdmin ? 'SAAD (مدير)' : 'مشرف';
-        
-        // Hide Admin Only Elements
+        document.getElementById('user-display-name').textContent = isAdmin ? 'SAAD (Admin)' : t('active');
         document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? '' : 'none');
-        
         initApp();
     } else {
         document.getElementById('login-section').style.display = 'flex';
         document.getElementById('app-section').style.display = 'none';
     }
 });
-
-document.getElementById('login-form').addEventListener('submit', async (e) => {
+document.getElementById('login-form').addEventListener('submit', async e => {
     e.preventDefault();
-    try {
-        await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value);
-    } catch (error) { document.getElementById('login-error').textContent = "خطأ في الدخول"; }
+    try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
+    catch (error) { document.getElementById('login-error').textContent = t('loginError'); }
 });
 document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
 
-// --- PIN Verification Logic (FIXED) ---
+// --- PIN ---
 let pinCallback = null;
 function requestPin(callback) {
-    if(!isAdmin) { callback(); return; } // Only admin needs PIN
+    if(!isAdmin) { callback(); return; }
     pinCallback = callback;
     document.getElementById('pin-input').value = '';
     document.getElementById('pin-modal').style.display = 'block';
 }
-
-document.getElementById('pin-form').addEventListener('submit', async (e) => {
+document.getElementById('pin-form').addEventListener('submit', async e => {
     e.preventDefault();
     const enteredPin = String(document.getElementById('pin-input').value);
     try {
         const snap = await get(ref(db, 'settings/adminPin'));
         const realPin = String(snap.val() || '1234'); 
-        if(enteredPin === realPin) {
-            document.getElementById('pin-modal').style.display = 'none';
-            if(pinCallback) pinCallback();
-        } else { alert('رمز PIN خاطئ!'); }
-    } catch(err) { alert('خطأ في التحقق'); }
+        if(enteredPin === realPin) { document.getElementById('pin-modal').style.display = 'none'; if(pinCallback) pinCallback(); }
+        else { alert(t('pinError')); }
+    } catch(err) { alert(t('pinError')); }
 });
 
 // --- Navigation ---
 const sections = ['stats', 'cars', 'drivers', 'mods', 'logs'];
-sections.forEach(sec => document.getElementById(`nav-${sec}`).addEventListener('click', (e) => { e.preventDefault(); showSection(sec); }));
+sections.forEach(sec => document.getElementById(`nav-${sec}`).addEventListener('click', e => { e.preventDefault(); showSection(sec); }));
 function showSection(sec) {
     sections.forEach(s => { 
         const secEl = document.getElementById(`${s}-section`);
-        // Prevent showing admin sections to moderators
-        if(s === 'mods' || s === 'logs') {
-            secEl.style.display = (s === sec && isAdmin) ? 'block' : 'none';
-        } else {
-            secEl.style.display = s === sec ? 'block' : 'none';
-        }
+        secEl.style.display = (s === sec && (isAdmin || (s !== 'mods' && s !== 'logs'))) ? 'block' : 'none';
         document.getElementById(`nav-${s}`).classList.toggle('active', s === sec); 
     });
 }
 
 // --- Helpers ---
 document.querySelectorAll('.close-btn').forEach(btn => btn.addEventListener('click', () => document.getElementById(btn.dataset.modal).style.display = 'none'));
-window.onclick = (e) => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
-function getStatusClass(dateStr) { if(!dateStr) return ''; const now=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Dubai'})); const exp=new Date(dateStr); now.setHours(0,0,0,0); exp.setHours(0,0,0,0); const d=Math.ceil((exp-now)/(1000*60*60*24)); return d<0?'status-red':d<=15?'status-yellow':'status-green'; }
-function fmtDate(d) { return d ? new Date(d).toLocaleDateString('ar-EG') : '-'; }
+window.onclick = e => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
+
+function getStatusClass(dateStr, hasDriver = false) { 
+    if(!dateStr) return ''; 
+    const now = getUaeTime(); const exp = getUaeTime(new Date(dateStr)); 
+    now.setHours(0,0,0,0); exp.setHours(0,0,0,0); 
+    const d = Math.ceil((exp-now)/(1000*60*60*24)); 
+    if(d < 0) return hasDriver ? 'status-danger' : 'status-red'; // Danger if expired and has driver
+    if(d <= 15) return hasDriver ? 'status-danger' : 'status-yellow'; // Danger if warning and has driver
+    return 'status-green'; 
+}
+function getStatusText(dateStr) { 
+    if(!dateStr) return ''; 
+    const now = getUaeTime(); const exp = getUaeTime(new Date(dateStr)); 
+    now.setHours(0,0,0,0); exp.setHours(0,0,0,0); 
+    const d = Math.ceil((exp-now)/(1000*60*60*24)); 
+    if(d < 0) return t('expiredStatus');
+    if(d <= 15) return t('warnStatus');
+    return t('activeStatus');
+}
 async function logAction(action, details) { const user = auth.currentUser; if(!user) return; await set(push(ref(db, 'logs')), { timestamp: new Date().toISOString(), userId: user.email, action, details }); }
 
-// --- Pagination & Data Arrays ---
+// --- Pagination ---
 const LIMIT = 10;
-let allCars = [], displayedCars = [], carsShown = 0;
-let allDrivers = [], displayedDrivers = [], driversShown = 0;
-let allMods = [], modsShown = 0;
-let allLogs = [], logsShown = 0;
+let allCars=[], displayedCars=[], carsShown=0;
+let allDrivers=[], displayedDrivers=[], driversShown=0;
+let allMods=[], modsShown=0;
+let allLogs=[], logsShown=0;
+let allHistory=[];
 
 function initApp() { fetchCars(); fetchDrivers(); if(isAdmin) { fetchMods(); fetchLogs(); } calculateStats(); }
 
@@ -126,150 +143,286 @@ async function generateCarId() { const c = await runTransaction(ref(db, 'counter
 
 function openCarModal(data=null) {
     document.getElementById('car-form').reset(); document.getElementById('car-id-hidden').value = '';
-    document.getElementById('car-modal-title').textContent = data ? "تعديل سيارة" : "إضافة سيارة";
+    document.getElementById('car-modal-title').textContent = data ? t('edit') : t('addCar');
     if(data) { document.getElementById('car-id-hidden').value=data.id; document.getElementById('plate-number').value=data.plateNumber; document.getElementById('plate-code').value=data.plateCode; document.getElementById('emirate').value=data.emirate; document.getElementById('owner').value=data.owner; document.getElementById('car-type').value=data.type; document.getElementById('car-year').value=data.year; document.getElementById('vin').value=data.vin; document.getElementById('license-expiry').value=data.licenseExpiry; document.getElementById('insurance-expiry').value=data.insuranceExpiry; document.getElementById('car-notes').value=data.notes||''; document.getElementById('violations').value=data.violations||''; }
     document.getElementById('car-modal').style.display = 'block';
 }
 
-document.getElementById('car-form').addEventListener('submit', async (e) => {
-    e.preventDefault(); const btn=e.target.querySelector('button'); btn.disabled=true; btn.textContent="Saving...";
+document.getElementById('car-form').addEventListener('submit', async e => {
+    e.preventDefault(); const btn=e.target.querySelector('button'); btn.disabled=true; btn.textContent="...";
     const hid=document.getElementById('car-id-hidden').value, vin=document.getElementById('vin').value.trim(), pNum=document.getElementById('plate-number').value.trim(), pCode=document.getElementById('plate-code').value.trim(), emi=document.getElementById('emirate').value.trim();
     try {
-        const snap=await get(ref(db,'cars')); if(snap.exists()){ const cars=snap.val(); for(let k in cars){ if(k===hid)continue; if(cars[k].vin===vin){alert('VIN مكرر!');btn.disabled=false;btn.textContent="حفظ";return;} if(cars[k].plateNumber===pNum&&cars[k].plateCode===pCode&&cars[k].emirate===emi){alert('اللوحة مكررة!');btn.disabled=false;btn.textContent="حفظ";return;} } }
+        const snap=await get(ref(db,'cars')); if(snap.exists()){ const cars=snap.val(); for(let k in cars){ if(k===hid)continue; if(cars[k].vin===vin){alert(t('dupVin'));btn.disabled=false;btn.textContent=t('save');return;} if(cars[k].plateNumber===pNum&&cars[k].plateCode===pCode&&cars[k].emirate===emi){alert(t('dupPlate'));btn.disabled=false;btn.textContent=t('save');return;} } }
         const data = { plateNumber:pNum, plateCode:pCode, emirate:emi, owner:document.getElementById('owner').value.trim(), type:document.getElementById('car-type').value.trim(), year:document.getElementById('car-year').value.trim(), vin:vin, licenseExpiry:document.getElementById('license-expiry').value, insuranceExpiry:document.getElementById('insurance-expiry').value, notes:document.getElementById('car-notes').value.trim(), violations:document.getElementById('violations').value.trim(), currentDriverId:null, currentDriverName:null };
-        if(hid) { const ex=(await get(ref(db,`cars/${hid}`))).val(); data.currentDriverId=ex.currentDriverId||null; data.currentDriverName=ex.currentDriverName||null; await update(ref(db,`cars/${hid}`),data); await logAction('تعديل سيارة', hid); } else { const id=await generateCarId(); data.id=id; await set(ref(db,`cars/${id}`),data); await logAction('إضافة سيارة', id); }
+        if(hid) { const ex=(await get(ref(db,`cars/${hid}`))).val(); data.currentDriverId=ex.currentDriverId||null; data.currentDriverName=ex.currentDriverName||null; await update(ref(db,`cars/${hid}`),data); await logAction(t('edit'), hid); } else { const id=await generateCarId(); data.id=id; await set(ref(db,`cars/${id}`),data); await logAction(t('addCar'), id); }
         document.getElementById('car-modal').style.display='none';
-    } catch(err){alert(err.message)} finally {btn.disabled=false;btn.textContent="حفظ";}
+    } catch(err){alert(err.message)} finally {btn.disabled=false;btn.textContent=t('save');}
 });
 
-async function deleteCar(id) { if(confirm('حذف السيارة؟')){ await remove(ref(db,`cars/${id}`)); await logAction('حذف سيارة', id); } }
+async function deleteCar(id) { if(confirm(t('confirmDeleteCar'))){ await remove(ref(db,`cars/${id}`)); await logAction(t('delete'), id); } }
 
 function fetchCars() { onValue(ref(db,'cars'), snap => { allCars = snap.exists() ? Object.values(snap.val()) : []; applyCarSearch(); }); }
-function applyCarSearch() {
-    const q = document.getElementById('search-car').value.toLowerCase();
-    displayedCars = q ? allCars.filter(c => `${c.plateNumber} ${c.vin} ${c.owner}`.toLowerCase().includes(q)) : allCars;
-    carsShown = 0; renderCars(false);
-}
+function applyCarSearch() { const q = document.getElementById('search-car').value.toLowerCase(); displayedCars = q ? allCars.filter(c => `${c.plateNumber} ${c.vin} ${c.owner}`.toLowerCase().includes(q)) : allCars; carsShown = 0; renderCars(false); }
 function renderCars(append) {
     const c = document.getElementById('cars-container'); if(!append) c.innerHTML = '';
     const items = displayedCars.slice(carsShown, carsShown + LIMIT);
     items.forEach(car => c.appendChild(createCarCard(car)));
     carsShown += items.length;
     document.getElementById('load-more-cars').style.display = carsShown < displayedCars.length ? 'inline-block' : 'none';
-    if(displayedCars.length === 0 && !append) c.innerHTML='<p style="text-align:center">لا توجد سيارات</p>';
+    if(displayedCars.length === 0 && !append) c.innerHTML=`<p style="text-align:center">${t('none')}</p>`;
 }
 
 function createCarCard(car) {
-    const lSt=getStatusClass(car.licenseExpiry), iSt=getStatusClass(car.insuranceExpiry); let cSt='status-green'; if(lSt==='status-red'||iSt==='status-red')cSt='status-red'; else if(lSt==='status-yellow'||iSt==='status-yellow')cSt='status-yellow';
+    const hasDriver = !!car.currentDriverId;
+    const lSt=getStatusClass(car.licenseExpiry, hasDriver), iSt=getStatusClass(car.insuranceExpiry, hasDriver); 
+    let cSt = (lSt==='status-danger' || iSt==='status-danger') ? 'status-danger' : (lSt==='status-red' || iSt==='status-red') ? 'status-red' : (lSt==='status-yellow' || iSt==='status-yellow') ? 'status-yellow' : 'status-green';
+    
     const el=document.createElement('div'); el.className=`card ${cSt}`; 
     el.innerHTML=`
-        <div class="card-header"><div><div class="card-title">${car.id}</div><div class="plate-design"><span class="plate-number">${car.plateNumber}</span><span class="plate-code">| ${car.plateCode}</span><span class="plate-emirate">${car.emirate}</span></div></div><div style="text-align:left"><b>${car.owner}</b><br>${car.currentDriverName?`<span class="custody-badge"><i class="fas fa-user"></i> ${car.currentDriverName}</span>`:'<small style="color:#888">بدون سائق</small>'}</div></div>
-        <div class="card-body"><p><b>النوع:</b> ${car.type} | ${car.year}</p><p><b>القاعدة:</b> ${car.vin}</p><p><b>ترخيص:</b> ${fmtDate(car.licenseExpiry)} <span style="color:var(--${cSt==='status-green'?'green':cSt==='status-yellow'?'yellow':'red'})">●</span></p><p><b>تأمين:</b> ${fmtDate(car.insuranceExpiry)} <span style="color:var(--${cSt==='status-green'?'green':cSt==='status-yellow'?'yellow':'red'})">●</span></p>${car.notes?`<p><b>ملاحظات:</b> ${car.notes}</p>`:''}${car.violations?`<p style="color:red"><b>مخالفات:</b> ${car.violations}</p>`:''}<div class="card-actions">${!car.currentDriverId?`<button class="btn-action assign" style="background:var(--primary-dark)"><i class="fas fa-link"></i> ربط</button>`:`<button class="btn-action unassign" style="background:var(--yellow);color:#333"><i class="fas fa-unlink"></i> فك</button>`}<button class="btn-action edit" style="background:#6c757d"><i class="fas fa-edit"></i></button><button class="btn-action delete" style="background:var(--red)"><i class="fas fa-trash"></i></button><button class="btn-action print" style="background:#17a2b8"><i class="fas fa-print"></i></button><button class="btn-action share" style="background:#6c757d"><i class="fas fa-share"></i></button></div></div>`;
+        <div class="card-header"><div><div class="card-title">${car.id}</div><div class="plate-design"><span class="plate-number">${car.plateNumber}</span><span class="plate-code">| ${car.plateCode}</span><span class="plate-emirate">${car.emirate}</span></div><div style="margin-top:5px"><b>${t('owner')}:</b> ${car.owner}</div></div><div style="text-align:left">${hasDriver?`<span class="custody-badge"><i class="fas fa-user"></i> ${car.currentDriverName}</span>`:`<small style="color:#888">${t('noDriver')}</small>`}</div></div>
+        <div class="card-body">
+            <p><b>${t('carType')}:</b> ${car.type} | ${car.year}</p><p><b>${t('vin')}:</b> ${car.vin}</p>
+            <p><b>${t('licenseExpiry')}:</b> ${fmtDate(car.licenseExpiry)} (${getStatusText(car.licenseExpiry)})</p>
+            <p><b>${t('insuranceExpiry')}:</b> ${fmtDate(car.insuranceExpiry)} (${getStatusText(car.insuranceExpiry)})</p>
+            ${car.notes?`<p><b>${t('notes')}:</b> ${car.notes}</p>`:''}${car.violations?`<p style="color:red"><b>${t('violations')}:</b> ${car.violations}</p>`:''}
+            <div class="card-actions">
+                ${!hasDriver?`<button class="btn-action assign" style="background:var(--primary-dark)"><i class="fas fa-link"></i> ${t('assign')}</button>`:`<button class="btn-action unassign" style="background:var(--yellow);color:#333"><i class="fas fa-unlink"></i> ${t('unassign')}</button>`}
+                <button class="btn-action edit" style="background:#6c757d"><i class="fas fa-edit"></i> ${t('edit')}</button>
+                <button class="btn-action delete" style="background:var(--red)"><i class="fas fa-trash"></i> ${t('delete')}</button>
+                <button class="btn-action history" style="background:#17a2b8"><i class="fas fa-history"></i> ${t('history')}</button>
+                <button class="btn-action share" style="background:#6c757d"><i class="fas fa-share"></i></button>
+            </div>
+        </div>`;
     
-    el.querySelector('.card-header').addEventListener('click', (e) => { if(!e.target.closest('.btn-action')) el.classList.toggle('expanded'); });
-    el.querySelector('.edit').addEventListener('click',(e)=>{e.stopPropagation();openCarModal(car)});
-    el.querySelector('.delete').addEventListener('click',(e)=>{e.stopPropagation();deleteCar(car.id)});
-    el.querySelector('.print').addEventListener('click',(e)=>{e.stopPropagation();printCard(car)});
-    el.querySelector('.share').addEventListener('click',(e)=>{e.stopPropagation();shareCard(car)});
-    if(car.currentDriverId) el.querySelector('.unassign').addEventListener('click',(e)=>{e.stopPropagation();unassignDriver(car)});
-    else el.querySelector('.assign').addEventListener('click',(e)=>{e.stopPropagation();openCustodyModal(car)});
+    el.querySelector('.card-header').addEventListener('click', e => { if(!e.target.closest('.btn-action')) el.classList.toggle('expanded'); });
+    el.querySelector('.edit').addEventListener('click', e => { e.stopPropagation(); openCarModal(car); });
+    el.querySelector('.delete').addEventListener('click', e => { e.stopPropagation(); deleteCar(car.id); });
+    el.querySelector('.share').addEventListener('click', e => { e.stopPropagation(); shareCard(car); });
+    el.querySelector('.history').addEventListener('click', e => { e.stopPropagation(); showCustodyHistory('car', car.id); });
+    if(hasDriver) el.querySelector('.unassign').addEventListener('click', e => { e.stopPropagation(); unassignCar(car); });
+    else el.querySelector('.assign').addEventListener('click', e => { e.stopPropagation(); openCustodyModal(car); });
     return el;
 }
 
-function printCard(car) { const w=window.open('','_blank'); w.document.write(`<html dir="rtl"><head><title>${car.id}</title><style>body{font-family:Tahoma;padding:20px;} .border{border:2px solid #000;padding:20px;border-radius:10px;} table{width:100%;} td{padding:8px;}</style></head><body><div class="border"><h2>${car.id} - ${car.plateNumber} | ${car.plateCode}</h2><hr><table><tr><td><b>المالك:</b> ${car.owner}</td><td><b>النوع:</b> ${car.type}</td></tr><tr><td><b>القاعدة:</b> ${car.vin}</td><td><b>السنة:</b> ${car.year}</td></tr><tr><td><b>انتهاء الترخيص:</b> ${fmtDate(car.licenseExpiry)}</td><td><b>انتهاء التأمين:</b> ${fmtDate(car.insuranceExpiry)}</td></tr><tr><td colspan="2"><b>السائق:</b> ${car.currentDriverName||'غير معين'}</td></tr></table></div></body></html>`); w.print(); w.close(); }
-function shareCard(car) { const text=`بيانات السيارة:\nالرقم: ${car.id}\nاللوحة: ${car.plateNumber}|${car.plateCode}\nالمالك: ${car.owner}\nالسائق: ${car.currentDriverName||'لا يوجد'}`; if(navigator.share) navigator.share({title:car.id, text:text}); else { navigator.clipboard.writeText(text); alert('تم نسخ البيانات!'); } }
+function shareCard(car) { const text=`${t('car')}: ${car.id}\n${t('plateNumber')}: ${car.plateNumber}|${car.plateCode}\n${t('owner')}: ${car.owner}\n${t('driverName')}: ${car.currentDriverName||t('noDriver')}`; if(navigator.share) navigator.share({title:car.id, text:text}); else { navigator.clipboard.writeText(text); alert('Copied!'); } }
 
 // =================== DRIVERS ===================
 document.getElementById('add-driver-btn').addEventListener('click', () => openDriverModal());
 document.getElementById('load-more-drivers').addEventListener('click', () => renderDrivers(true));
 document.getElementById('search-driver').addEventListener('input', applyDriverSearch);
 
-function openDriverModal(data=null) { document.getElementById('driver-form').reset(); document.getElementById('driver-id-hidden').value=''; document.getElementById('driver-modal-title').textContent=data?'تعديل سائق':'إضافة سائق'; if(data){document.getElementById('driver-id-hidden').value=data.id;document.getElementById('driver-name').value=data.name;document.getElementById('driver-contact').value=data.contact;document.getElementById('driver-notes').value=data.notes||'';} document.getElementById('driver-modal').style.display='block'; }
+function openDriverModal(data=null) { document.getElementById('driver-form').reset(); document.getElementById('driver-id-hidden').value=''; document.getElementById('driver-modal-title').textContent=data?t('edit'):t('addDriver'); if(data){document.getElementById('driver-id-hidden').value=data.id;document.getElementById('driver-name').value=data.name;document.getElementById('driver-contact').value=data.contact;document.getElementById('driver-notes').value=data.notes||'';} document.getElementById('driver-modal').style.display='block'; }
 
-document.getElementById('driver-form').addEventListener('submit', async (e) => {
+document.getElementById('driver-form').addEventListener('submit', async e => {
     e.preventDefault(); const btn=e.target.querySelector('button'); btn.disabled=true;
-    const hid=document.getElementById('driver-id-hidden').value, data={name:document.getElementById('driver-name').value.trim(), contact:document.getElementById('driver-contact').value.trim(), notes:document.getElementById('driver-notes').value.trim(), currentCarId:null, currentCarPlate:null};
-    try { if(hid){ const ex=(await get(ref(db,`drivers/${hid}`))).val(); data.currentCarId=ex.currentCarId||null; data.currentCarPlate=ex.currentCarPlate||null; await update(ref(db,`drivers/${hid}`),data); await logAction('تعديل سائق', data.name); } else { const dRef=push(ref(db,'drivers')); data.id=dRef.key; await set(dRef,data); await logAction('إضافة سائق', data.name); } document.getElementById('driver-modal').style.display='none'; } catch(err){alert(err)} finally{btn.disabled=false;}
+    const hid=document.getElementById('driver-id-hidden').value, data={name:document.getElementById('driver-name').value.trim(), contact:document.getElementById('driver-contact').value.trim(), notes:document.getElementById('driver-notes').value.trim()};
+    try { if(hid){ await update(ref(db,`drivers/${hid}`),data); await logAction(t('edit'), data.name); } else { const dRef=push(ref(db,'drivers')); data.id=dRef.key; await set(dRef,data); await logAction(t('addDriver'), data.name); } document.getElementById('driver-modal').style.display='none'; } catch(err){alert(err)} finally{btn.disabled=false;}
 });
 
-async function deleteDriver(id, carId) { if(carId){alert('افك العهدة أولاً');return;} if(confirm('حذف السائق؟')){ await remove(ref(db,`drivers/${id}`)); await logAction('حذف سائق', id); } }
+async function deleteDriver(id) { const assignedCars = allCars.filter(c => c.currentDriverId === id); if(assignedCars.length > 0){alert(t('unassignFirst'));return;} if(confirm(t('confirmDeleteDriver'))){ await remove(ref(db,`drivers/${id}`)); await logAction(t('delete'), id); } }
 
 function fetchDrivers() { onValue(ref(db,'drivers'), snap => { allDrivers = snap.exists() ? Object.values(snap.val()) : []; applyDriverSearch(); }); }
-function applyDriverSearch() {
-    const q = document.getElementById('search-driver').value.toLowerCase();
-    displayedDrivers = q ? allDrivers.filter(d => `${d.name} ${d.contact}`.toLowerCase().includes(q)) : allDrivers;
-    driversShown = 0; renderDrivers(false);
-}
+function applyDriverSearch() { const q = document.getElementById('search-driver').value.toLowerCase(); displayedDrivers = q ? allDrivers.filter(d => `${d.name} ${d.contact}`.toLowerCase().includes(q)) : allDrivers; driversShown = 0; renderDrivers(false); }
 function renderDrivers(append) {
     const c = document.getElementById('drivers-container'); if(!append) c.innerHTML = '';
     const items = displayedDrivers.slice(driversShown, driversShown + LIMIT);
     items.forEach(d => c.appendChild(createDriverCard(d)));
     driversShown += items.length;
     document.getElementById('load-more-drivers').style.display = driversShown < displayedDrivers.length ? 'inline-block' : 'none';
-    if(displayedDrivers.length === 0 && !append) c.innerHTML='<p style="text-align:center">لا يوجد سائقون</p>';
+    if(displayedDrivers.length === 0 && !append) c.innerHTML=`<p style="text-align:center">${t('none')}</p>`;
 }
 
 function createDriverCard(d) {
+    const assignedCars = allCars.filter(c => c.currentDriverId === d.id);
     const el=document.createElement('div'); el.className='card status-green'; 
-    el.innerHTML=`<div class="card-header"><div><div class="card-title"><i class="fas fa-user"></i> ${d.name}</div><div style="color:#666; margin-top:5px"><i class="fas fa-phone"></i> ${d.contact}</div></div><div style="text-align:left">${d.currentCarPlate?`<span class="custody-badge"><i class="fas fa-car"></i> ${d.currentCarPlate}</span>`:'<small style="color:#888">بدون عهدة</small>'}</div></div><div class="card-body">${d.notes?`<p>${d.notes}</p>`:''}<div class="card-actions"><button class="btn-action edit" style="background:#6c757d"><i class="fas fa-edit"></i></button><button class="btn-action delete" style="background:var(--red)"><i class="fas fa-trash"></i></button></div></div>`;
+    el.innerHTML=`
+        <div class="card-header"><div><div class="card-title"><i class="fas fa-user"></i> ${d.name}</div><div style="color:#666; margin-top:5px"><i class="fas fa-phone"></i> ${d.contact}</div></div><div style="text-align:left">${assignedCars.length > 0 ? assignedCars.map(c => `<span class="custody-badge"><i class="fas fa-car"></i> ${c.plateNumber}|${c.plateCode}</span>`).join('') : `<small style="color:#888">${t('noDriver')}</small>`}</div></div>
+        <div class="card-body">${d.notes?`<p>${d.notes}</p>`:''}
+            <div class="card-actions">
+                <button class="btn-action assign" style="background:var(--green)"><i class="fas fa-plus"></i> ${t('assign')}</button>
+                <button class="btn-action edit" style="background:#6c757d"><i class="fas fa-edit"></i> ${t('edit')}</button>
+                <button class="btn-action delete" style="background:var(--red)"><i class="fas fa-trash"></i> ${t('delete')}</button>
+                <button class="btn-action history" style="background:#17a2b8"><i class="fas fa-history"></i> ${t('history')}</button>
+            </div>
+        </div>`;
     
-    el.querySelector('.card-header').addEventListener('click', (e) => { if(!e.target.closest('.btn-action')) el.classList.toggle('expanded'); });
-    el.querySelector('.edit').addEventListener('click',(e)=>{e.stopPropagation();openDriverModal(d)});
-    el.querySelector('.delete').addEventListener('click',(e)=>{e.stopPropagation();deleteDriver(d.id, d.currentCarId)});
+    el.querySelector('.card-header').addEventListener('click', e => { if(!e.target.closest('.btn-action')) el.classList.toggle('expanded'); });
+    el.querySelector('.edit').addEventListener('click', e => { e.stopPropagation(); openDriverModal(d); });
+    el.querySelector('.delete').addEventListener('click', e => { e.stopPropagation(); deleteDriver(d.id); });
+    el.querySelector('.history').addEventListener('click', e => { e.stopPropagation(); showCustodyHistory('driver', d.id); });
+    
+    // Assign car to this driver directly
+    el.querySelector('.assign').addEventListener('click', e => { 
+        e.stopPropagation(); 
+        const availableCars = allCars.filter(c => !c.currentDriverId);
+        if(availableCars.length === 0) { alert(t('none')); return; }
+        const sel = document.getElementById('custody-driver-select');
+        sel.innerHTML = '';
+        availableCars.forEach(c => { const o = document.createElement('option'); o.value = c.id; o.textContent = `${c.id} - ${c.plateNumber}|${c.plateCode}`; sel.appendChild(o); });
+        document.getElementById('custody-car-id').value = 'SELECT_CAR';
+        document.getElementById('custody-car-display').value = '';
+        document.getElementById('custody-modal').style.display = 'block';
+        // Temporarily change form behavior
+        document.getElementById('custody-form').onsubmit = async (ev) => {
+            ev.preventDefault();
+            const selectedCarId = sel.value;
+            if(!selectedCarId) return;
+            const carData = availableCars.find(c => c.id === selectedCarId);
+            const now = new Date().toISOString();
+            try {
+                await update(ref(db, `cars/${selectedCarId}`), { currentDriverId: d.id, currentDriverName: d.name });
+                const hRef = push(ref(db, 'custodyHistory'));
+                await set(hRef, { carId: selectedCarId, driverId: d.id, driverName: d.name, carPlate: `${carData.plateNumber}|${carData.plateCode}`, startTime: now, endTime: null });
+                await logAction(t('assignCustody'), `${t('car')} ${selectedCarId} -> ${t('driverName')} ${d.name}`);
+                document.getElementById('custody-modal').style.display = 'none';
+                document.getElementById('custody-form').onsubmit = null; // reset
+            } catch(err) { alert(err); }
+        };
+    });
+
+    // Unassign buttons for currently assigned cars
+    assignedCars.forEach(c => {
+        el.querySelector(`.custody-badge[title="${c.id}"]`).addEventListener('click', e => { e.stopPropagation(); unassignCar(c); });
+    });
+
     return el;
 }
 
-// =================== CUSTODY ===================
-async function openCustodyModal(car) { document.getElementById('custody-car-id').value=car.id; document.getElementById('custody-car-display').value=`${car.plateNumber}|${car.plateCode}`; const sel=document.getElementById('custody-driver-select'); sel.innerHTML='<option value="">-- اختر --</option>'; const snap=await get(ref(db,'drivers')); if(snap.exists()) Object.values(snap.val()).forEach(d=>{if(!d.currentCarId){const o=document.createElement('option');o.value=d.id;o.textContent=`${d.name} (${d.contact})`;sel.appendChild(o);}}); document.getElementById('custody-modal').style.display='block'; }
+// =================== CUSTODY LOGIC ===================
+function openCustodyModal(car) { 
+    document.getElementById('custody-car-id').value = car.id; 
+    document.getElementById('custody-car-display').value = `${car.plateNumber}|${car.plateCode}`; 
+    const sel = document.getElementById('custody-driver-select'); 
+    sel.innerHTML = '<option value="">--</option>'; 
+    allDrivers.forEach(d => { const o = document.createElement('option'); o.value = d.id; o.textContent = `${d.name} (${d.contact})`; sel.appendChild(o); }); 
+    document.getElementById('custody-modal').style.display = 'block'; 
+}
 
-document.getElementById('custody-form').addEventListener('submit', async (e) => {
-    e.preventDefault(); const cId=document.getElementById('custody-car-id').value, dId=document.getElementById('custody-driver-select').value; if(!dId){alert('اختر سائق');return;}
-    try { const cSnap=await get(ref(db,`cars/${cId}`)), dSnap=await get(ref(db,`drivers/${dId}`)), cData=cSnap.val(), dData=dSnap.val(), now=new Date().toISOString();
-        await update(ref(db,`cars/${cId}`),{currentDriverId:dId,currentDriverName:dData.name}); const pStr=`${cData.plateNumber}|${cData.plateCode}`; await update(ref(db,`drivers/${dId}`),{currentCarId:cId,currentCarPlate:pStr}); const hRef=push(ref(db,'custodyHistory')); await set(hRef,{carId:cId,driverId:dId,startTime:now,endTime:null}); await logAction('ربط عهدة', `سيارة ${cId} للسائق ${dData.name}`); document.getElementById('custody-modal').style.display='none';
+// Default car assign form
+document.getElementById('custody-form').addEventListener('submit', async e => {
+    e.preventDefault(); 
+    const cId = document.getElementById('custody-car-id').value; 
+    const dId = document.getElementById('custody-driver-select').value; 
+    if(!dId){alert(t('selectDriver'));return;}
+    try { 
+        const carData = allCars.find(c => c.id === cId); const dData = allDrivers.find(d => d.id === dId); const now = new Date().toISOString();
+        await update(ref(db,`cars/${cId}`),{currentDriverId:dId,currentDriverName:dData.name}); 
+        const hRef = push(ref(db, 'custodyHistory'));
+        await set(hRef, { carId: cId, driverId: dId, driverName: dData.name, carPlate: `${carData.plateNumber}|${carData.plateCode}`, startTime: now, endTime: null });
+        await logAction(t('assignCustody'), `${t('car')} ${cId} -> ${t('driverName')} ${dData.name}`); 
+        document.getElementById('custody-modal').style.display='none'; 
     } catch(err){alert(err)}
 });
 
-async function unassignDriver(car) { if(!confirm('فك الربط؟'))return; try { const hSnap=await get(ref(db,'custodyHistory')); let key=null; if(hSnap.exists()) hSnap.forEach(c=>{if(c.val().carId===car.id&&!c.val().endTime)key=c.key;}); const now=new Date().toISOString(); if(key) await update(ref(db,`custodyHistory/${key}`),{endTime:now}); await update(ref(db,`cars/${car.id}`),{currentDriverId:null,currentDriverName:null}); await update(ref(db,`drivers/${car.currentDriverId}`),{currentCarId:null,currentCarPlate:null}); await logAction('فك عهدة', `سيارة ${car.id}`); } catch(err){alert(err)} }
+async function unassignCar(car) { 
+    if(!confirm(t('confirmUnassign')))return; 
+    try { 
+        // Find the active history record for this car
+        const hSnap = await get(ref(db, 'custodyHistory')); let key = null;
+        if(hSnap.exists()) hSnap.forEach(c => { if(c.val().carId === car.id && !c.val().endTime) key = c.key; });
+        const now = new Date().toISOString();
+        if(key) await update(ref(db, `custodyHistory/${key}`), { endTime: now });
+        await update(ref(db, `cars/${car.id}`), { currentDriverId: null, currentDriverName: null }); 
+        await logAction(t('unassign'), `${t('car')} ${car.id}`); 
+    } catch(err){alert(err)} 
+}
 
-// =================== MODERATORS (Admin Only) ===================
-document.getElementById('add-mod-btn').addEventListener('click', () => { requestPin(() => { document.getElementById('mod-form').reset(); document.getElementById('mod-modal').style.display='block'; }); });
+async function showCustodyHistory(type, id) {
+    document.getElementById('history-tbody').innerHTML = '';
+    try {
+        const snap = await get(ref(db, 'custodyHistory'));
+        let records = [];
+        if(snap.exists()) {
+            const data = snap.val();
+            for(let k in data) {
+                if((type === 'car' && data[k].carId === id) || (type === 'driver' && data[k].driverId === id)) {
+                    records.push(data[k]);
+                }
+            }
+        }
+        records.sort((a,b) => new Date(b.startTime) - new Date(a.startTime));
+        
+        const tbody = document.getElementById('history-tbody');
+        if(records.length === 0) { tbody.innerHTML = `<tr><td colspan="3" style="text-align:center">${t('none')}</td></tr>`; }
+        else {
+            records.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${type === 'car' ? r.driverName : r.carPlate}</td>
+                    <td>${fmtDateTime(r.startTime)}</td>
+                    <td>${r.endTime ? fmtDateTime(r.endTime) : `<b style="color:var(--green)">${t('untilNow')}</b>`}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        document.getElementById('history-modal').style.display = 'block';
+    } catch(err) { alert(err); }
+}
+
+// =================== MODERATORS ===================
+document.getElementById('add-mod-btn').addEventListener('click', () => { requestPin(() => { document.getElementById('mod-form').reset(); document.getElementById('mod-uid-hidden').value=''; document.getElementById('mod-pass-group').style.display='flex'; document.getElementById('mod-modal').style.display='block'; }); });
 document.getElementById('load-more-mods').addEventListener('click', () => renderMods(true));
 
-document.getElementById('mod-form').addEventListener('submit', async (e) => {
+document.getElementById('mod-form').addEventListener('submit', async e => {
     e.preventDefault(); const btn=e.target.querySelector('button'); btn.disabled=true;
-    const email=document.getElementById('mod-email').value, pass=document.getElementById('mod-pass').value, name=document.getElementById('mod-name').value;
-    try { const cred=await createUserWithEmailAndPassword(secondaryAuth,email,pass); await set(ref(db,`users/${cred.user.uid}`),{email,name,role:'moderator',status:'active'}); await logAction('إضافة مشرف', name); document.getElementById('mod-modal').style.display='none'; } catch(err){alert(err.message)} finally{btn.disabled=false;}
+    const uid=document.getElementById('mod-uid-hidden').value;
+    const name=document.getElementById('mod-name').value, email=document.getElementById('mod-email').value;
+    try {
+        if(uid) { // Edit
+            await update(ref(db, `users/${uid}`), { name, email });
+            await logAction(t('edit'), name);
+        } else { // Create
+            const pass=document.getElementById('mod-pass').value;
+            const cred=await createUserWithEmailAndPassword(secondaryAuth,email,pass); 
+            await set(ref(db,`users/${cred.user.uid}`),{email,name,role:'moderator',status:'active'}); 
+            await logAction(t('addMod'), name); 
+        }
+        document.getElementById('mod-modal').style.display='none'; 
+    } catch(err){alert(err.message)} finally{btn.disabled=false;}
 });
 
-function fetchMods() { onValue(ref(db,'users'), snap => { allMods = snap.exists() ? Object.values(snap.val()).filter(u => u.role==='moderator') : []; modsShown = 0; renderMods(false); }); }
+function fetchMods() { onValue(ref(db,'users'), snap => { allMods = snap.exists() ? Object.keys(snap.val()).map(k => ({...snap.val()[k], id: k})).filter(u => u.role==='moderator') : []; modsShown = 0; renderMods(false); }); }
 function renderMods(append) {
     const c = document.getElementById('mods-container'); if(!append) c.innerHTML = '';
     const items = allMods.slice(modsShown, modsShown + LIMIT);
     items.forEach(u => c.appendChild(createModCard(u)));
     modsShown += items.length;
     document.getElementById('load-more-mods').style.display = modsShown < allMods.length ? 'inline-block' : 'none';
-    if(allMods.length === 0 && !append) c.innerHTML='<p style="text-align:center">لا يوجد مشرفون</p>';
 }
 
 function createModCard(u) {
     const el=document.createElement('div'); el.className=`card ${u.status==='active'?'status-green':'status-red'}`;
-    el.innerHTML=`<div class="card-header"><div class="card-title">${u.name}</div><small>${u.email}</small></div><div class="card-body"><p>الحالة: ${u.status==='active'?'<span style="color:green">فعال</span>':'<span style="color:red">معلق</span>'}</p><div class="card-actions">${u.status==='active'?`<button class="btn-action suspend" style="background:var(--yellow);color:#333">تعليق</button>`:`<button class="btn-action activate" style="background:var(--green)">تفعيل</button>`}<button class="btn-action delete" style="background:var(--red)">حذف</button></div></div>`;
+    el.innerHTML=`
+        <div class="card-header"><div class="card-title">${u.name}</div><small>${u.email}</small></div>
+        <div class="card-body"><p>${t('active')}: ${u.status==='active'?`<span style="color:green">${t('active')}</span>`:`<span style="color:red">${t('suspended')}</span>`}</p>
+            <div class="card-actions">
+                ${u.status==='active'?`<button class="btn-action suspend" style="background:var(--yellow);color:#333"><i class="fas fa-ban"></i> ${t('suspended')}</button>`:`<button class="btn-action activate" style="background:var(--green)"><i class="fas fa-check"></i> ${t('active')}</button>`}
+                <button class="btn-action edit" style="background:#6c757d"><i class="fas fa-edit"></i> ${t('edit')}</button>
+                <button class="btn-action reset-pass" style="background:#17a2b8"><i class="fas fa-key"></i> ${t('resetPass')}</button>
+                <button class="btn-action delete" style="background:var(--red)"><i class="fas fa-trash"></i> ${t('delete')}</button>
+            </div>
+        </div>`;
     
-    el.querySelector('.card-header').addEventListener('click', (e) => { if(!e.target.closest('.btn-action')) el.classList.toggle('expanded'); });
-    if(u.status==='active') el.querySelector('.suspend').addEventListener('click',(e)=>{e.stopPropagation();requestPin(async()=>{await update(ref(db,`users/${u.id||u.uid}`),{status:'suspended'});await logAction('تعليق مشرف',u.name);})});
-    else el.querySelector('.activate').addEventListener('click',(e)=>{e.stopPropagation();requestPin(async()=>{await update(ref(db,`users/${u.id||u.uid}`),{status:'active'});await logAction('تفعيل مشرف',u.name);})});
-    el.querySelector('.delete').addEventListener('click',(e)=>{e.stopPropagation();requestPin(async()=>{if(confirm('حذف المشرف نهائياً؟')){await remove(ref(db,`users/${u.id||u.uid}`));await logAction('حذف مشرف',u.name);}})});
+    el.querySelector('.card-header').addEventListener('click', e => { if(!e.target.closest('.btn-action')) el.classList.toggle('expanded'); });
+    
+    if(u.status==='active') el.querySelector('.suspend').addEventListener('click', e => { e.stopPropagation(); requestPin(async()=>{await update(ref(db,`users/${u.id}`),{status:'suspended'});await logAction(t('suspended'),u.name);}); });
+    else el.querySelector('.activate').addEventListener('click', e => { e.stopPropagation(); requestPin(async()=>{await update(ref(db,`users/${u.id}`),{status:'active'});await logAction(t('active'),u.name);}); });
+    
+    el.querySelector('.edit').addEventListener('click', e => { e.stopPropagation(); document.getElementById('mod-uid-hidden').value = u.id; document.getElementById('mod-name').value = u.name; document.getElementById('mod-email').value = u.email; document.getElementById('mod-pass-group').style.display = 'none'; document.getElementById('mod-modal').style.display = 'block'; });
+    
+    el.querySelector('.reset-pass').addEventListener('click', async e => { e.stopPropagation(); try { await sendPasswordResetEmail(auth, u.email); alert(t('resetPassSent')); } catch(err) { alert(err.message); } });
+    
+    el.querySelector('.delete').addEventListener('click', e => { e.stopPropagation(); requestPin(async()=>{if(confirm(t('confirmDeleteCar'))){await remove(ref(db,`users/${u.id}`));await logAction(t('delete'),u.name);}}); });
     return el;
 }
 
-// =================== LOGS (Admin Only) ===================
+// =================== LOGS ===================
 document.getElementById('load-more-logs').addEventListener('click', () => renderLogs(true));
-
 function fetchLogs() { onValue(ref(db,'logs'), snap => { allLogs = snap.exists() ? Object.values(snap.val()).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp)) : []; logsShown = 0; renderLogs(false); }); }
 function renderLogs(append) {
     const tb = document.getElementById('logs-tbody'); if(!append) tb.innerHTML = '';
     const items = allLogs.slice(logsShown, logsShown + LIMIT);
-    items.forEach(l => { const tr=document.createElement('tr'); tr.innerHTML=`<td>${new Date(l.timestamp).toLocaleString('ar-EG',{timeZone:'Asia/Dubai'})}</td><td>${l.userId}</td><td>${l.action}</td><td>${l.details}</td>`; tb.appendChild(tr); });
+    items.forEach(l => { const tr=document.createElement('tr'); tr.innerHTML=`<td>${fmtDateTime(l.timestamp)}</td><td>${l.userId}</td><td>${l.action}</td><td>${l.details}</td>`; tb.appendChild(tr); });
     logsShown += items.length;
     document.getElementById('load-more-logs').style.display = logsShown < allLogs.length ? 'inline-block' : 'none';
 }
@@ -281,5 +434,4 @@ function calculateStats() {
     if(isAdmin) { onValue(ref(db,'users'), snap => { let m=0; if(snap.exists()) Object.values(snap.val()).forEach(u=>{if(u.role==='moderator')m++}); document.getElementById('stat-mods').textContent=m; }); }
 }
 
-// PWA
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('/service-worker.js'));
