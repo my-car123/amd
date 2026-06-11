@@ -1,53 +1,97 @@
 :root {
-    --bg-color: #ffffff;
-    --primary-color: #87CEFA; /* أزرق فاتح */
+    --bg-color: #f4f7f6;
+    --primary-color: #87CEFA;
+    --primary-dark: #5ba3c9;
     --text-color: #333333;
+    --white: #ffffff;
     --green: #28a745;
     --yellow: #ffc107;
     --red: #dc3545;
+    --border-radius: 8px;
 }
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: var(--bg-color);
     color: var(--text-color);
-    display: flex;
-    flex-direction: column;
     min-height: 100vh;
 }
 
+/* Login Section */
+.login-container {
+    display: flex; justify-content: center; align-items: center;
+    height: 100vh; background-color: var(--bg-color);
+}
+.login-box {
+    background: var(--white); padding: 40px; border-radius: var(--border-radius);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center;
+}
+.logo-login { height: 80px; margin-bottom: 20px; }
+.login-box h2 { margin-bottom: 20px; color: var(--primary-dark); }
+.login-box input {
+    width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc;
+    border-radius: var(--border-radius); font-size: 16px;
+}
+.btn-primary {
+    width: 100%; padding: 12px; background-color: var(--primary-dark); color: var(--white);
+    border: none; border-radius: var(--border-radius); cursor: pointer; font-size: 16px;
+}
+.btn-primary:hover { background-color: #4a8fb0; }
+.error-msg { color: var(--red); margin-top: 10px; font-size: 14px; }
+
+/* App Layout */
+.app-wrapper { display: flex; flex-direction: column; min-height: 100vh; }
 header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 15px 20px;
-    border-bottom: 2px solid var(--primary-color);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 15px 20px; background: var(--white); border-bottom: 3px solid var(--primary-color);
 }
+.logo { height: 50px; }
+.main-nav { display: flex; gap: 20px; }
+.nav-item {
+    text-decoration: none; color: var(--text-color); font-weight: bold;
+    display: flex; align-items: center; gap: 5px; padding: 8px 12px; border-radius: var(--border-radius);
+}
+.nav-item:hover, .nav-item.active { background-color: var(--primary-color); color: var(--white); }
+.user-info { font-size: 14px; display: flex; align-items: center; gap: 10px; }
+.btn-logout { background: none; border: 1px solid var(--red); color: var(--red); padding: 5px 10px; border-radius: 5px; cursor: pointer; }
 
-.logo {
-    height: 50px;
-}
+/* Main Content */
+#app-container { flex: 1; padding: 20px; max-width: 1200px; margin: 0 auto; width: 100%; }
+.search-bar { display: flex; margin-bottom: 20px; gap: 10px; }
+.search-bar input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: var(--border-radius); font-size: 16px; }
 
-.main-nav {
-    display: flex;
-    gap: 15px;
-}
+/* Cards Grid */
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
 
-#app-container {
-    flex: 1;
-    padding: 20px;
+/* The Collapsible Card */
+.card {
+    background: var(--white); border-radius: var(--border-radius); overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-right: 6px solid #ccc; /* اللون يتغير برمجياً */
+    transition: transform 0.2s; cursor: pointer;
 }
+.card:hover { transform: translateY(-3px); }
+.card-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+.card-title { font-size: 18px; font-weight: bold; }
+.card-body { padding: 0 15px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+.card.expanded .card-body { max-height: 500px; padding-bottom: 15px; border-top: 1px solid #eee; }
+.card-actions { margin-top: 15px; display: flex; gap: 10px; }
+.btn-action { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
 
-footer {
-    text-align: center;
-    padding: 10px;
-    border-top: 1px solid var(--primary-color);
-    font-size: 0.9em;
-    color: #666;
+/* UAE License Plate Design */
+.plate-design {
+    display: inline-flex; align-items: center; background: var(--white);
+    border: 3px solid #000; border-radius: 6px; padding: 4px 10px; font-weight: bold;
+    font-family: 'Courier New', Courier, monospace; letter-spacing: 1px;
 }
+.plate-number { font-size: 20px; }
+.plate-code { font-size: 16px; border-right: 2px solid #000; padding-right: 8px; margin-right: 8px; }
+
+/* Status Borders */
+.status-green { border-right-color: var(--green) !important; }
+.status-yellow { border-right-color: var(--yellow) !important; }
+.status-red { border-right-color: var(--red) !important; }
+
+.btn-load-more { display: block; margin: 20px auto; padding: 10px 30px; background: #eee; border: none; border-radius: 5px; cursor: pointer; }
+footer { text-align: center; padding: 15px; background: var(--white); border-top: 1px solid #ccc; font-size: 0.9em; color: #666; }
