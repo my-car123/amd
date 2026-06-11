@@ -227,7 +227,7 @@ function renderCars(append) {
     if(displayedCars.length === 0 && !append) c.innerHTML=`<p style="text-align:center">${t('none')}</p>`;
 }
 
-// Navigation helper functions
+// Navigation helper functions (kept original)
 function navigateToCar(carId) {
     showSection('cars');
     document.getElementById('search-car').value = '';
@@ -255,6 +255,7 @@ function navigateToDriver(driverId) {
     }, 300);
 }
 
+// =================== CAR CARD (NEW VERSION) ===================
 function createCarCard(car) {
     const hasDriver = !!car.currentDriverId;
     const lSt=getStatusClass(car.licenseExpiry, hasDriver), iSt=getStatusClass(car.insuranceExpiry, hasDriver); 
@@ -262,20 +263,21 @@ function createCarCard(car) {
     
     const el=document.createElement('div'); el.className=`card ${cSt}`; 
     el.setAttribute('data-car-id', car.id);
+    
+    // Build current driver display box
+    const driverHtml = hasDriver ? 
+        `<div class="current-driver-box"><i class="fas fa-user-check"></i> ${t('currentlyWith')}: <span>${car.currentDriverName}</span></div>` :
+        `<div class="current-driver-box"><i class="fas fa-user-slash"></i> ${t('noDriver')}</div>`;
+    
     el.innerHTML=`
         <div class="card-header">
-            <div class="card-header-main">
-                <div>
-                    <div class="card-title">${car.id}</div>
-                    <div style="margin-top:5px"><span style="font-size:12px; color:#666">${t('owner')}:</span> <b>${car.owner}</b></div>
-                </div>
-                <div class="plate-design">
-                    <span class="plate-number">${car.plateNumber}</span> <span class="plate-sep">|</span> <span class="plate-code">${car.plateCode}</span> <span class="plate-sep">|</span> <span class="plate-emirate">${car.emirate}</span>
-                </div>
+            <div class="card-title">${car.id}</div>
+            <div class="owner-name-box"><i class="fas fa-user-tie"></i> ${t('owner')}: ${car.owner}</div>
+            <div class="plate-design">
+                <span class="plate-number">${car.plateNumber}</span> <span class="plate-sep">|</span> <span class="plate-code">${car.plateCode}</span> <span class="plate-sep">|</span> <span class="plate-emirate">${car.emirate}</span>
             </div>
-            <div class="card-driver-info">
-                ${hasDriver?`<span class="custody-badge" title="${car.currentDriverName}"><i class="fas fa-user"></i> ${car.currentDriverName}</span>`:`<small style="color:#888">${t('noDriver')}</small>`}
-            </div>
+            ${driverHtml}
+            ${hasDriver ? `<div class="card-driver-info" style="justify-content:center; margin-top:5px;"><span class="custody-badge" title="${car.currentDriverName}"><i class="fas fa-user"></i> ${car.currentDriverName}</span></div>` : `<div class="card-driver-info"><small style="color:#888">${t('noDriver')}</small></div>`}
         </div>
         <div class="card-body">
             <div class="info-grid">
@@ -308,18 +310,21 @@ function createCarCard(car) {
             </div>
         </div>`;
     
-    el.querySelector('.card-header').addEventListener('click', e => { if(!e.target.closest('.btn-action') && !e.target.closest('.custody-badge') && !e.target.closest('.toggle-cars-btn')) el.classList.toggle('expanded'); });
+    el.querySelector('.card-header').addEventListener('click', e => { if(!e.target.closest('.btn-action') && !e.target.closest('.custody-badge') && !e.target.closest('.driver-car-item')) el.classList.toggle('expanded'); });
     el.querySelector('.edit').addEventListener('click', e => { e.stopPropagation(); openCarModal(car); });
     el.querySelector('.delete').addEventListener('click', e => { e.stopPropagation(); deleteCar(car.id); });
     el.querySelector('.print').addEventListener('click', e => { e.stopPropagation(); printCard(car); });
     el.querySelector('.share').addEventListener('click', e => { e.stopPropagation(); shareCard(car); });
     el.querySelector('.history').addEventListener('click', e => { e.stopPropagation(); showCustodyHistory('car', car.id); });
     if(hasDriver) {
-        el.querySelector('.unassign').addEventListener('click', e => { e.stopPropagation(); unassignCar(car); });
+        const unassignBtn = el.querySelector('.unassign');
+        if(unassignBtn) unassignBtn.addEventListener('click', e => { e.stopPropagation(); unassignCar(car); });
         const driverBadge = el.querySelector('.custody-badge');
-        driverBadge.addEventListener('click', e => { e.stopPropagation(); navigateToDriver(car.currentDriverId); });
+        if(driverBadge) driverBadge.addEventListener('click', e => { e.stopPropagation(); navigateToDriver(car.currentDriverId); });
+    } else {
+        const assignBtn = el.querySelector('.assign');
+        if(assignBtn) assignBtn.addEventListener('click', e => { e.stopPropagation(); openCustodyModal('car', car.id); });
     }
-    else el.querySelector('.assign').addEventListener('click', e => { e.stopPropagation(); openCustodyModal('car', car.id); });
     return el;
 }
 
@@ -399,31 +404,52 @@ function renderDrivers(append) {
     if(displayedDrivers.length === 0 && !append) c.innerHTML=`<p style="text-align:center">${t('none')}</p>`;
 }
 
+// =================== DRIVER CARD (NEW VERSION - GRID INSTEAD OF TOGGLE) ===================
 function createDriverCard(d) {
     const assignedCars = allCars.filter(c => c.currentDriverId === d.id);
     const el=document.createElement('div'); el.className='card status-green-top'; 
     el.setAttribute('data-driver-id', d.id);
     
-    let carsHtml = `<small style="color:#888">${t('noCar')}</small>`;
-    if (assignedCars.length > 0) {
-        const firstCar = assignedCars[0];
-        const firstBadge = `<span class="custody-badge" data-car-id="${firstCar.id}"><i class="fas fa-car"></i> ${firstCar.plateNumber}|${firstCar.plateCode}</span>`;
-        if (assignedCars.length === 1) {
-            carsHtml = firstBadge;
-        } else {
-            let moreBadges = assignedCars.slice(1).map(c => `<span class="custody-badge" data-car-id="${c.id}"><i class="fas fa-car"></i> ${c.plateNumber}|${c.plateCode}</span>`).join('');
-            carsHtml = `<div class="driver-cars-wrapper">${firstBadge}<button class="toggle-cars-btn"><i class="fas fa-chevron-down"></i> +${assignedCars.length - 1} ${t('moreCars')}</button><div class="more-cars-list">${moreBadges}</div></div>`;
-        }
+    // Build grid of cars (all cars, no toggle)
+    let carsGridHtml = '';
+    if (assignedCars.length === 0) {
+        carsGridHtml = `<div class="driver-cars-grid"><div style="text-align:center; color:#888; grid-column:1/-1;">${t('noCar')}</div></div>`;
+    } else {
+        let gridItems = '';
+        assignedCars.forEach(car => {
+            const statusText = getStatusText(car.licenseExpiry);
+            let statusColor = '#28a745';
+            if (statusText === t('expiredStatus')) statusColor = '#dc3545';
+            else if (statusText === t('warnStatus')) statusColor = '#ffc107';
+            gridItems += `
+                <div class="driver-car-item" data-car-id="${car.id}">
+                    <div class="mini-plate">
+                        <span class="plate-number">${car.plateNumber}</span> <span class="plate-sep">|</span> 
+                        <span class="plate-code">${car.plateCode}</span> <span class="plate-sep">|</span> 
+                        <span class="plate-emirate">${car.emirate}</span>
+                    </div>
+                    <div class="car-mini-info">
+                        <span><i class="fas fa-car"></i> ${car.type}</span>
+                        <span><i class="fas fa-calendar"></i> ${car.year}</span>
+                        <span style="color:${statusColor}"><i class="fas fa-clock"></i> ${statusText}</span>
+                    </div>
+                </div>
+            `;
+        });
+        carsGridHtml = `<div class="driver-cars-grid">${gridItems}</div>`;
     }
-
+    
     el.innerHTML=`
         <div class="card-header">
             <div class="card-header-main">
                 <div><div class="card-title"><i class="fas fa-user"></i> ${d.name}</div><div style="color:#666; margin-top:5px"><i class="fas fa-phone"></i> ${d.contact}</div></div>
             </div>
-            <div class="card-driver-info">${carsHtml}</div>
+            <div class="card-driver-info" style="width:100%; flex-direction:column; align-items:stretch;">
+                ${carsGridHtml}
+            </div>
         </div>
-        <div class="card-body">${d.notes?`<p>${d.notes}</p>`:''}
+        <div class="card-body">
+            ${d.notes?`<p>${d.notes}</p>`:''}
             <div class="card-actions">
                 <button class="btn-action assign" style="background:var(--green)"><i class="fas fa-plus"></i> ${t('assign')}</button>
                 <button class="btn-action edit" style="background:#6c757d"><i class="fas fa-edit"></i> ${t('edit')}</button>
@@ -432,33 +458,23 @@ function createDriverCard(d) {
             </div>
         </div>`;
     
-    el.querySelector('.card-header').addEventListener('click', e => { if(!e.target.closest('.btn-action') && !e.target.closest('.custody-badge') && !e.target.closest('.toggle-cars-btn')) el.classList.toggle('expanded'); });
+    el.querySelector('.card-header').addEventListener('click', e => { if(!e.target.closest('.btn-action') && !e.target.closest('.driver-car-item')) el.classList.toggle('expanded'); });
     el.querySelector('.edit').addEventListener('click', e => { e.stopPropagation(); openDriverModal(d); });
     el.querySelector('.delete').addEventListener('click', e => { e.stopPropagation(); deleteDriver(d.id); });
     el.querySelector('.history').addEventListener('click', e => { e.stopPropagation(); showCustodyHistory('driver', d.id); });
     el.querySelector('.assign').addEventListener('click', e => { e.stopPropagation(); openCustodyModal('driver', d.id); });
     
-    const toggleBtn = el.querySelector('.toggle-cars-btn');
-    if(toggleBtn) {
-        toggleBtn.addEventListener('click', e => { 
-            e.stopPropagation(); 
-            el.classList.toggle('show-more-cars'); 
-            const icon = toggleBtn.querySelector('i');
-            if(el.classList.contains('show-more-cars')) icon.className = 'fas fa-chevron-up';
-            else icon.className = 'fas fa-chevron-down';
-        });
-    }
-
-    // Add click navigation for each car badge
-    el.querySelectorAll('.custody-badge').forEach(badge => {
-        const carId = badge.getAttribute('data-car-id');
+    // Add click navigation for each car item
+    el.querySelectorAll('.driver-car-item').forEach(item => {
+        const carId = item.getAttribute('data-car-id');
         if (carId) {
-            badge.addEventListener('click', e => { 
-                e.stopPropagation(); 
-                navigateToCar(carId); 
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                navigateToCar(carId);
             });
         }
     });
+    
     return el;
 }
 
