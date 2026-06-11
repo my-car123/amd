@@ -1,0 +1,21 @@
+{
+  "name": "FleetSys - نظام إدارة الأسطول",
+  "short_name": "FleetSys",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#87CEFA",
+  "description": "نظام متقدم لإدارة أسطول السيارات والسائقين",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
