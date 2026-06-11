@@ -14,6 +14,7 @@
     <!-- Login -->
     <div id="login-section" class="login-container">
         <div class="login-box">
+            <!-- تأكد أن ملف logo.png موجود في نفس المجلد الرئيسي بجانب index.html -->
             <img src="logo.png" alt="Logo" class="logo-login">
             <h2 data-i18n="loginTitle">تسجيل الدخول</h2>
             <form id="login-form">
@@ -92,7 +93,7 @@
                 <div class="load-more-container"><button id="load-more-logs" class="btn-load-more" style="display:none;" data-i18n="loadMore">عرض المزيد</button></div>
             </div>
         </main>
-        <footer><p>FleetSys &copy; 2024</p></footer>
+        <footer><p>FleetSys &copy; <span id="footer-year"></span> <span data-i18n="footerRights">جميع الحقوق محفوظة</span></p></footer>
     </div>
 
     <!-- PIN Modal -->
@@ -151,9 +152,11 @@
                 <input type="hidden" id="custody-mode" value="car">
                 <input type="hidden" id="custody-source-id">
                 <div class="form-group" id="custody-car-display-group"><label data-i18n="car">السيارة</label><input type="text" id="custody-car-display" readonly></div>
-                <div class="form-group" id="custody-driver-select-group"><label data-i18n="selectDriver">اختر السائق *</label><select id="custody-driver-select" required><option value="">--</option></select></div>
+                <!-- تمت إزالة required من هنا لحل مشكلة عدم الاستجابة عند ربط السيارة من بطاقة السائق -->
+                <div class="form-group" id="custody-driver-select-group"><label data-i18n="selectDriver">اختر السائق *</label><select id="custody-driver-select"><option value="">--</option></select></div>
                 <div class="form-group" id="custody-driver-display-group" style="display:none;"><label data-i18n="driverName">السائق</label><input type="text" id="custody-driver-display" readonly></div>
-                <div class="form-group" id="custody-car-select-group" style="display:none;"><label data-i18n="selectCar">اختر السيارة (بدون عهدة) *</label><select id="custody-car-select" required><option value="">--</option></select></div>
+                <!-- تمت إزالة required من هنا أيضاً -->
+                <div class="form-group" id="custody-car-select-group" style="display:none;"><label data-i18n="selectCar">اختر السيارة (بدون عهدة) *</label><select id="custody-car-select"><option value="">--</option></select></div>
                 <button type="submit" class="btn-success btn-block" data-i18n="confirmAssign">تأكيد الربط</button>
             </form>
         </div>
