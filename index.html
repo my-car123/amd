@@ -49,10 +49,10 @@
             <div id="stats-section" class="content-section">
                 <div class="stats-grid">
                     <div class="stat-card green"><h3 id="stat-cars-active">0</h3><p data-i18n="statActive">سيارات سارية</p></div>
-                    <div class="stat-card yellow"><h3 id="stat-cars-warn">0</h3><p data-i18n="statWarn">سيارات قاربت على الانتهاء</p></div>
-                    <div class="stat-card red"><h3 id="stat-cars-exp">0</h3><p data-i18n="statExp">سيارات منتهية</p></div>
+                    <div class="stat-card yellow"><h3 id="stat-cars-warn">0</h3><p data-i18n="statWarn">قاربت على الانتهاء</p></div>
+                    <div class="stat-card red"><h3 id="stat-cars-exp">0</h3><p data-i18n="statExp">منتهية</p></div>
                     <div class="stat-card blue"><h3 id="stat-drivers">0</h3><p data-i18n="statDrivers">سائقين</p></div>
-                    <div class="stat-card gray"><h3 id="stat-mods">0</h3><p data-i18n="statMods">مشرفين</p></div>
+                    <div class="stat-card gray admin-only"><h3 id="stat-mods">0</h3><p data-i18n="statMods">مشرفين</p></div>
                 </div>
             </div>
 
@@ -63,6 +63,7 @@
                     <button id="add-car-btn" class="btn-success"><i class="fas fa-plus"></i> <span data-i18n="addCar">إضافة سيارة</span></button>
                 </div>
                 <div id="cars-container" class="cards-grid"></div>
+                <div class="load-more-container"><button id="load-more-cars" class="btn-load-more" style="display:none;">عرض المزيد</button></div>
             </div>
 
             <!-- Drivers Section -->
@@ -72,19 +73,21 @@
                     <button id="add-driver-btn" class="btn-success"><i class="fas fa-plus"></i> <span data-i18n="addDriver">إضافة سائق</span></button>
                 </div>
                 <div id="drivers-container" class="cards-grid"></div>
+                <div class="load-more-container"><button id="load-more-drivers" class="btn-load-more" style="display:none;">عرض المزيد</button></div>
             </div>
 
             <!-- Moderators Section -->
-            <div id="mods-section" class="content-section" style="display: none;">
+            <div id="mods-section" class="content-section admin-only" style="display: none;">
                 <div class="top-actions">
                     <h2 data-i18n="modManagement">إدارة المشرفين</h2>
                     <button id="add-mod-btn" class="btn-success"><i class="fas fa-plus"></i> <span data-i18n="addMod">إضافة مشرف</span></button>
                 </div>
                 <div id="mods-container" class="cards-grid"></div>
+                <div class="load-more-container"><button id="load-more-mods" class="btn-load-more" style="display:none;">عرض المزيد</button></div>
             </div>
 
             <!-- Logs Section -->
-            <div id="logs-section" class="content-section" style="display: none;">
+            <div id="logs-section" class="content-section admin-only" style="display: none;">
                 <h2 data-i18n="systemLogs">سجل النظام الدقيق</h2>
                 <div class="logs-table-container">
                     <table id="logs-table">
@@ -92,9 +95,10 @@
                         <tbody id="logs-tbody"></tbody>
                     </table>
                 </div>
+                <div class="load-more-container"><button id="load-more-logs" class="btn-load-more" style="display:none;">عرض المزيد</button></div>
             </div>
         </main>
-        <footer><p>FleetSys &copy; 2024</p></footer>
+        <footer><p>FleetSys &copy; 2024 - Designed with <i class="fas fa-heart" style="color:var(--red)"></i></p></footer>
     </div>
 
     <!-- PIN Verification Modal -->
@@ -102,7 +106,7 @@
         <div class="modal-content small-modal">
             <div class="modal-header"><h2 data-i18n="pinTitle">التحقق من الرمز السري</h2><span class="close-btn" data-modal="pin-modal">&times;</span></div>
             <form id="pin-form" style="padding:20px; text-align:center;">
-                <p data-i18n="pinDesc">أدخل رمز PIN المكون من 4 خانات للمتابعة</p>
+                <p data-i18n="pinDesc">أدخل رمز PIN للمتابعة</p>
                 <input type="password" id="pin-input" maxlength="4" required style="text-align:center; font-size:24px; letter-spacing:10px;">
                 <button type="submit" class="btn-primary" style="margin-top:15px;">تأكيد</button>
             </form>
