@@ -1,0 +1,53 @@
+:root {
+    --bg-color: #ffffff;
+    --primary-color: #87CEFA; /* أزرق فاتح */
+    --text-color: #333333;
+    --green: #28a745;
+    --yellow: #ffc107;
+    --red: #dc3545;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.logo {
+    height: 50px;
+}
+
+.main-nav {
+    display: flex;
+    gap: 15px;
+}
+
+#app-container {
+    flex: 1;
+    padding: 20px;
+}
+
+footer {
+    text-align: center;
+    padding: 10px;
+    border-top: 1px solid var(--primary-color);
+    font-size: 0.9em;
+    color: #666;
+}
