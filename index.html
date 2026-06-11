@@ -31,28 +31,43 @@
         <header>
             <img src="logo.png" alt="Logo" class="logo">
             <nav class="main-nav">
-                <a href="#" class="nav-item active"><i class="fas fa-car"></i> السيارات</a>
-                <a href="#" class="nav-item"><i class="fas fa-id-card"></i> السائقون</a>
-                <a href="#" class="nav-item admin-only"><i class="fas fa-users-cog"></i> المشرفون</a>
-                <a href="#" class="nav-item admin-only"><i class="fas fa-history"></i> السجل العام</a>
+                <a href="#" id="nav-cars" class="nav-item active"><i class="fas fa-car"></i> <span>السيارات</span></a>
+                <a href="#" id="nav-drivers" class="nav-item"><i class="fas fa-id-card"></i> <span>السائقون</span></a>
+                <a href="#" class="nav-item admin-only"><i class="fas fa-users-cog"></i> <span>المشرفون</span></a>
+                <a href="#" class="nav-item admin-only"><i class="fas fa-history"></i> <span>السجل</span></a>
             </nav>
             <div class="user-info">
-                <span id="user-display-name">SAAD</span> | <span id="user-role">مدير النظام</span>
-                <button id="logout-btn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> خروج</button>
+                <span id="user-display-name">SAAD</span>
+                <button id="logout-btn" class="btn-logout"><i class="fas fa-sign-out-alt"></i></button>
             </div>
         </header>
 
         <main id="app-container">
-            <div class="top-actions">
-                <div class="search-bar">
-                    <input type="text" id="search-input" placeholder="بحث برقم السيارة، القاعدة، أو المالك...">
-                    <button class="btn-primary"><i class="fas fa-search"></i></button>
+            
+            <!-- قسم السيارات -->
+            <div id="cars-section" class="content-section">
+                <div class="top-actions">
+                    <div class="search-bar">
+                        <input type="text" id="search-car" placeholder="بحث برقم السيارة، القاعدة، أو المالك...">
+                        <button class="btn-search"><i class="fas fa-search"></i></button>
+                    </div>
+                    <button id="add-car-btn" class="btn-success"><i class="fas fa-plus"></i> إضافة سيارة</button>
                 </div>
-                <button id="add-car-btn" class="btn-success"><i class="fas fa-plus"></i> إضافة سيارة</button>
+                <div id="cars-container" class="cards-grid"></div>
             </div>
 
-            <div id="cards-container" class="cards-grid"></div>
-            <button id="load-more-btn" class="btn-load-more" style="display: none;">عرض المزيد</button>
+            <!-- قسم السائقين -->
+            <div id="drivers-section" class="content-section" style="display: none;">
+                <div class="top-actions">
+                    <div class="search-bar">
+                        <input type="text" id="search-driver" placeholder="بحث باسم السائق أو رقم الهاتف...">
+                        <button class="btn-search"><i class="fas fa-search"></i></button>
+                    </div>
+                    <button id="add-driver-btn" class="btn-success"><i class="fas fa-plus"></i> إضافة سائق</button>
+                </div>
+                <div id="drivers-container" class="cards-grid"></div>
+            </div>
+
         </main>
 
         <footer>
@@ -60,12 +75,12 @@
         </footer>
     </div>
 
-    <!-- نافذة إضافة/تعديل السيارة (Modal) -->
+    <!-- نافذة إضافة/تعديل السيارة -->
     <div id="car-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modal-title">إضافة سيارة جديدة</h2>
-                <span class="close-btn">&times;</span>
+                <h2 id="car-modal-title">إضافة سيارة جديدة</h2>
+                <span class="close-btn" data-modal="car-modal">&times;</span>
             </div>
             <form id="car-form">
                 <input type="hidden" id="car-id-hidden">
@@ -77,6 +92,19 @@
                     <div class="form-group">
                         <label>الرمز *</label>
                         <input type="text" id="plate-code" required placeholder="مثال: 22 أو أ">
+                    </div>
+                    <div class="form-group">
+                        <label>الإمارة *</label>
+                        <input type="text" id="emirate" list="emirates-list" required placeholder="اختر أو اكتب">
+                        <datalist id="emirates-list">
+                            <option value="أبوظبي">
+                            <option value="دبي">
+                            <option value="الشارقة">
+                            <option value="عجمان">
+                            <option value="الفجيرة">
+                            <option value="أم القيوين">
+                            <option value="رأس الخيمة">
+                        </datalist>
                     </div>
                 </div>
                 <div class="form-group">
@@ -109,13 +137,63 @@
                 </div>
                 <div class="form-group">
                     <label>ملاحظات</label>
-                    <textarea id="notes"></textarea>
+                    <textarea id="car-notes"></textarea>
                 </div>
                 <div class="form-group">
                     <label>تدوين المخالفات</label>
                     <textarea id="violations"></textarea>
                 </div>
                 <button type="submit" class="btn-primary btn-block">حفظ البيانات</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- نافذة إضافة/تعديل السائق -->
+    <div id="driver-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="driver-modal-title">إضافة سائق جديد</h2>
+                <span class="close-btn" data-modal="driver-modal">&times;</span>
+            </div>
+            <form id="driver-form">
+                <input type="hidden" id="driver-id-hidden">
+                <div class="form-group">
+                    <label>اسم السائق *</label>
+                    <input type="text" id="driver-name" required>
+                </div>
+                <div class="form-group">
+                    <label>وسيلة اتصال (رقم الموبايل) *</label>
+                    <input type="tel" id="driver-contact" required pattern="[0-9]{10,}" title="يجب أن يتكون من 10 أرقام على الأقل">
+                </div>
+                <div class="form-group">
+                    <label>ملاحظات</label>
+                    <textarea id="driver-notes"></textarea>
+                </div>
+                <button type="submit" class="btn-primary btn-block">حفظ البيانات</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- نافذة ربط السائق بالسيارة (العهدة) -->
+    <div id="custody-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>ربط السيارة بسائق (عهدة)</h2>
+                <span class="close-btn" data-modal="custody-modal">&times;</span>
+            </div>
+            <form id="custody-form">
+                <input type="hidden" id="custody-car-id">
+                <div class="form-group">
+                    <label>السيارة</label>
+                    <input type="text" id="custody-car-display" readonly>
+                </div>
+                <div class="form-group">
+                    <label>اختر السائق *</label>
+                    <select id="custody-driver-select" required>
+                        <option value="">-- اختر سائق متاح --</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-success btn-block">تأكيد الربط</button>
             </form>
         </div>
     </div>
