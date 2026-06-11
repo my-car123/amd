@@ -258,18 +258,19 @@ function navigateToDriver(driverId) {
 // =================== CAR CARD (NEW VERSION) ===================
 function createCarCard(car) {
     const hasDriver = !!car.currentDriverId;
-    const lSt=getStatusClass(car.licenseExpiry, hasDriver), iSt=getStatusClass(car.insuranceExpiry, hasDriver); 
-    let cSt = (lSt==='status-danger' || iSt==='status-danger') ? 'status-danger-top' : (lSt==='status-red' || iSt==='status-red') ? 'status-red-top' : (lSt==='status-yellow' || iSt==='status-yellow') ? 'status-yellow-top' : 'status-green-top';
+    const lSt = getStatusClass(car.licenseExpiry, hasDriver), iSt = getStatusClass(car.insuranceExpiry, hasDriver); 
+    let cSt = (lSt === 'status-danger' || iSt === 'status-danger') ? 'status-danger-top' : (lSt === 'status-red' || iSt === 'status-red') ? 'status-red-top' : (lSt === 'status-yellow' || iSt === 'status-yellow') ? 'status-yellow-top' : 'status-green-top';
     
-    const el=document.createElement('div'); el.className=`card ${cSt}`; 
+    const el = document.createElement('div');
+    el.className = `card ${cSt}`;
     el.setAttribute('data-car-id', car.id);
     
-    // Build current driver display box
+    // Build current driver display box (without the blue badge underneath)
     const driverHtml = hasDriver ? 
         `<div class="current-driver-box"><i class="fas fa-user-check"></i> ${t('currentlyWith')}: <span>${car.currentDriverName}</span></div>` :
         `<div class="current-driver-box"><i class="fas fa-user-slash"></i> ${t('noDriver')}</div>`;
     
-    el.innerHTML=`
+    el.innerHTML = `
         <div class="card-header">
             <div class="card-title">${car.id}</div>
             <div class="owner-name-box"><i class="fas fa-user-tie"></i> ${t('owner')}: ${car.owner}</div>
@@ -277,7 +278,7 @@ function createCarCard(car) {
                 <span class="plate-number">${car.plateNumber}</span> <span class="plate-sep">|</span> <span class="plate-code">${car.plateCode}</span> <span class="plate-sep">|</span> <span class="plate-emirate">${car.emirate}</span>
             </div>
             ${driverHtml}
-            ${hasDriver ? `<div class="card-driver-info" style="justify-content:center; margin-top:5px;"><span class="custody-badge" title="${car.currentDriverName}"><i class="fas fa-user"></i> ${car.currentDriverName}</span></div>` : `<div class="card-driver-info"><small style="color:#888">${t('noDriver')}</small></div>`}
+            <!-- Blue badge removed as requested -->
         </div>
         <div class="card-body">
             <div class="info-grid">
@@ -297,11 +298,11 @@ function createCarCard(car) {
                     <span class="chip-label">${t('insuranceExpiry')} (${getStatusText(car.insuranceExpiry)})</span>
                     <span class="chip-value">${fmtDate(car.insuranceExpiry)}</span>
                 </div>
-                ${car.notes?`<div class="info-chip full-width"><span class="chip-label">${t('notes')}</span><span class="chip-value">${car.notes}</span></div>`:''}
-                ${car.violations?`<div class="info-chip full-width violations-chip"><span class="chip-label">${t('violations')}</span><span class="chip-value">${car.violations}</span></div>`:''}
+                ${car.notes ? `<div class="info-chip full-width"><span class="chip-label">${t('notes')}</span><span class="chip-value">${car.notes}</span></div>` : ''}
+                ${car.violations ? `<div class="info-chip full-width violations-chip"><span class="chip-label">${t('violations')}</span><span class="chip-value">${car.violations}</span></div>` : ''}
             </div>
             <div class="card-actions">
-                ${!hasDriver?`<button class="btn-action assign" style="background:var(--primary-dark)"><i class="fas fa-link"></i> ${t('assign')}</button>`:`<button class="btn-action unassign" style="background:var(--yellow);color:#333"><i class="fas fa-unlink"></i> ${t('unassign')}</button>`}
+                ${!hasDriver ? `<button class="btn-action assign" style="background:var(--primary-dark)"><i class="fas fa-link"></i> ${t('assign')}</button>` : `<button class="btn-action unassign" style="background:var(--yellow);color:#333"><i class="fas fa-unlink"></i> ${t('unassign')}</button>`}
                 <button class="btn-action edit" style="background:#6c757d"><i class="fas fa-edit"></i> ${t('edit')}</button>
                 <button class="btn-action delete" style="background:var(--red)"><i class="fas fa-trash"></i> ${t('delete')}</button>
                 <button class="btn-action print" style="background:#17a2b8"><i class="fas fa-print"></i> ${t('print')}</button>
@@ -310,20 +311,32 @@ function createCarCard(car) {
             </div>
         </div>`;
     
-    el.querySelector('.card-header').addEventListener('click', e => { if(!e.target.closest('.btn-action') && !e.target.closest('.custody-badge') && !e.target.closest('.driver-car-item')) el.classList.toggle('expanded'); });
+    // Events remain the same
+    el.querySelector('.card-header').addEventListener('click', e => {
+        if (!e.target.closest('.btn-action') && !e.target.closest('.driver-car-item'))
+            el.classList.toggle('expanded');
+    });
     el.querySelector('.edit').addEventListener('click', e => { e.stopPropagation(); openCarModal(car); });
     el.querySelector('.delete').addEventListener('click', e => { e.stopPropagation(); deleteCar(car.id); });
     el.querySelector('.print').addEventListener('click', e => { e.stopPropagation(); printCard(car); });
     el.querySelector('.share').addEventListener('click', e => { e.stopPropagation(); shareCard(car); });
     el.querySelector('.history').addEventListener('click', e => { e.stopPropagation(); showCustodyHistory('car', car.id); });
-    if(hasDriver) {
+    
+    if (hasDriver) {
         const unassignBtn = el.querySelector('.unassign');
-        if(unassignBtn) unassignBtn.addEventListener('click', e => { e.stopPropagation(); unassignCar(car); });
-        const driverBadge = el.querySelector('.custody-badge');
-        if(driverBadge) driverBadge.addEventListener('click', e => { e.stopPropagation(); navigateToDriver(car.currentDriverId); });
+        if (unassignBtn) unassignBtn.addEventListener('click', e => { e.stopPropagation(); unassignCar(car); });
+        // Add click navigation to the new driver box
+        const driverBox = el.querySelector('.current-driver-box');
+        if (driverBox) {
+            driverBox.style.cursor = 'pointer';
+            driverBox.addEventListener('click', e => {
+                e.stopPropagation();
+                navigateToDriver(car.currentDriverId);
+            });
+        }
     } else {
         const assignBtn = el.querySelector('.assign');
-        if(assignBtn) assignBtn.addEventListener('click', e => { e.stopPropagation(); openCustodyModal('car', car.id); });
+        if (assignBtn) assignBtn.addEventListener('click', e => { e.stopPropagation(); openCustodyModal('car', car.id); });
     }
     return el;
 }
