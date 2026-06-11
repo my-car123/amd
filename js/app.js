@@ -365,7 +365,7 @@ function printCard(car) {
             </div>
             ${car.notes ? `<div class="print-item" style="margin-bottom:10px;"><div class="print-label">${t('notes')}</div><div class="print-value">${car.notes}</div></div>` : ''}
             ${car.violations ? `<div class="print-item" style="border-left-color: #dc3545; margin-bottom:10px;"><div class="print-label" style="color: #dc3545;">${t('violations')}</div><div class="print-value" style="color: #dc3545;">${car.violations}</div></div>` : ''}
-            <div class="print-footer">FleetSys &copy; ${new Date().getFullYear()} | ${t('logTime')}: ${fmtDateTime(new Date().toISOString())}</div>
+            <div class="print-footer">MOHAMED SAAD &copy; ${new Date().getFullYear()} | ${t('logTime')}: ${fmtDateTime(new Date().toISOString())}</div>
         </div>
         <script>window.onload = function() { window.print(); window.close(); }<\/script>
     </body></html>`);
