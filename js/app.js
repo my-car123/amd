@@ -18,6 +18,8 @@ const auth = getAuth(app);
 const secondaryApp = initializeApp(firebaseConfig, "Secondary");
 const secondaryAuth = getAuth(secondaryApp);
 
+let datetimeInterval = null;
+
 // --- Strict UAE Time & English Numerals ---
 function getUaeTime(dateObj = new Date()) { return new Date(dateObj.toLocaleString('en-US', { timeZone: 'Asia/Dubai' })); }
 function toLatinNumerals(str) {
@@ -49,21 +51,26 @@ const translations = {
     en: { loginTitle: "Login", loginBtn: "Login", navStats: "Stats", navCars: "Cars", navDrivers: "Drivers", navMods: "Mods", navLogs: "Logs", statActive: "Active Cars", statWarn: "Warning", statExp: "Expired", statDrivers: "Drivers", statMods: "Mods", addCar: "Add Car", addDriver: "Add Driver", addMod: "Add Mod", modManagement: "Moderators", systemLogs: "System Logs", pinTitle: "PIN Verification", pinDesc: "Enter PIN to continue", confirm: "Confirm", loadMore: "Load More", searchCar: "Search (Plate, VIN, Owner)...", searchDriver: "Search (Name, Phone)...", owner: "Owner", plateNumber: "Plate Number", plateCode: "Code", emirate: "Emirate", carType: "Type", carYear: "Year", vin: "VIN", licenseExpiry: "License Expiry", insuranceExpiry: "Insurance Expiry", notes: "Notes", violations: "Violations", save: "Save", driverName: "Driver Name", driverContact: "Phone", assignCustody: "Assign Custody", selectDriver: "Select Driver", selectCar: "Select Car (No Custody)", confirmAssign: "Confirm Assign", car: "Car", modName: "Display Name", email: "Email", password: "Password", custodyHistory: "Custody History", startTime: "Start", endTime: "End", logTime: "Time", logUser: "User", logAction: "Action", logDetails: "Details", active: "Active", suspended: "Suspended", assign: "Assign", unassign: "Unassign", edit: "Edit", delete: "Delete", print: "Print", share: "Share", history: "History", resetPass: "Reset Pass", noDriver: "No Driver", noCar: "No Car", activeStatus: "Active", warnStatus: "Warning", expiredStatus: "Expired", currentlyWith: "With", untilNow: "Until Now", loginError: "Login Error", pinError: "Wrong PIN!", dupVin: "Duplicate VIN!", dupPlate: "Duplicate Plate!", dupDriver: "Driver Name or Phone already exists!", confirmDeleteCar: "Delete Car?", confirmDeleteDriver: "Delete Driver?", confirmUnassign: "Unassign?", unassignFirst: "Unassign first", resetPassSent: "Reset link sent to email", none: "No data", copied: "Copied!", footerRights: "All Rights Reserved", moreCars: "more cars" }
 };
 
-// *** ميزة حفظ اللغة بشكل دائم ***
 let currentLang = localStorage.getItem('fleetSysLang') || 'ar';
 function t(key) { return translations[currentLang][key] || key; }
+
+function updateDateTimeDisplay() {
+    const el = document.getElementById('live-datetime');
+    if (el) el.textContent = fmtDateTime(new Date());
+}
+
 function setLanguage(lang) {
     currentLang = lang;
-    localStorage.setItem('fleetSysLang', lang); // حفظ الاختيار
+    localStorage.setItem('fleetSysLang', lang);
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = lang;
     document.getElementById('lang-toggle').textContent = lang === 'ar' ? 'EN' : 'AR';
     document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if (translations[lang][key]) el.textContent = translations[lang][key]; });
     document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { const key = el.getAttribute('data-i18n-placeholder'); if (translations[lang][key]) el.placeholder = translations[lang][key]; });
+    updateDateTimeDisplay();
 }
-// تطبيق اللغة فور تحميل الصفحة
-setLanguage(currentLang);
 
+setLanguage(currentLang);
 document.getElementById('lang-toggle').addEventListener('click', () => setLanguage(currentLang === 'ar' ? 'en' : 'ar'));
 
 // --- Auth & Role ---
@@ -77,6 +84,7 @@ onAuthStateChanged(auth, user => {
         document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? '' : 'none');
         initApp();
     } else {
+        if (datetimeInterval) clearInterval(datetimeInterval);
         document.getElementById('login-section').style.display = 'flex';
         document.getElementById('app-section').style.display = 'none';
     }
@@ -162,6 +170,9 @@ let currentCarStatusFilter = 'all';
 
 function initApp() { 
     document.getElementById('footer-year').textContent = new Date().getFullYear();
+    updateDateTimeDisplay();
+    if (datetimeInterval) clearInterval(datetimeInterval);
+    datetimeInterval = setInterval(updateDateTimeDisplay, 60000);
     fetchCars(); fetchDrivers(); if(isAdmin) { fetchMods(); fetchLogs(); } calculateStats(); setupStatClicks(); 
 }
 
@@ -216,12 +227,41 @@ function renderCars(append) {
     if(displayedCars.length === 0 && !append) c.innerHTML=`<p style="text-align:center">${t('none')}</p>`;
 }
 
+// Navigation helper functions
+function navigateToCar(carId) {
+    showSection('cars');
+    document.getElementById('search-car').value = '';
+    currentCarStatusFilter = 'all';
+    applyCarSearch();
+    setTimeout(() => {
+        const carCard = document.querySelector(`.card[data-car-id="${carId}"]`);
+        if (carCard && !carCard.classList.contains('expanded')) {
+            carCard.querySelector('.card-header').click();
+            carCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 300);
+}
+
+function navigateToDriver(driverId) {
+    showSection('drivers');
+    document.getElementById('search-driver').value = '';
+    applyDriverSearch();
+    setTimeout(() => {
+        const driverCard = document.querySelector(`.card[data-driver-id="${driverId}"]`);
+        if (driverCard && !driverCard.classList.contains('expanded')) {
+            driverCard.querySelector('.card-header').click();
+            driverCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 300);
+}
+
 function createCarCard(car) {
     const hasDriver = !!car.currentDriverId;
     const lSt=getStatusClass(car.licenseExpiry, hasDriver), iSt=getStatusClass(car.insuranceExpiry, hasDriver); 
     let cSt = (lSt==='status-danger' || iSt==='status-danger') ? 'status-danger-top' : (lSt==='status-red' || iSt==='status-red') ? 'status-red-top' : (lSt==='status-yellow' || iSt==='status-yellow') ? 'status-yellow-top' : 'status-green-top';
     
     const el=document.createElement('div'); el.className=`card ${cSt}`; 
+    el.setAttribute('data-car-id', car.id);
     el.innerHTML=`
         <div class="card-header">
             <div class="card-header-main">
@@ -276,7 +316,8 @@ function createCarCard(car) {
     el.querySelector('.history').addEventListener('click', e => { e.stopPropagation(); showCustodyHistory('car', car.id); });
     if(hasDriver) {
         el.querySelector('.unassign').addEventListener('click', e => { e.stopPropagation(); unassignCar(car); });
-        el.querySelector('.custody-badge').addEventListener('click', e => { e.stopPropagation(); unassignCar(car); });
+        const driverBadge = el.querySelector('.custody-badge');
+        driverBadge.addEventListener('click', e => { e.stopPropagation(); navigateToDriver(car.currentDriverId); });
     }
     else el.querySelector('.assign').addEventListener('click', e => { e.stopPropagation(); openCustodyModal('car', car.id); });
     return el;
@@ -361,15 +402,16 @@ function renderDrivers(append) {
 function createDriverCard(d) {
     const assignedCars = allCars.filter(c => c.currentDriverId === d.id);
     const el=document.createElement('div'); el.className='card status-green-top'; 
+    el.setAttribute('data-driver-id', d.id);
     
     let carsHtml = `<small style="color:#888">${t('noCar')}</small>`;
     if (assignedCars.length > 0) {
         const firstCar = assignedCars[0];
-        const firstBadge = `<span class="custody-badge unassign-car-btn" data-car-id="${firstCar.id}"><i class="fas fa-car"></i> ${firstCar.plateNumber}|${firstCar.plateCode}</span>`;
+        const firstBadge = `<span class="custody-badge" data-car-id="${firstCar.id}"><i class="fas fa-car"></i> ${firstCar.plateNumber}|${firstCar.plateCode}</span>`;
         if (assignedCars.length === 1) {
             carsHtml = firstBadge;
         } else {
-            let moreBadges = assignedCars.slice(1).map(c => `<span class="custody-badge unassign-car-btn" data-car-id="${c.id}"><i class="fas fa-car"></i> ${c.plateNumber}|${c.plateCode}</span>`).join('');
+            let moreBadges = assignedCars.slice(1).map(c => `<span class="custody-badge" data-car-id="${c.id}"><i class="fas fa-car"></i> ${c.plateNumber}|${c.plateCode}</span>`).join('');
             carsHtml = `<div class="driver-cars-wrapper">${firstBadge}<button class="toggle-cars-btn"><i class="fas fa-chevron-down"></i> +${assignedCars.length - 1} ${t('moreCars')}</button><div class="more-cars-list">${moreBadges}</div></div>`;
         }
     }
@@ -407,8 +449,15 @@ function createDriverCard(d) {
         });
     }
 
-    el.querySelectorAll('.unassign-car-btn').forEach(btn => {
-        btn.addEventListener('click', e => { e.stopPropagation(); const carObj = allCars.find(c => c.id === btn.getAttribute('data-car-id')); if(carObj) unassignCar(carObj); });
+    // Add click navigation for each car badge
+    el.querySelectorAll('.custody-badge').forEach(badge => {
+        const carId = badge.getAttribute('data-car-id');
+        if (carId) {
+            badge.addEventListener('click', e => { 
+                e.stopPropagation(); 
+                navigateToCar(carId); 
+            });
+        }
     });
     return el;
 }
