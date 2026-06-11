@@ -50,27 +50,28 @@ header { display: flex; align-items: center; justify-content: space-between; pad
 .card { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); border-top: 5px solid #ccc; transition: 0.3s; } 
 .card:hover { box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
 
-.card-header { padding: 15px; display: flex; flex-direction: column; cursor: pointer; gap: 10px; } 
-.card-header-main { display: flex; justify-content: space-between; align-items: center; gap: 15px; }
+.card-header { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 12px; width: 100%; }
+.card-header-main { display: flex; justify-content: space-between; align-items: center; gap: 15px; width: 100%; }
 .card-driver-info { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
 
-.card-title { font-size: 16px; font-weight: bold; color: var(--primary-dark); display: flex; align-items: center; gap: 8px; } 
-.card-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out, padding 0.3s; padding: 0 15px; background: #fafafa; } 
-.card.expanded .card-body { max-height: 1000px; padding: 15px; border-top: 2px solid #eee; } 
-.card-actions { margin-top: 15px; display: flex; gap: 8px; flex-wrap: wrap; } 
-.btn-action { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; color: white; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
-.btn-action:hover { opacity: 0.8; }
-.btn-action.reset-pass { background: #17a2b8; }
+.card-title { font-size: 18px; font-weight: bold; color: var(--primary-dark); text-align: center; background: #f0f8ff; padding: 4px 12px; border-radius: 20px; display: inline-block; margin: 0 auto; }
+.owner-name-box { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-right: 4px solid var(--primary-dark); border-radius: 12px; padding: 8px 16px; margin: 5px auto; width: fit-content; max-width: 90%; box-shadow: var(--shadow); font-weight: bold; display: flex; align-items: center; gap: 8px; font-size: 15px; }
+.owner-name-box i { color: var(--primary-dark); font-size: 16px; }
+.current-driver-box { background: #fef9e6; border: 1px solid var(--yellow); border-radius: 30px; padding: 6px 15px; margin: 5px auto 0 auto; width: fit-content; max-width: 90%; font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 8px; color: #b37400; }
+.current-driver-box i { color: var(--yellow); font-size: 14px; }
+.current-driver-box span { color: var(--text); }
 
-/* Plate design fixed width */
 .plate-design { 
     display: inline-flex; align-items: center; justify-content: center; gap: 10px;
     background: linear-gradient(180deg, #ffffff 0%, #f0f0f0 100%); 
     border: 4px solid #000; border-radius: 8px; padding: 0 12px;
     font-weight: bold; font-family: 'Courier New', monospace; 
-    width: 280px; min-width: 240px; height: 52px;
+    width: 280px; min-width: 280px; max-width: 280px; height: 52px;
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.2);
+    overflow-x: auto; white-space: nowrap; scrollbar-width: thin;
+    margin: 5px auto;
 } 
+.plate-design::-webkit-scrollbar { height: 4px; }
 .plate-number { font-size: 24px; letter-spacing: 1px; color: #000; }
 .plate-sep { font-size: 20px; color: #888; font-weight: bold; }
 .plate-code { font-size: 20px; color: #c0392b; font-weight: bold; letter-spacing: 1px; }
@@ -106,15 +107,24 @@ header { display: flex; align-items: center; justify-content: space-between; pad
 .info-chip.violations-chip .chip-label { color: var(--red); }
 .info-chip.violations-chip .chip-value { color: var(--red); }
 
-.driver-cars-wrapper { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; width: 100%; }
-.more-cars-list { display: none; flex-direction: column; align-items: flex-end; gap: 5px; margin-top: 5px; width: 100%; }
-.card.show-more-cars .more-cars-list { display: flex; }
-.toggle-cars-btn { 
-    background: var(--primary-dark); color: white; border: none; padding: 4px 12px; 
-    border-radius: 20px; font-size: 12px; cursor: pointer; font-weight: bold; transition: 0.3s;
-    display: flex; align-items: center; gap: 5px;
-}
-.toggle-cars-btn:hover { background: #3a7a9b; }
+.driver-cars-wrapper { width: 100%; }
+.driver-cars-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 15px; margin-top: 15px; width: 100%; }
+.driver-car-item { background: #ffffff; border-radius: 12px; padding: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; border: 1px solid #eee; }
+.driver-car-item:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); border-color: var(--primary-dark); }
+.mini-plate { width: 220px; min-width: 220px; max-width: 220px; height: 42px; font-size: 16px; background: linear-gradient(180deg, #ffffff 0%, #f0f0f0 100%); border: 3px solid #000; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0 auto 8px auto; overflow-x: auto; white-space: nowrap; padding: 0 6px; }
+.mini-plate .plate-number { font-size: 16px; }
+.mini-plate .plate-code { font-size: 15px; }
+.mini-plate .plate-emirate { font-size: 9px; }
+.mini-plate .plate-sep { font-size: 14px; }
+.car-mini-info { font-size: 12px; text-align: center; color: #555; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.car-mini-info span { background: #f2f2f2; padding: 2px 8px; border-radius: 20px; }
+
+.card-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out, padding 0.3s; padding: 0 15px; background: #fafafa; } 
+.card.expanded .card-body { max-height: 1000px; padding: 15px; border-top: 2px solid #eee; } 
+.card-actions { margin-top: 15px; display: flex; gap: 8px; flex-wrap: wrap; } 
+.btn-action { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; color: white; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
+.btn-action:hover { opacity: 0.8; }
+.btn-action.reset-pass { background: #17a2b8; }
 
 .status-green-top { border-top-color: var(--green) !important; } 
 .status-yellow-top { border-top-color: var(--yellow) !important; } 
@@ -147,10 +157,17 @@ textarea { resize: vertical; min-height: 50px; }
 .btn-load-more:hover { background: var(--primary-dark); color: white; }
 
 footer { text-align: center; padding: 15px; background: var(--white); border-top: 1px solid #eee; color: #666; font-size: 0.9em; margin-top: auto; font-weight: 500; }
+
 @media (max-width: 768px) { 
     header { justify-content: center; } .main-nav { width: 100%; justify-content: center; overflow-x: auto; } .user-info { width: 100%; justify-content: center; } 
     .form-row { flex-direction: column; gap: 0; } .cards-grid { grid-template-columns: 1fr; } 
-    .plate-design { width: 220px; min-width: 180px; height: 46px; } .plate-number { font-size: 20px; }
-    .plate-code { font-size: 18px; } .plate-sep { font-size: 16px; }
-    .info-grid { grid-template-columns: 1fr; } .info-chip.full-width { grid-column: span 1; }
+    .plate-design { width: 240px; min-width: 240px; font-size: 16px; height: 46px; } 
+    .plate-number { font-size: 20px; }
+    .plate-code { font-size: 18px; } 
+    .plate-sep { font-size: 16px; }
+    .info-grid { grid-template-columns: 1fr; } 
+    .info-chip.full-width { grid-column: span 1; }
+    .mini-plate { width: 200px; min-width: 200px; height: 38px; font-size: 13px; }
+    .driver-cars-grid { grid-template-columns: 1fr; }
+    .owner-name-box, .current-driver-box { font-size: 12px; padding: 5px 10px; }
 }
