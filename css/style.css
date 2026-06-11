@@ -52,15 +52,19 @@ header { display: flex; align-items: center; justify-content: space-between; pad
 .btn-action:hover { opacity: 0.8; }
 .btn-action.reset-pass { background: #17a2b8; }
 
-.plate-design { display: inline-flex; align-items: center; justify-content: center; background: var(--white); border: 3px solid #000; border-radius: 8px; padding: 6px 15px; font-weight: bold; font-family: 'Courier New', monospace; margin-top: 5px; min-width: 200px; } 
-.plate-number { font-size: 20px; min-width: 40px; text-align: center; } 
-.plate-code { font-size: 14px; border-right: 2px solid #000; padding-right: 10px; margin-right: 10px; } 
-.plate-emirate { font-size: 12px; border-left: 2px solid #000; padding-left: 10px; margin-left: 10px; font-family: 'Segoe UI', sans-serif; }
+/* License Plate New Design */
+.plate-design { display: inline-flex; align-items: center; justify-content: center; background: var(--white); border: 3px solid #000; border-radius: 8px; padding: 6px 20px; font-weight: bold; font-family: 'Courier New', monospace; margin-top: 5px; min-width: 200px; gap: 10px; } 
+.plate-number { font-size: 22px; }
+.plate-sep { font-size: 18px; color: #666; font-weight: bold; }
+.plate-code { font-size: 18px; color: #c0392b; font-weight: bold; } /* Red Color for Code */
+.plate-emirate { font-size: 11px; font-family: 'Segoe UI', sans-serif; text-transform: uppercase; color: #333; }
+
 .status-green { border-top-color: var(--green) !important; } 
 .status-yellow { border-top-color: var(--yellow) !important; } 
 .status-red { border-top-color: var(--red) !important; }
-.status-danger { border-top-color: var(--red) !important; box-shadow: 0 0 10px rgba(220, 53, 69, 0.3); } /* Expired + Has Driver */
-.custody-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; color: white; background: var(--primary-dark); margin-top: 5px; margin-left: 5px; }
+.status-danger { border-top-color: var(--red) !important; box-shadow: 0 0 10px rgba(220, 53, 69, 0.3); } 
+.custody-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; color: white; background: var(--primary-dark); margin-top: 5px; margin-left: 5px; cursor: pointer; transition: 0.3s; }
+.custody-badge:hover { background: #3a7a9b; }
 
 .logs-table-container, .history-table { overflow-x: auto; background: white; border-radius: var(--radius); box-shadow: var(--shadow); width: 100%; } 
 table { width: 100%; border-collapse: collapse; } 
