@@ -43,10 +43,15 @@ header { display: flex; align-items: center; justify-content: space-between; pad
 .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px; } 
 .card { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); border-top: 5px solid #ccc; transition: 0.3s; } 
 .card:hover { box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
-.card-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; gap: 15px; } 
+
+/* --- إعادة هيكلة الترويسة (اللوحة والسائق) --- */
+.card-header { padding: 15px; display: flex; flex-direction: column; cursor: pointer; gap: 10px; } 
+.card-header-main { display: flex; justify-content: space-between; align-items: center; gap: 15px; }
+.card-driver-info { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+
 .card-title { font-size: 16px; font-weight: bold; color: var(--primary-dark); display: flex; align-items: center; gap: 8px; } 
 .card-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out, padding 0.3s; padding: 0 15px; background: #fafafa; } 
-.card.expanded .card-body { max-height: 800px; padding: 15px; border-top: 2px solid #eee; } 
+.card.expanded .card-body { max-height: 1000px; padding: 15px; border-top: 2px solid #eee; } 
 .card-actions { margin-top: 15px; display: flex; gap: 8px; flex-wrap: wrap; } 
 .btn-action { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; color: white; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
 .btn-action:hover { opacity: 0.8; }
@@ -58,8 +63,7 @@ header { display: flex; align-items: center; justify-content: space-between; pad
     background: linear-gradient(180deg, #ffffff 0%, #f0f0f0 100%); 
     border: 4px solid #000; border-radius: 8px; padding: 0 15px;
     font-weight: bold; font-family: 'Courier New', monospace; 
-    margin-top: 8px; min-width: 260px; height: 52px; 
-    flex-shrink: 0; /* يمنع انضغاط اللوحة مهما كان حجم الشاشة أو المحتوى المجاور */
+    min-width: 260px; height: 52px; flex-shrink: 0; 
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.2);
 } 
 .plate-number { font-size: 26px; letter-spacing: 2px; color: #000; }
@@ -67,18 +71,37 @@ header { display: flex; align-items: center; justify-content: space-between; pad
 .plate-code { font-size: 20px; color: #c0392b; font-weight: bold; letter-spacing: 1px; }
 .plate-emirate { font-size: 11px; font-family: 'Segoe UI', sans-serif; text-transform: uppercase; color: #333; font-weight: 900; }
 
-/* --- تنسيق اسم السائق في بطاقة السيارة --- */
-.card-driver-info { 
-    flex: 1; min-width: 0; /* يسمح للمساحة بالتقلص والتمدد بأناقة */ 
-    display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 5px; 
-}
-
 .custody-badge { 
-    display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; 
+    display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px; 
     border-radius: 20px; font-size: 13px; font-weight: bold; color: white; 
     background: var(--primary-dark); white-space: nowrap; transition: 0.3s; cursor: pointer;
 } 
 .custody-badge:hover { background: #3a7a9b; }
+
+/* --- إطار البيانات (Info Chips) --- */
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.info-chip { 
+    background: var(--white); padding: 10px; border-radius: 8px; 
+    border: 1px solid #e9ecef; border-right: 4px solid var(--primary-dark);
+    display: flex; flex-direction: column; gap: 4px;
+}
+.info-chip.full-width { grid-column: span 2; }
+.chip-label { font-size: 11px; color: #888; font-weight: bold; text-transform: uppercase; }
+.chip-value { font-size: 14px; color: var(--text); font-weight: 600; word-wrap: break-word; }
+
+/* --- تلوين إطارات التواريخ بناءً على الحالة --- */
+.info-chip.status-green { border-right-color: var(--green); background: #f0fff4; }
+.info-chip.status-green .chip-label { color: var(--green); }
+.info-chip.status-yellow { border-right-color: var(--yellow); background: #fffdf0; }
+.info-chip.status-yellow .chip-label { color: #d39e00; }
+.info-chip.status-red { border-right-color: var(--red); background: #fff5f5; }
+.info-chip.status-red .chip-label { color: var(--red); }
+.info-chip.status-danger { border-right-color: var(--red); background: #fff5f5; box-shadow: 0 0 8px rgba(220, 53, 69, 0.2); }
+.info-chip.status-danger .chip-label { color: var(--red); }
+
+.info-chip.violations-chip { border-right-color: var(--red); background: #fff5f5; }
+.info-chip.violations-chip .chip-label { color: var(--red); }
+.info-chip.violations-chip .chip-value { color: var(--red); }
 
 /* --- القائمة المنسدلة للسيارات المتعددة في بطاقة السائق --- */
 .driver-cars-wrapper { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; width: 100%; }
@@ -91,10 +114,10 @@ header { display: flex; align-items: center; justify-content: space-between; pad
 }
 .toggle-cars-btn:hover { background: #3a7a9b; }
 
-.status-green { border-top-color: var(--green) !important; } 
-.status-yellow { border-top-color: var(--yellow) !important; } 
-.status-red { border-top-color: var(--red) !important; }
-.status-danger { border-top-color: var(--red) !important; box-shadow: 0 0 10px rgba(220, 53, 69, 0.3); } 
+.status-green-top { border-top-color: var(--green) !important; } 
+.status-yellow-top { border-top-color: var(--yellow) !important; } 
+.status-red-top { border-top-color: var(--red) !important; }
+.status-danger-top { border-top-color: var(--red) !important; box-shadow: 0 0 10px rgba(220, 53, 69, 0.3); } 
 
 .logs-table-container, .history-table { overflow-x: auto; background: white; border-radius: var(--radius); box-shadow: var(--shadow); width: 100%; } 
 table { width: 100%; border-collapse: collapse; } 
@@ -125,5 +148,6 @@ footer { text-align: center; padding: 15px; background: var(--white); border-top
 @media (max-width: 768px) { 
     header { justify-content: center; } .logo { display: none; } .main-nav { width: 100%; justify-content: center; overflow-x: auto; } .user-info { width: 100%; justify-content: center; } 
     .form-row { flex-direction: column; gap: 0; } .cards-grid { grid-template-columns: 1fr; } 
-    .plate-design { min-width: 220px; height: 46px; } .plate-number { font-size: 22px; } 
+    .plate-design { min-width: 220px; height: 46px; } .plate-number { font-size: 22px; }
+    .info-grid { grid-template-columns: 1fr; } .info-chip.full-width { grid-column: span 1; }
 }
