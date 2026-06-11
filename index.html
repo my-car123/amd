@@ -17,8 +17,8 @@
             <img src="logo.png" alt="Logo" class="logo-login">
             <h2 data-i18n="loginTitle">تسجيل الدخول</h2>
             <form id="login-form">
-                <input type="email" id="email" placeholder="Email" required>
-                <input type="password" id="password" placeholder="Password" required>
+                <input type="email" id="email" data-i18n-placeholder="email" placeholder="البريد الإلكتروني" required>
+                <input type="password" id="password" data-i18n-placeholder="password" placeholder="كلمة المرور" required>
                 <button type="submit" class="btn-primary" data-i18n="loginBtn">دخول</button>
                 <p id="login-error" class="error-msg"></p>
             </form>
@@ -143,20 +143,17 @@
         </div>
     </div>
 
-    <!-- Custody Modal (Dual Mode: Car->Driver & Driver->Car) -->
+    <!-- Custody Modal -->
     <div id="custody-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h2 data-i18n="assignCustody">ربط عهدة</h2><span class="close-btn" data-modal="custody-modal">&times;</span></div>
             <form id="custody-form">
-                <input type="hidden" id="custody-mode" value="car"> <!-- 'car' or 'driver' -->
+                <input type="hidden" id="custody-mode" value="car">
                 <input type="hidden" id="custody-source-id">
-                
                 <div class="form-group" id="custody-car-display-group"><label data-i18n="car">السيارة</label><input type="text" id="custody-car-display" readonly></div>
                 <div class="form-group" id="custody-driver-select-group"><label data-i18n="selectDriver">اختر السائق *</label><select id="custody-driver-select" required><option value="">--</option></select></div>
-                
                 <div class="form-group" id="custody-driver-display-group" style="display:none;"><label data-i18n="driverName">السائق</label><input type="text" id="custody-driver-display" readonly></div>
                 <div class="form-group" id="custody-car-select-group" style="display:none;"><label data-i18n="selectCar">اختر السيارة (بدون عهدة) *</label><select id="custody-car-select" required><option value="">--</option></select></div>
-
                 <button type="submit" class="btn-success btn-block" data-i18n="confirmAssign">تأكيد الربط</button>
             </form>
         </div>
