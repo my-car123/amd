@@ -25,8 +25,8 @@ function fmtDateTime(d) { if (!d) return '-'; return getUaeTime(new Date(d)).toL
 
 // --- Comprehensive i18n ---
 const translations = {
-    ar: { loginTitle: "تسجيل الدخول", loginBtn: "دخول", navStats: "الإحصائيات", navCars: "السيارات", navDrivers: "السائقون", navMods: "المشرفون", navLogs: "السجل", statActive: "سيارات سارية", statWarn: "قاربت على الانتهاء", statExp: "منتهية", statDrivers: "سائقين", statMods: "مشرفين", addCar: "إضافة سيارة", addDriver: "إضافة سائق", addMod: "إضافة مشرف", modManagement: "إدارة المشرفين", systemLogs: "سجل النظام الدقيق", pinTitle: "التحقق من الرمز السري", pinDesc: "أدخل رمز PIN للمتابعة", confirm: "تأكيد", loadMore: "عرض المزيد", searchCar: "بحث (لوحة، قاعدة، مالك)...", searchDriver: "بحث (اسم، هاتف)...", owner: "المالك", plateNumber: "رقم اللوحة", plateCode: "الرمز", emirate: "الإمارة", carType: "النوع", carYear: "سنة الصنع", vin: "رقم القاعدة (VIN)", licenseExpiry: "انتهاء الترخيص", insuranceExpiry: "انتهاء التأمين", notes: "ملاحظات", violations: "مخالفات", save: "حفظ", driverName: "اسم السائق", driverContact: "رقم الموبايل", assignCustody: "ربط عهدة", selectDriver: "اختر السائق", selectCar: "اختر السيارة (بدون عهدة)", confirmAssign: "تأكيد الربط", car: "السيارة", modName: "اسم المستخدم", email: "البريد الإلكتروني", password: "كلمة المرور", custodyHistory: "سجل العهدات", startTime: "البداية", endTime: "النهاية", logTime: "التوقيت", logUser: "المستخدم", logAction: "الإجراء", logDetails: "التفاصيل", active: "فعال", suspended: "معلق", assign: "ربط", unassign: "فك", edit: "تعديل", delete: "حذف", print: "طباعة", share: "مشاركة", history: "سجل", resetPass: "إعادة كلمة المرور", noDriver: "بدون سائق", noCar: "بدون سيارة", activeStatus: "سارية", warnStatus: "قاربت على الانتهاء", expiredStatus: "منتهية", currentlyWith: "مع", untilNow: "حتى الآن", loginError: "خطأ في الدخول", pinError: "رمز PIN خاطئ!", dupVin: "VIN مكرر!", dupPlate: "اللوحة مكررة!", dupDriver: "اسم السائق أو رقم الهاتف مسجل مسبقاً!", confirmDeleteCar: "حذف السيارة؟", confirmDeleteDriver: "حذف السائق؟", confirmUnassign: "فك الربط؟", unassignFirst: "افك العهدة أولاً", resetPassSent: "تم إرسال رابط إعادة التعيين للبريد", none: "لا توجد بيانات" },
-    en: { loginTitle: "Login", loginBtn: "Login", navStats: "Stats", navCars: "Cars", navDrivers: "Drivers", navMods: "Mods", navLogs: "Logs", statActive: "Active Cars", statWarn: "Warning", statExp: "Expired", statDrivers: "Drivers", statMods: "Mods", addCar: "Add Car", addDriver: "Add Driver", addMod: "Add Mod", modManagement: "Moderators", systemLogs: "System Logs", pinTitle: "PIN Verification", pinDesc: "Enter PIN to continue", confirm: "Confirm", loadMore: "Load More", searchCar: "Search (Plate, VIN, Owner)...", searchDriver: "Search (Name, Phone)...", owner: "Owner", plateNumber: "Plate Number", plateCode: "Code", emirate: "Emirate", carType: "Type", carYear: "Year", vin: "VIN", licenseExpiry: "License Expiry", insuranceExpiry: "Insurance Expiry", notes: "Notes", violations: "Violations", save: "Save", driverName: "Driver Name", driverContact: "Phone", assignCustody: "Assign Custody", selectDriver: "Select Driver", selectCar: "Select Car (No Custody)", confirmAssign: "Confirm Assign", car: "Car", modName: "Display Name", email: "Email", password: "Password", custodyHistory: "Custody History", startTime: "Start", endTime: "End", logTime: "Time", logUser: "User", logAction: "Action", logDetails: "Details", active: "Active", suspended: "Suspended", assign: "Assign", unassign: "Unassign", edit: "Edit", delete: "Delete", print: "Print", share: "Share", history: "History", resetPass: "Reset Pass", noDriver: "No Driver", noCar: "No Car", activeStatus: "Active", warnStatus: "Warning", expiredStatus: "Expired", currentlyWith: "With", untilNow: "Until Now", loginError: "Login Error", pinError: "Wrong PIN!", dupVin: "Duplicate VIN!", dupPlate: "Duplicate Plate!", dupDriver: "Driver Name or Phone already exists!", confirmDeleteCar: "Delete Car?", confirmDeleteDriver: "Delete Driver?", confirmUnassign: "Unassign?", unassignFirst: "Unassign first", resetPassSent: "Reset link sent to email", none: "No data" }
+    ar: { loginTitle: "تسجيل الدخول", loginBtn: "دخول", navStats: "الإحصائيات", navCars: "السيارات", navDrivers: "السائقون", navMods: "المشرفون", navLogs: "السجل", statActive: "سيارات سارية", statWarn: "قاربت على الانتهاء", statExp: "منتهية", statDrivers: "سائقين", statMods: "مشرفين", addCar: "إضافة سيارة", addDriver: "إضافة سائق", addMod: "إضافة مشرف", modManagement: "إدارة المشرفين", systemLogs: "سجل النظام الدقيق", pinTitle: "التحقق من الرمز السري", pinDesc: "أدخل رمز PIN للمتابعة", confirm: "تأكيد", loadMore: "عرض المزيد", searchCar: "بحث (لوحة، قاعدة، مالك)...", searchDriver: "بحث (اسم، هاتف)...", owner: "المالك", plateNumber: "رقم اللوحة", plateCode: "الرمز", emirate: "الإمارة", carType: "النوع", carYear: "سنة الصنع", vin: "رقم القاعدة (VIN)", licenseExpiry: "انتهاء الترخيص", insuranceExpiry: "انتهاء التأمين", notes: "ملاحظات", violations: "مخالفات", save: "حفظ", driverName: "اسم السائق", driverContact: "رقم الموبايل", assignCustody: "ربط عهدة", selectDriver: "اختر السائق", selectCar: "اختر السيارة (بدون عهدة)", confirmAssign: "تأكيد الربط", car: "السيارة", modName: "اسم المستخدم", email: "البريد الإلكتروني", password: "كلمة المرور", custodyHistory: "سجل العهدات", startTime: "البداية", endTime: "النهاية", logTime: "التوقيت", logUser: "المستخدم", logAction: "الإجراء", logDetails: "التفاصيل", active: "فعال", suspended: "معلق", assign: "ربط", unassign: "فك", edit: "تعديل", delete: "حذف", print: "طباعة", share: "مشاركة", history: "سجل", resetPass: "إعادة كلمة المرور", noDriver: "بدون سائق", noCar: "بدون سيارة", activeStatus: "سارية", warnStatus: "قاربت على الانتهاء", expiredStatus: "منتهية", currentlyWith: "مع", untilNow: "حتى الآن", loginError: "خطأ في الدخول", pinError: "رمز PIN خاطئ!", dupVin: "VIN مكرر!", dupPlate: "اللوحة مكررة!", dupDriver: "اسم السائق أو رقم الهاتف مسجل مسبقاً!", confirmDeleteCar: "حذف السيارة؟", confirmDeleteDriver: "حذف السائق؟", confirmUnassign: "فك الربط؟", unassignFirst: "افك العهدة أولاً", resetPassSent: "تم إرسال رابط إعادة التعيين للبريد", none: "لا توجد بيانات", copied: "تم النسخ!" },
+    en: { loginTitle: "Login", loginBtn: "Login", navStats: "Stats", navCars: "Cars", navDrivers: "Drivers", navMods: "Mods", navLogs: "Logs", statActive: "Active Cars", statWarn: "Warning", statExp: "Expired", statDrivers: "Drivers", statMods: "Mods", addCar: "Add Car", addDriver: "Add Driver", addMod: "Add Mod", modManagement: "Moderators", systemLogs: "System Logs", pinTitle: "PIN Verification", pinDesc: "Enter PIN to continue", confirm: "Confirm", loadMore: "Load More", searchCar: "Search (Plate, VIN, Owner)...", searchDriver: "Search (Name, Phone)...", owner: "Owner", plateNumber: "Plate Number", plateCode: "Code", emirate: "Emirate", carType: "Type", carYear: "Year", vin: "VIN", licenseExpiry: "License Expiry", insuranceExpiry: "Insurance Expiry", notes: "Notes", violations: "Violations", save: "Save", driverName: "Driver Name", driverContact: "Phone", assignCustody: "Assign Custody", selectDriver: "Select Driver", selectCar: "Select Car (No Custody)", confirmAssign: "Confirm Assign", car: "Car", modName: "Display Name", email: "Email", password: "Password", custodyHistory: "Custody History", startTime: "Start", endTime: "End", logTime: "Time", logUser: "User", logAction: "Action", logDetails: "Details", active: "Active", suspended: "Suspended", assign: "Assign", unassign: "Unassign", edit: "Edit", delete: "Delete", print: "Print", share: "Share", history: "History", resetPass: "Reset Pass", noDriver: "No Driver", noCar: "No Car", activeStatus: "Active", warnStatus: "Warning", expiredStatus: "Expired", currentlyWith: "With", untilNow: "Until Now", loginError: "Login Error", pinError: "Wrong PIN!", dupVin: "Duplicate VIN!", dupPlate: "Duplicate Plate!", dupDriver: "Driver Name or Phone already exists!", confirmDeleteCar: "Delete Car?", confirmDeleteDriver: "Delete Driver?", confirmUnassign: "Unassign?", unassignFirst: "Unassign first", resetPassSent: "Reset link sent to email", none: "No data", copied: "Copied!" }
 };
 let currentLang = 'ar';
 function t(key) { return translations[currentLang][key] || key; }
@@ -114,6 +114,14 @@ function getStatusText(dateStr) {
     if(d <= 15) return t('warnStatus');
     return t('activeStatus');
 }
+function getStatusPrintColor(dateStr) {
+    if(!dateStr) return '#333'; 
+    const now = getUaeTime(); const exp = getUaeTime(new Date(dateStr)); now.setHours(0,0,0,0); exp.setHours(0,0,0,0); 
+    const d = Math.ceil((exp-now)/(1000*60*60*24)); 
+    if(d < 0) return '#dc3545';
+    if(d <= 15) return '#ffc107';
+    return '#28a745';
+}
 async function logAction(action, details) { const user = auth.currentUser; if(!user) return; await set(push(ref(db, 'logs')), { timestamp: new Date().toISOString(), userId: user.email, action, details }); }
 
 // --- Pagination ---
@@ -189,7 +197,8 @@ function createCarCard(car) {
                 ${!hasDriver?`<button class="btn-action assign" style="background:var(--primary-dark)"><i class="fas fa-link"></i> ${t('assign')}</button>`:`<button class="btn-action unassign" style="background:var(--yellow);color:#333"><i class="fas fa-unlink"></i> ${t('unassign')}</button>`}
                 <button class="btn-action edit" style="background:#6c757d"><i class="fas fa-edit"></i> ${t('edit')}</button>
                 <button class="btn-action delete" style="background:var(--red)"><i class="fas fa-trash"></i> ${t('delete')}</button>
-                <button class="btn-action history" style="background:#17a2b8"><i class="fas fa-history"></i> ${t('history')}</button>
+                <button class="btn-action print" style="background:#17a2b8"><i class="fas fa-print"></i> ${t('print')}</button>
+                <button class="btn-action history" style="background:#6c757d"><i class="fas fa-history"></i> ${t('history')}</button>
                 <button class="btn-action share" style="background:#6c757d"><i class="fas fa-share"></i></button>
             </div>
         </div>`;
@@ -197,6 +206,7 @@ function createCarCard(car) {
     el.querySelector('.card-header').addEventListener('click', e => { if(!e.target.closest('.btn-action') && !e.target.closest('.custody-badge')) el.classList.toggle('expanded'); });
     el.querySelector('.edit').addEventListener('click', e => { e.stopPropagation(); openCarModal(car); });
     el.querySelector('.delete').addEventListener('click', e => { e.stopPropagation(); deleteCar(car.id); });
+    el.querySelector('.print').addEventListener('click', e => { e.stopPropagation(); printCard(car); });
     el.querySelector('.share').addEventListener('click', e => { e.stopPropagation(); shareCard(car); });
     el.querySelector('.history').addEventListener('click', e => { e.stopPropagation(); showCustodyHistory('car', car.id); });
     if(hasDriver) {
@@ -207,7 +217,63 @@ function createCarCard(car) {
     return el;
 }
 
-function shareCard(car) { const text=`${t('car')}: ${car.id}\n${t('plateNumber')}: ${car.plateNumber}|${car.plateCode}\n${t('owner')}: ${car.owner}\n${t('driverName')}: ${car.currentDriverName||t('noDriver')}`; if(navigator.share) navigator.share({title:car.id, text:text}); else { navigator.clipboard.writeText(text); alert('Copied!'); } }
+// Professional Print Layout
+function printCard(car) {
+    const lColor = getStatusPrintColor(car.licenseExpiry);
+    const iColor = getStatusPrintColor(car.insuranceExpiry);
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+    <html dir="${currentLang === 'ar' ? 'rtl' : 'ltr'}">
+    <head>
+        <title>${car.id}</title>
+        <style>
+            body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 20px; background: #fff; color: #333; }
+            .print-card { border: 2px solid #000; border-radius: 15px; padding: 25px; max-width: 600px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+            .print-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed #ccc; padding-bottom: 15px; margin-bottom: 15px; }
+            .print-title { font-size: 24px; font-weight: bold; color: #4a8fb0; }
+            .print-plate { font-size: 32px; font-weight: bold; border: 3px solid #000; padding: 10px 20px; border-radius: 8px; text-align: center; display: inline-block; letter-spacing: 2px; }
+            .print-plate .code { color: #c0392b; }
+            .print-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+            .print-item { background: #f8f9fa; padding: 10px; border-radius: 8px; border-left: 4px solid #4a8fb0; }
+            .print-label { font-size: 12px; color: #666; margin-bottom: 5px; font-weight: bold; }
+            .print-value { font-size: 16px; font-weight: bold; }
+            .status-badge { font-weight: bold; font-size: 14px; }
+            .print-footer { text-align: center; font-size: 12px; color: #888; margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px; }
+        </style>
+    </head>
+    <body>
+        <div class="print-card">
+            <div class="print-header">
+                <div>
+                    <div class="print-title">${t('car')}: ${car.id}</div>
+                    <div style="margin-top:10px;">
+                        <span class="print-plate">${car.plateNumber} | <span class="code">${car.plateCode}</span> | ${car.emirate}</span>
+                    </div>
+                </div>
+                <div style="text-align: ${currentLang === 'ar' ? 'left' : 'right'};">
+                    <div class="print-label">${t('driverName')}</div>
+                    <div class="print-value" style="font-size: 20px;">${car.currentDriverName || t('noDriver')}</div>
+                </div>
+            </div>
+            <div class="print-grid">
+                <div class="print-item"><div class="print-label">${t('owner')}</div><div class="print-value">${car.owner}</div></div>
+                <div class="print-item"><div class="print-label">${t('carType')} & ${t('carYear')}</div><div class="print-value">${car.type} - ${car.year}</div></div>
+                <div class="print-item" style="grid-column: span 2;"><div class="print-label">${t('vin')}</div><div class="print-value">${car.vin}</div></div>
+                <div class="print-item"><div class="print-label">${t('licenseExpiry')}</div><div class="print-value">${fmtDate(car.licenseExpiry)} <span class="status-badge" style="color:${lColor}">(${getStatusText(car.licenseExpiry)})</span></div></div>
+                <div class="print-item"><div class="print-label">${t('insuranceExpiry')}</div><div class="print-value">${fmtDate(car.insuranceExpiry)} <span class="status-badge" style="color:${iColor}">(${getStatusText(car.insuranceExpiry)})</span></div></div>
+            </div>
+            ${car.notes ? `<div class="print-item" style="margin-bottom:10px;"><div class="print-label">${t('notes')}</div><div class="print-value">${car.notes}</div></div>` : ''}
+            ${car.violations ? `<div class="print-item" style="border-left-color: #dc3545; margin-bottom:10px;"><div class="print-label" style="color: #dc3545;">${t('violations')}</div><div class="print-value" style="color: #dc3545;">${car.violations}</div></div>` : ''}
+            <div class="print-footer">FleetSys &copy; ${new Date().getFullYear()} | ${t('logTime')}: ${fmtDateTime(new Date().toISOString())}</div>
+        </div>
+        <script>window.onload = function() { window.print(); window.close(); }<\/script>
+    </body>
+    </html>
+    `);
+    printWindow.document.close();
+}
+
+function shareCard(car) { const text=`${t('car')}: ${car.id}\n${t('plateNumber')}: ${car.plateNumber}|${car.plateCode}\n${t('owner')}: ${car.owner}\n${t('driverName')}: ${car.currentDriverName||t('noDriver')}`; if(navigator.share) navigator.share({title:car.id, text:text}); else { navigator.clipboard.writeText(text); alert(t('copied')); } }
 
 // =================== DRIVERS ===================
 document.getElementById('add-driver-btn').addEventListener('click', () => openDriverModal());
@@ -220,7 +286,6 @@ document.getElementById('driver-form').addEventListener('submit', async e => {
     e.preventDefault(); const btn=e.target.querySelector('button'); btn.disabled=true;
     const hid=document.getElementById('driver-id-hidden').value, data={name:document.getElementById('driver-name').value.trim(), contact:document.getElementById('driver-contact').value.trim(), notes:document.getElementById('driver-notes').value.trim()};
     try { 
-        // Check Duplicate Driver
         const snap = await get(ref(db, 'drivers')); 
         if(snap.exists()) { 
             const drivers = snap.val(); 
@@ -261,7 +326,7 @@ function createDriverCard(d) {
                 <button class="btn-action assign" style="background:var(--green)"><i class="fas fa-plus"></i> ${t('assign')}</button>
                 <button class="btn-action edit" style="background:#6c757d"><i class="fas fa-edit"></i> ${t('edit')}</button>
                 <button class="btn-action delete" style="background:var(--red)"><i class="fas fa-trash"></i> ${t('delete')}</button>
-                <button class="btn-action history" style="background:#17a2b8"><i class="fas fa-history"></i> ${t('history')}</button>
+                <button class="btn-action history" style="background:#6c757d"><i class="fas fa-history"></i> ${t('history')}</button>
             </div>
         </div>`;
     
@@ -270,26 +335,16 @@ function createDriverCard(d) {
     el.querySelector('.delete').addEventListener('click', e => { e.stopPropagation(); deleteDriver(d.id); });
     el.querySelector('.history').addEventListener('click', e => { e.stopPropagation(); showCustodyHistory('driver', d.id); });
     el.querySelector('.assign').addEventListener('click', e => { e.stopPropagation(); openCustodyModal('driver', d.id); });
-
-    // Attach unassign listeners to the car badges
     el.querySelectorAll('.unassign-car-btn').forEach(btn => {
-        btn.addEventListener('click', e => { 
-            e.stopPropagation(); 
-            const carId = btn.getAttribute('data-car-id');
-            const carObj = allCars.find(c => c.id === carId);
-            if(carObj) unassignCar(carObj);
-        });
+        btn.addEventListener('click', e => { e.stopPropagation(); const carObj = allCars.find(c => c.id === btn.getAttribute('data-car-id')); if(carObj) unassignCar(carObj); });
     });
-
     return el;
 }
 
-// =================== CUSTODY LOGIC (Dual Mode) ===================
+// =================== CUSTODY LOGIC ===================
 function openCustodyModal(sourceType, sourceId) { 
     document.getElementById('custody-mode').value = sourceType;
     document.getElementById('custody-source-id').value = sourceId;
-    
-    // Reset visibility
     document.getElementById('custody-car-display-group').style.display = 'none';
     document.getElementById('custody-driver-select-group').style.display = 'none';
     document.getElementById('custody-driver-display-group').style.display = 'none';
@@ -312,7 +367,6 @@ function openCustodyModal(sourceType, sourceId) {
         sel.innerHTML = '<option value="">--</option>';
         allCars.filter(c => !c.currentDriverId).forEach(c => { const o = document.createElement('option'); o.value = c.id; o.textContent = `${c.id} - ${c.plateNumber}|${c.plateCode}`; sel.appendChild(o); });
     }
-
     document.getElementById('custody-modal').style.display = 'block'; 
 }
 
@@ -417,7 +471,7 @@ function createModCard(u) {
     const el=document.createElement('div'); el.className=`card ${u.status==='active'?'status-green':'status-red'}`;
     el.innerHTML=`
         <div class="card-header"><div class="card-title">${u.name}</div><small>${u.email}</small></div>
-        <div class="card-body"><p>${t('active')}: ${u.status==='active'?`<span style="color:green">${t('active')}</span>`:`<span style="color:red">${t('suspended')}</span>`}</p>
+        <div class="card-body"><p>${u.status==='active'?`<span style="color:green">${t('active')}</span>`:`<span style="color:red">${t('suspended')}</span>`}</p>
             <div class="card-actions">
                 ${u.status==='active'?`<button class="btn-action suspend" style="background:var(--yellow);color:#333"><i class="fas fa-ban"></i> ${t('suspended')}</button>`:`<button class="btn-action activate" style="background:var(--green)"><i class="fas fa-check"></i> ${t('active')}</button>`}
                 <button class="btn-action edit" style="background:#6c757d"><i class="fas fa-edit"></i> ${t('edit')}</button>
