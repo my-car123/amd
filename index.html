@@ -47,7 +47,7 @@
         </header>
 
         <main id="app-container">
-            <!-- Stats Section (admin/moderator) -->
+            <!-- Stats Section -->
             <div id="stats-section" class="content-section">
                 <div class="stats-grid">
                     <div class="stat-card green"><h3 id="stat-cars-active">0</h3><p data-i18n="statActive">سيارات سارية</p></div>
@@ -78,7 +78,7 @@
                 <div class="load-more-container"><button id="load-more-drivers" class="btn-load-more" style="display:none;" data-i18n="loadMore">عرض المزيد</button></div>
             </div>
 
-            <!-- Moderators Section (admin only) -->
+            <!-- Moderators Section -->
             <div id="mods-section" class="content-section admin-only" style="display: none;">
                 <div class="top-actions">
                     <h2 data-i18n="modManagement">إدارة المشرفين</h2>
@@ -88,31 +88,24 @@
                 <div class="load-more-container"><button id="load-more-mods" class="btn-load-more" style="display:none;" data-i18n="loadMore">عرض المزيد</button></div>
             </div>
 
-            <!-- Logs Section (admin only) -->
+            <!-- Logs Section -->
             <div id="logs-section" class="content-section admin-only" style="display: none;">
                 <h2 data-i18n="systemLogs">سجل النظام الدقيق</h2>
                 <div class="logs-table-container">
-                    <table id="logs-table">
-                        <thead><tr><th data-i18n="logTime">التوقيت</th><th data-i18n="logUser">المستخدم</th><th data-i18n="logAction">الإجراء</th><th data-i18n="logDetails">التفاصيل</th></tr>
-                        </thead>
-                        <tbody id="logs-tbody"></tbody>
-                    </table>
+                    <table id="logs-table"><thead><tr><th data-i18n="logTime">التوقيت</th><th data-i18n="logUser">المستخدم</th><th data-i18n="logAction">الإجراء</th><th data-i18n="logDetails">التفاصيل</th></tr></thead><tbody id="logs-tbody"></tbody></table>
                 </div>
                 <div class="load-more-container"><button id="load-more-logs" class="btn-load-more" style="display:none;" data-i18n="loadMore">عرض المزيد</button></div>
             </div>
 
-            <!-- Pending Requests Section (admin/moderator) -->
+            <!-- Pending Requests Section -->
             <div id="pending-section" class="content-section admin-only" style="display: none;">
                 <h2 data-i18n="pendingRequests">طلبات إضافة سيارات</h2>
-                <div id="pending-requests-container" class="pending-table-container">
-                    <table class="data-table">
-                        <thead><tr><th data-i18n="driverName">السائق</th><th data-i18n="plateNumber">رقم اللوحة</th><th data-i18n="plateCode">الرمز</th><th data-i18n="emirate">الإمارة</th><th data-i18n="carType">النوع</th><th data-i18n="submittedAt">تاريخ الطلب</th><th data-i18n="actions">إجراءات</th></tr></thead>
-                        <tbody id="pending-tbody"></tbody>
-                    </table>
+                <div class="pending-table-container">
+                    <table class="data-table"><thead><tr><th data-i18n="driverName">السائق</th><th data-i18n="plateNumber">رقم اللوحة</th><th data-i18n="plateCode">الرمز</th><th data-i18n="emirate">الإمارة</th><th data-i18n="carType">النوع</th><th data-i18n="submittedAt">تاريخ الطلب</th><th data-i18n="actions">إجراءات</th></tr></thead><tbody id="pending-tbody"></tbody></table>
                 </div>
             </div>
 
-            <!-- Driver Dashboard (for driver role) -->
+            <!-- Driver Dashboard -->
             <div id="driver-dashboard" class="content-section" style="display: none;">
                 <div class="driver-profile">
                     <h2><i class="fas fa-user-circle"></i> <span id="driver-name-display"></span></h2>
@@ -143,110 +136,25 @@
     </div>
 
     <!-- PIN Modal -->
-    <div id="pin-modal" class="modal">
-        <div class="modal-content small-modal">
-            <div class="modal-header"><h2 data-i18n="pinTitle">التحقق من الرمز السري</h2><span class="close-btn" data-modal="pin-modal">&times;</span></div>
-            <form id="pin-form" style="padding:20px; text-align:center;">
-                <p data-i18n="pinDesc">أدخل رمز PIN للمتابعة</p>
-                <input type="password" id="pin-input" maxlength="4" required style="text-align:center; font-size:24px; letter-spacing:10px;">
-                <button type="submit" class="btn-primary" style="margin-top:15px;" data-i18n="confirm">تأكيد</button>
-            </form>
-        </div>
-    </div>
+    <div id="pin-modal" class="modal"><div class="modal-content small-modal"><div class="modal-header"><h2 data-i18n="pinTitle">التحقق من الرمز السري</h2><span class="close-btn" data-modal="pin-modal">&times;</span></div><form id="pin-form" style="padding:20px;text-align:center;"><p data-i18n="pinDesc">أدخل رمز PIN للمتابعة</p><input type="password" id="pin-input" maxlength="4" required><button type="submit" class="btn-primary" data-i18n="confirm">تأكيد</button></form></div></div>
 
     <!-- Change Password Modal -->
-    <div id="change-password-modal" class="modal">
-        <div class="modal-content small-modal">
-            <div class="modal-header"><h2 data-i18n="changePass">تغيير كلمة المرور</h2><span class="close-btn" data-modal="change-password-modal">&times;</span></div>
-            <form id="change-password-form" style="padding:20px;">
-                <div class="form-group"><label data-i18n="currentPass">كلمة المرور الحالية</label><input type="password" id="current-pass" required></div>
-                <div class="form-group"><label data-i18n="newPass">كلمة المرور الجديدة</label><input type="password" id="new-pass" minlength="6" required></div>
-                <div class="form-group"><label data-i18n="confirmNewPass">تأكيد كلمة المرور</label><input type="password" id="confirm-new-pass" required></div>
-                <button type="submit" class="btn-primary btn-block" data-i18n="save">تغيير</button>
-            </form>
-        </div>
-    </div>
+    <div id="change-password-modal" class="modal"><div class="modal-content small-modal"><div class="modal-header"><h2 data-i18n="changePass">تغيير كلمة المرور</h2><span class="close-btn" data-modal="change-password-modal">&times;</span></div><form id="change-password-form" style="padding:20px;"><div class="form-group"><label data-i18n="currentPass">كلمة المرور الحالية</label><input type="password" id="current-pass" required></div><div class="form-group"><label data-i18n="newPass">كلمة المرور الجديدة</label><input type="password" id="new-pass" minlength="6" required></div><div class="form-group"><label data-i18n="confirmNewPass">تأكيد كلمة المرور</label><input type="password" id="confirm-new-pass" required></div><button type="submit" class="btn-primary btn-block" data-i18n="save">تغيير</button></form></div></div>
 
     <!-- Car Modal -->
-    <div id="car-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header"><h2 id="car-modal-title" data-i18n="addCar">إضافة سيارة</h2><span class="close-btn" data-modal="car-modal">&times;</span></div>
-            <form id="car-form">
-                <input type="hidden" id="car-id-hidden">
-                <div class="form-row">
-                    <div class="form-group"><label data-i18n="plateNumber">رقم اللوحة *</label><input type="text" id="plate-number" required></div>
-                    <div class="form-group"><label data-i18n="plateCode">الرمز *</label><input type="text" id="plate-code" required></div>
-                    <div class="form-group"><label data-i18n="emirate">الإمارة *</label><input type="text" id="emirate" list="emirates-list" required><datalist id="emirates-list"><option value="Abu Dhabi"><option value="Dubai"><option value="Sharjah"><option value="Ajman"><option value="Fujairah"><option value="Umm Al Quwain"><option value="Ras Al Khaimah"></datalist></div>
-                </div>
-                <div class="form-group"><label data-i18n="owner">المالك *</label><input type="text" id="owner" required></div>
-                <div class="form-row"><div class="form-group"><label data-i18n="carType">النوع *</label><input type="text" id="car-type" required></div><div class="form-group"><label data-i18n="carYear">سنة الصنع *</label><input type="number" id="car-year" required></div></div>
-                <div class="form-group"><label data-i18n="vin">رقم القاعدة (VIN) *</label><input type="text" id="vin" required></div>
-                <div class="form-row"><div class="form-group"><label data-i18n="licenseExpiry">انتهاء الترخيص *</label><input type="date" id="license-expiry" required></div><div class="form-group"><label data-i18n="insuranceExpiry">انتهاء التأمين *</label><input type="date" id="insurance-expiry" required></div></div>
-                <div class="form-group"><label data-i18n="notes">ملاحظات</label><textarea id="car-notes"></textarea></div>
-                <div class="form-group"><label data-i18n="violations">مخالفات</label><textarea id="violations"></textarea></div>
-                <button type="submit" class="btn-primary btn-block" data-i18n="save">حفظ</button>
-            </form>
-        </div>
-    </div>
+    <div id="car-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2 id="car-modal-title" data-i18n="addCar">إضافة سيارة</h2><span class="close-btn" data-modal="car-modal">&times;</span></div><form id="car-form"><input type="hidden" id="car-id-hidden"><div class="form-row"><div class="form-group"><label data-i18n="plateNumber">رقم اللوحة *</label><input type="text" id="plate-number" required></div><div class="form-group"><label data-i18n="plateCode">الرمز *</label><input type="text" id="plate-code" required></div><div class="form-group"><label data-i18n="emirate">الإمارة *</label><input type="text" id="emirate" list="emirates-list" required><datalist id="emirates-list"><option value="Abu Dhabi"><option value="Dubai"><option value="Sharjah"><option value="Ajman"><option value="Fujairah"><option value="Umm Al Quwain"><option value="Ras Al Khaimah"></datalist></div></div><div class="form-group"><label data-i18n="owner">المالك *</label><input type="text" id="owner" required></div><div class="form-row"><div class="form-group"><label data-i18n="carType">النوع *</label><input type="text" id="car-type" required></div><div class="form-group"><label data-i18n="carYear">سنة الصنع *</label><input type="number" id="car-year" required></div></div><div class="form-group"><label data-i18n="vin">رقم القاعدة (VIN) *</label><input type="text" id="vin" required></div><div class="form-row"><div class="form-group"><label data-i18n="licenseExpiry">انتهاء الترخيص *</label><input type="date" id="license-expiry" required></div><div class="form-group"><label data-i18n="insuranceExpiry">انتهاء التأمين *</label><input type="date" id="insurance-expiry" required></div></div><div class="form-group"><label data-i18n="notes">ملاحظات</label><textarea id="car-notes"></textarea></div><div class="form-group"><label data-i18n="violations">مخالفات</label><textarea id="violations"></textarea></div><button type="submit" class="btn-primary btn-block" data-i18n="save">حفظ</button></form></div></div>
 
     <!-- Driver Modal -->
-    <div id="driver-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header"><h2 id="driver-modal-title" data-i18n="addDriver">إضافة سائق</h2><span class="close-btn" data-modal="driver-modal">&times;</span></div>
-            <form id="driver-form">
-                <input type="hidden" id="driver-id-hidden">
-                <div class="form-group"><label data-i18n="driverName">اسم السائق *</label><input type="text" id="driver-name" required></div>
-                <div class="form-group"><label data-i18n="driverContact">رقم الموبايل *</label><input type="tel" id="driver-contact" required></div>
-                <div class="form-group" id="driver-email-group" style="display:none;"><label data-i18n="email">البريد الإلكتروني *</label><input type="email" id="driver-email"></div>
-                <div class="form-group" id="driver-pass-group" style="display:none;"><label data-i18n="password">كلمة المرور *</label><input type="password" id="driver-pass" minlength="6"></div>
-                <div class="form-group"><label data-i18n="notes">ملاحظات</label><textarea id="driver-notes"></textarea></div>
-                <button type="submit" class="btn-primary btn-block" data-i18n="save">حفظ</button>
-            </form>
-        </div>
-    </div>
+    <div id="driver-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2 id="driver-modal-title" data-i18n="addDriver">إضافة سائق</h2><span class="close-btn" data-modal="driver-modal">&times;</span></div><form id="driver-form"><input type="hidden" id="driver-id-hidden"><div class="form-group"><label data-i18n="driverName">اسم السائق *</label><input type="text" id="driver-name" required></div><div class="form-group"><label data-i18n="driverContact">رقم الموبايل *</label><input type="tel" id="driver-contact" required></div><div class="form-group" id="driver-email-group"><label data-i18n="email">البريد الإلكتروني</label><input type="email" id="driver-email"></div><div class="form-group" id="driver-pass-group"><label data-i18n="password">كلمة المرور</label><input type="password" id="driver-pass" minlength="6"></div><div class="form-group"><label data-i18n="notes">ملاحظات</label><textarea id="driver-notes"></textarea></div><button type="submit" class="btn-primary btn-block" data-i18n="save">حفظ</button></form></div></div>
 
     <!-- Custody Modal -->
-    <div id="custody-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header"><h2 data-i18n="assignCustody">ربط عهدة</h2><span class="close-btn" data-modal="custody-modal">&times;</span></div>
-            <form id="custody-form">
-                <input type="hidden" id="custody-mode" value="car">
-                <input type="hidden" id="custody-source-id">
-                <div class="form-group" id="custody-car-display-group"><label data-i18n="car">السيارة</label><input type="text" id="custody-car-display" readonly></div>
-                <div class="form-group" id="custody-driver-select-group"><label data-i18n="selectDriver">اختر السائق *</label><select id="custody-driver-select"><option value="">--</option></select></div>
-                <div class="form-group" id="custody-driver-display-group" style="display:none;"><label data-i18n="driverName">السائق</label><input type="text" id="custody-driver-display" readonly></div>
-                <div class="form-group" id="custody-car-select-group" style="display:none;"><label data-i18n="selectCar">اختر السيارة (بدون عهدة) *</label><select id="custody-car-select"><option value="">--</option></select></div>
-                <button type="submit" class="btn-success btn-block" data-i18n="confirmAssign">تأكيد الربط</button>
-            </form>
-        </div>
-    </div>
+    <div id="custody-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2 data-i18n="assignCustody">ربط عهدة</h2><span class="close-btn" data-modal="custody-modal">&times;</span></div><form id="custody-form"><input type="hidden" id="custody-mode" value="car"><input type="hidden" id="custody-source-id"><div class="form-group" id="custody-car-display-group"><label data-i18n="car">السيارة</label><input type="text" id="custody-car-display" readonly></div><div class="form-group" id="custody-driver-select-group"><label data-i18n="selectDriver">اختر السائق *</label><select id="custody-driver-select"><option value="">--</option></select></div><div class="form-group" id="custody-driver-display-group" style="display:none;"><label data-i18n="driverName">السائق</label><input type="text" id="custody-driver-display" readonly></div><div class="form-group" id="custody-car-select-group" style="display:none;"><label data-i18n="selectCar">اختر السيارة (بدون عهدة) *</label><select id="custody-car-select"><option value="">--</option></select></div><button type="submit" class="btn-success btn-block" data-i18n="confirmAssign">تأكيد الربط</button></form></div></div>
 
     <!-- Mod Modal -->
-    <div id="mod-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header"><h2 id="mod-modal-title" data-i18n="addMod">إضافة مشرف جديد</h2><span class="close-btn" data-modal="mod-modal">&times;</span></div>
-            <form id="mod-form">
-                <input type="hidden" id="mod-uid-hidden">
-                <div class="form-group"><label data-i18n="modName">اسم المستخدم *</label><input type="text" id="mod-name" required></div>
-                <div class="form-group"><label data-i18n="email">البريد الإلكتروني *</label><input type="email" id="mod-email" required></div>
-                <div class="form-group" id="mod-pass-group"><label data-i18n="password">كلمة المرور *</label><input type="password" id="mod-pass" minlength="6"></div>
-                <button type="submit" class="btn-primary btn-block" data-i18n="save">حفظ</button>
-            </form>
-        </div>
-    </div>
+    <div id="mod-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2 id="mod-modal-title" data-i18n="addMod">إضافة مشرف جديد</h2><span class="close-btn" data-modal="mod-modal">&times;</span></div><form id="mod-form"><input type="hidden" id="mod-uid-hidden"><div class="form-group"><label data-i18n="modName">اسم المستخدم *</label><input type="text" id="mod-name" required></div><div class="form-group"><label data-i18n="email">البريد الإلكتروني *</label><input type="email" id="mod-email" required></div><div class="form-group" id="mod-pass-group"><label data-i18n="password">كلمة المرور *</label><input type="password" id="mod-pass" minlength="6"></div><button type="submit" class="btn-primary btn-block" data-i18n="save">حفظ</button></form></div></div>
 
     <!-- Custody History Modal -->
-    <div id="history-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header"><h2 data-i18n="custodyHistory">سجل العهدات</h2><span class="close-btn" data-modal="history-modal">&times;</span></div>
-            <div style="padding:20px;">
-                <table class="history-table">
-                    <thead><tr><th data-i18n="driverName">السائق</th><th data-i18n="startTime">البداية</th><th data-i18n="endTime">النهاية</th><th data-i18n="assignedBy">تمت بواسطة</th><th data-i18n="unassignedBy">فك بواسطة</th></tr></thead>
-                    <tbody id="history-tbody"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+    <div id="history-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2 data-i18n="custodyHistory">سجل العهدات</h2><span class="close-btn" data-modal="history-modal">&times;</span></div><div style="padding:20px;"><table class="history-table"><thead><tr><th data-i18n="driverName">السائق</th><th data-i18n="startTime">البداية</th><th data-i18n="endTime">النهاية</th><th data-i18n="assignedBy">تمت بواسطة</th><th data-i18n="unassignedBy">فك بواسطة</th></tr></thead><tbody id="history-tbody"></tbody></table></div></div></div>
 
     <script type="module" src="js/app.js"></script>
 </body>
