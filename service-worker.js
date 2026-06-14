@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fleetsys-cache-v7'; // ⚠️ مهم: قم بتغيير هذا الرقم (مثلاً إلى v3) في كل مرة تقوم فيها بتحديث الموقع
+const CACHE_NAME = 'fleetsys-cache-v8'; // ⚠️ مهم: قم بتغيير هذا الرقم (مثلاً إلى v3) في كل مرة تقوم فيها بتحديث الموقع
 const urlsToCache = [
   '/',
   '/index.html',
