@@ -1,38 +1,38 @@
-// js/auth/login.js
 import { auth, db } from '../config/firebase.js';
 import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { doc, getDoc, setDoc, collection, getCountFromServer } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 export async function loginUser(email, password) {
   try {
-    // 1. محاولة تسجيل الدخول
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // 2. التحقق من وجود المستخدم في قاعدة البيانات
+    // 1. التحقق من وجود مستخدمين في النظام
+    const usersCollection = collection(db, "users");
+    const snapshot = await getCountFromServer(usersCollection);
+    const isFirstUser = snapshot.data().count === 0;
+
     let userDoc = await getDoc(doc(db, "users", user.uid));
-    
-    // 3. منطق التهيئة الذاتية للمدير (إذا لم يكن موجوداً)
-    if (!userDoc.exists() && email === "saad323m@gmail.com") {
+
+    // 2. إذا كان أول مستخدم، ننشئ له ملف كمدير
+    if (!userDoc.exists() && isFirstUser) {
       await setDoc(doc(db, "users", user.uid), {
-        fullName: "MOHAMED SAAD",
+        fullName: "Admin", // يمكنك تغييره لاحقاً
         role: "admin",
-        status: "active",
         createdAt: new Date()
       });
-      // إعادة جلب البيانات بعد الإنشاء
       userDoc = await getDoc(doc(db, "users", user.uid));
     }
 
+    // 3. التحقق النهائي من الصلاحيات
     if (userDoc.exists()) {
       const userData = userDoc.data();
       sessionStorage.setItem("userName", userData.fullName);
-      sessionStorage.setItem("userRole", userData.role);
       return { success: true, role: userData.role };
     } else {
-      return { success: false, message: "غير مصرح لك بالدخول، يرجى مراجعة الإدارة." };
+      return { success: false, message: "حسابك غير مصرح له بالدخول (لا تملك رتبة)." };
     }
   } catch (error) {
-    return { success: false, message: "خطأ في تسجيل الدخول: " + error.message };
+    return { success: false, message: "خطأ: " + error.message };
   }
 }
