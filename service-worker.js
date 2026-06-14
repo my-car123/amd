@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fleetsys-cache-v12';
+const CACHE_NAME = 'fleetsys-cache-v13';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -38,22 +38,13 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request).then(
-          networkResponse => {
-            if(!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-              return networkResponse;
-            }
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseToCache);
-              });
-            return networkResponse;
-          }
-        );
+        if (response) return response;
+        return fetch(event.request).then(networkResponse => {
+          if(!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') return networkResponse;
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
+          return networkResponse;
+        });
       })
   );
 });
