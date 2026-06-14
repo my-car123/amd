@@ -263,3 +263,15 @@ footer { text-align: center; padding: 15px; background: var(--white); border-top
 #driver-current-cars .info-chip.status-danger {
     background: #f8f9fa;
 }
+/* تحسينات إضافية */
+.card-actions .btn-action.print, .card-actions .btn-action.share {
+    transition: 0.2s;
+}
+.card-actions .btn-action.print:hover, .card-actions .btn-action.share:hover {
+    opacity: 0.85;
+    transform: translateY(-2px);
+}
+.custody-meta {
+    font-size: 11px;
+    color: #b37400;
+}
