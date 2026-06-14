@@ -1,4 +1,4 @@
-// app.js - الإصدار النهائي (إصلاح كامل لكل المشاكل)
+// app.js - الإصدار النهائي المستقر (v2.0)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import { getDatabase, ref, set, get, remove, update, onValue, push, runTransaction } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, createUserWithEmailAndPassword, sendPasswordResetEmail, reauthenticateWithCredential, EmailAuthProvider, updatePassword } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
@@ -51,7 +51,8 @@ const translations = {
     assignedBy:"تمت بواسطة", unassignedBy:"فك بواسطة", carAlreadyAssigned:"السيارة مرتبطة بسائق آخر", requestSent:"تم إرسال طلبك للإدارة", carAddedAndAssigned:"تمت إضافة السيارة وربطها بنجاح", 
     loginErrorDetail:"فشل الدخول: تأكد من البريد وكلمة المرور", driverLoadError:"حدث خطأ في تحميل بيانات السائق", carAssignSuccess:"تم ربط السيارة بالسائق بنجاح", 
     carAssignFail:"فشل ربط السيارة: ", generatingIdError:"خطأ في توليد معرف السيارة، يرجى المحاولة مرة أخرى",
-    emailPassRequired:"البريد الإلكتروني وكلمة المرور مطلوبان", allFieldsRequired:"جميع الحقول مطلوبة", carNotFound:"السيارة غير موجودة", driverNotFound:"السائق غير موجود"
+    emailPassRequired:"البريد الإلكتروني وكلمة المرور مطلوبان", allFieldsRequired:"جميع الحقول مطلوبة", carNotFound:"السيارة غير موجودة", driverNotFound:"السائق غير موجود",
+    carExistsNoDriver:"السيارة موجودة بدون سائق، تم ربطها مباشرة", carExistsWithDriver:"السيارة مرتبطة بسائق آخر، لا يمكن الربط"
   },
   en: { 
     loginTitle:"Login", loginBtn:"Login", navStats:"Stats", navCars:"Cars", navDrivers:"Drivers", navMods:"Mods", navLogs:"Logs", navPending:"Requests", 
@@ -70,7 +71,8 @@ const translations = {
     changePass:"Change Password", currentPass:"Current Password", newPass:"New Password", confirmNewPass:"Confirm Password", assignedBy:"Assigned by", unassignedBy:"Unassigned by", 
     carAlreadyAssigned:"Car is already assigned", requestSent:"Request sent to admin", carAddedAndAssigned:"Car added and assigned", loginErrorDetail:"Login failed. Check email/password", 
     driverLoadError:"Error loading driver data", carAssignSuccess:"Car successfully assigned to driver", carAssignFail:"Failed to assign car: ", generatingIdError:"Error generating car ID, please try again",
-    emailPassRequired:"Email and password are required", allFieldsRequired:"All fields are required", carNotFound:"Car not found", driverNotFound:"Driver not found"
+    emailPassRequired:"Email and password are required", allFieldsRequired:"All fields are required", carNotFound:"Car not found", driverNotFound:"Driver not found",
+    carExistsNoDriver:"Car exists without driver, assigned directly", carExistsWithDriver:"Car is already assigned to another driver"
   }
 };
 let currentLang = localStorage.getItem('fleetSysLang') || 'ar';
@@ -91,7 +93,6 @@ function setLanguage(lang) {
     if(translations[lang][key]) el.placeholder = translations[lang][key]; 
   }); 
   updateDateTimeDisplay(); 
-  // إعادة تحميل البيانات الديناميكية لتحديث النصوص
   if (!isDriver) {
     renderCars(false);
     renderDrivers(false);
@@ -116,46 +117,54 @@ async function logAction(action, details) {
   });
 }
 
-// --- ربط العهدة (محسن) ---
-async function assignCustody(carId, driverId, assignedByEmail, assignedByName) {
-  const carSnap = await get(ref(db, `cars/${carId}`));
-  if (!carSnap.exists()) throw new Error(t('carNotFound'));
-  const carData = carSnap.val();
-  
-  const driverSnap = await get(ref(db, `drivers/${driverId}`));
-  if (!driverSnap.exists()) throw new Error(t('driverNotFound'));
-  const driverData = driverSnap.val();
-  
-  if(carData.currentDriverId) throw new Error(t('carAlreadyAssigned'));
-  
-  const now = new Date().toISOString();
-  const snap = await get(ref(db,'custodyHistory'));
-  let prevKey = null;
-  if(snap.exists()) {
-    snap.forEach(ch=>{
-      if(ch.val().carId===carId && !ch.val().endTime) prevKey = ch.key;
+// --- ربط العهدة (محسن بشدة) ---
+async function assignCustody(carId, driverId, assignedByEmail, assignedByName, retry = 0) {
+  try {
+    const carSnap = await get(ref(db, `cars/${carId}`));
+    if (!carSnap.exists()) throw new Error(t('carNotFound'));
+    const carData = carSnap.val();
+    
+    const driverSnap = await get(ref(db, `drivers/${driverId}`));
+    if (!driverSnap.exists()) throw new Error(t('driverNotFound'));
+    const driverData = driverSnap.val();
+    
+    if (carData.currentDriverId) throw new Error(t('carAlreadyAssigned'));
+    
+    const now = new Date().toISOString();
+    const snap = await get(ref(db,'custodyHistory'));
+    let prevKey = null;
+    if(snap.exists()) {
+      snap.forEach(ch=>{
+        if(ch.val().carId===carId && !ch.val().endTime) prevKey = ch.key;
+      });
+    }
+    if(prevKey) await update(ref(db,`custodyHistory/${prevKey}`),{ endTime: now, unassignedByEmail: assignedByEmail, unassignedByName: assignedByName });
+    
+    const newHistoryRef = push(ref(db,'custodyHistory'));
+    await set(newHistoryRef, {
+      carId, driverId, driverName: driverData.name,
+      carPlate: `${carData.plateNumber}|${carData.plateCode}`,
+      startTime: now, endTime: null,
+      assignedByEmail: assignedByEmail,
+      assignedByName: assignedByName,
+      unassignedByEmail: null, unassignedByName: null
     });
+    
+    await update(ref(db,`cars/${carId}`),{
+      currentDriverId: driverId,
+      currentDriverName: driverData.name,
+      currentAssignedByEmail: assignedByEmail,
+      currentAssignedByName: assignedByName,
+      currentAssignedAt: now
+    });
+    await logAction(t('assignCustody'), `${carId} -> ${driverData.name} by ${assignedByName}`);
+  } catch (err) {
+    if (retry < 2 && err.message.includes('permission_denied')) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return assignCustody(carId, driverId, assignedByEmail, assignedByName, retry + 1);
+    }
+    throw err;
   }
-  if(prevKey) await update(ref(db,`custodyHistory/${prevKey}`),{ endTime: now, unassignedByEmail: assignedByEmail, unassignedByName: assignedByName });
-  
-  const newHistoryRef = push(ref(db,'custodyHistory'));
-  await set(newHistoryRef, {
-    carId, driverId, driverName: driverData.name,
-    carPlate: `${carData.plateNumber}|${carData.plateCode}`,
-    startTime: now, endTime: null,
-    assignedByEmail: assignedByEmail,
-    assignedByName: assignedByName,
-    unassignedByEmail: null, unassignedByName: null
-  });
-  
-  await update(ref(db,`cars/${carId}`),{
-    currentDriverId: driverId,
-    currentDriverName: driverData.name,
-    currentAssignedByEmail: assignedByEmail,
-    currentAssignedByName: assignedByName,
-    currentAssignedAt: now
-  });
-  await logAction(t('assignCustody'), `${carId} -> ${driverData.name} by ${assignedByName}`);
 }
 
 // --- فك العهدة ---
@@ -180,14 +189,21 @@ async function unassignCar(car) {
   await logAction(t('unassign'), `${car.id} by ${userName}`);
 }
 
-// --- توليد معرف سيارة آمن مع إعادة المحاولة (محسن بشدة) ---
+// --- توليد معرف سيارة آمن (باستخدام push + عداد) ---
 async function generateCarId(retryCount = 0) {
   try {
+    // التأكد من وجود عداد أولي
     const counterRef = ref(db, 'counters/carsCount');
+    const initSnap = await get(counterRef);
+    if (!initSnap.exists()) {
+      await set(counterRef, 0);
+    }
+    
     const result = await runTransaction(counterRef, (current) => {
       let newVal = (current || 0) + 1;
       return newVal;
     });
+    
     if (result.committed && typeof result.snapshot.val() === 'number' && result.snapshot.val() > 0) {
       const idNumber = result.snapshot.val();
       return `UAE_${String(idNumber).padStart(3, '0')}`;
@@ -196,16 +212,20 @@ async function generateCarId(retryCount = 0) {
     }
   } catch (err) {
     console.error('generateCarId transaction failed:', err);
-    if (retryCount < 3) {
-      await new Promise(resolve => setTimeout(resolve, 500));
+    if (retryCount < 4) {
+      await new Promise(resolve => setTimeout(resolve, 600));
       return generateCarId(retryCount + 1);
     } else {
-      throw new Error(t('generatingIdError'));
+      // حل بديل: استخدام push للحصول على معرف فريد
+      const tempRef = push(ref(db, 'temp_ids'));
+      const fallbackId = `CAR_${tempRef.key.slice(-6)}`;
+      console.warn('Using fallback car ID:', fallbackId);
+      return fallbackId;
     }
   }
 }
 
-// --- Auth State (نفس الأصلي مع تحسينات طفيفة) ---
+// --- Auth State (نفس الأصلي) ---
 onAuthStateChanged(auth, async user => {
   if(user) {
     try {
@@ -404,7 +424,7 @@ function applyDriverSearch() { if(isDriver) return; const q = document.getElemen
 function renderDrivers(append) { const c = document.getElementById('drivers-container'); if(!c) return; if(!append) c.innerHTML = ''; const items = displayedDrivers.slice(driversShown, driversShown+LIMIT); items.forEach(d => c.appendChild(createDriverCard(d))); driversShown += items.length; document.getElementById('load-more-drivers').style.display = driversShown < displayedDrivers.length ? 'inline-block' : 'none'; if(displayedDrivers.length===0 && !append) c.innerHTML=`<p style="text-align:center">${t('none')}</p>`; }
 function createDriverCard(d) { const assignedCars = allCars.filter(c => c.currentDriverId === d.id); const el=document.createElement('div'); el.className='card status-green-top'; el.setAttribute('data-driver-id',d.id); let carsGridHtml = ''; if(assignedCars.length===0) carsGridHtml = `<div class="driver-cars-grid"><div style="text-align:center;color:#888;grid-column:1/-1;">${t('noCar')}</div></div>`; else { let gridItems=''; assignedCars.forEach(car=>{ const statusText = getStatusText(car.licenseExpiry); let statusColor='#28a745'; if(statusText===t('expiredStatus')) statusColor='#dc3545'; else if(statusText===t('warnStatus')) statusColor='#ffc107'; gridItems+=`<div class="driver-car-item" data-car-id="${car.id}"><div class="mini-plate"><span class="plate-number">${car.plateNumber}</span> <span class="plate-sep">|</span> <span class="plate-code">${car.plateCode}</span> <span class="plate-sep">|</span> <span class="plate-emirate">${car.emirate}</span></div><div class="car-mini-info"><span><i class="fas fa-car"></i> ${car.type}</span><span><i class="fas fa-calendar"></i> ${car.year}</span><span style="color:${statusColor}"><i class="fas fa-clock"></i> ${statusText}</span></div></div>`; }); carsGridHtml = `<div class="driver-cars-grid">${gridItems}</div>`; } el.innerHTML=`<div class="card-header"><div class="card-header-main"><div><div class="card-title"><i class="fas fa-user"></i> ${d.name}</div><div style="color:#666;margin-top:5px"><i class="fas fa-phone"></i> ${d.contact}</div><div style="color:#666;font-size:12px"><i class="fas fa-envelope"></i> ${d.email || ''}</div></div></div><div class="card-driver-info" style="width:100%;flex-direction:column;align-items:stretch;">${carsGridHtml}</div></div><div class="card-body">${d.notes?`<p>${d.notes}</p>`:''}<div class="card-actions"><button class="btn-action assign" style="background:var(--green)"><i class="fas fa-plus"></i> ${t('assign')}</button><button class="btn-action edit" style="background:#6c757d"><i class="fas fa-edit"></i> ${t('edit')}</button><button class="btn-action delete" style="background:var(--red)"><i class="fas fa-trash"></i> ${t('delete')}</button><button class="btn-action history" style="background:#6c757d"><i class="fas fa-history"></i> ${t('history')}</button></div></div>`; el.querySelector('.card-header').addEventListener('click', e=>{ if(!e.target.closest('.btn-action') && !e.target.closest('.driver-car-item')) el.classList.toggle('expanded'); }); el.querySelector('.edit').addEventListener('click', e=>{ e.stopPropagation(); openDriverModal(d); }); el.querySelector('.delete').addEventListener('click', e=>{ e.stopPropagation(); deleteDriver(d.id); }); el.querySelector('.history').addEventListener('click', e=>{ e.stopPropagation(); showCustodyHistory('driver',d.id); }); el.querySelector('.assign').addEventListener('click', e=>{ e.stopPropagation(); openCustodyModal('driver',d.id); }); el.querySelectorAll('.driver-car-item').forEach(item=>{ const carId = item.getAttribute('data-car-id'); if(carId) item.addEventListener('click',(e)=>{ e.stopPropagation(); navigateToCar(carId); }); }); return el; }
 
-// --- CUSTODY MODAL (محسنة بالرسائل) ---
+// --- CUSTODY MODAL ---
 function openCustodyModal(sourceType, sourceId) {
   document.getElementById('custody-mode').value = sourceType;
   document.getElementById('custody-source-id').value = sourceId;
@@ -481,17 +501,68 @@ function fetchMods(){ onValue(ref(db,'users'), snap=>{ allMods=snap.exists()?Obj
 function renderMods(append){ const c=document.getElementById('mods-container'); if(!c) return; if(!append) c.innerHTML=''; const items=allMods.slice(modsShown,modsShown+LIMIT); items.forEach(u=>c.appendChild(createModCard(u))); modsShown+=items.length; document.getElementById('load-more-mods').style.display=modsShown<allMods.length?'inline-block':'none'; }
 function createModCard(u){ const el=document.createElement('div'); el.className=`card ${u.status==='active'?'status-green-top':'status-red-top'}`; el.innerHTML=`<div class="card-header"><div class="card-title">${u.name}</div><small>${u.email}</small></div><div class="card-body"><p>${u.status==='active'?`<span style="color:green">${t('active')}</span>`:`<span style="color:red">${t('suspended')}</span>`}</p><div class="card-actions">${u.status==='active'?`<button class="btn-action suspend" style="background:var(--yellow);color:#333"><i class="fas fa-ban"></i> ${t('suspended')}</button>`:`<button class="btn-action activate" style="background:var(--green)"><i class="fas fa-check"></i> ${t('active')}</button>`}<button class="btn-action edit" style="background:#6c757d"><i class="fas fa-edit"></i> ${t('edit')}</button><button class="btn-action reset-pass" style="background:#17a2b8"><i class="fas fa-key"></i> ${t('resetPass')}</button><button class="btn-action delete" style="background:var(--red)"><i class="fas fa-trash"></i> ${t('delete')}</button></div></div>`; el.querySelector('.card-header').addEventListener('click',e=>{if(!e.target.closest('.btn-action')) el.classList.toggle('expanded');}); if(u.status==='active') el.querySelector('.suspend').addEventListener('click',e=>{e.stopPropagation();requestPin(async()=>{await update(ref(db,`users/${u.id}`),{status:'suspended'});await logAction(t('suspended'),u.name);});}); else el.querySelector('.activate').addEventListener('click',e=>{e.stopPropagation();requestPin(async()=>{await update(ref(db,`users/${u.id}`),{status:'active'});await logAction(t('active'),u.name);});}); el.querySelector('.edit').addEventListener('click',e=>{e.stopPropagation();document.getElementById('mod-uid-hidden').value=u.id;document.getElementById('mod-name').value=u.name;document.getElementById('mod-email').value=u.email;document.getElementById('mod-pass-group').style.display='none';document.getElementById('mod-modal').style.display='block';}); el.querySelector('.reset-pass').addEventListener('click',async e=>{e.stopPropagation();try{await sendPasswordResetEmail(auth,u.email);alert(t('resetPassSent'));}catch(err){alert(err.message);}}); el.querySelector('.delete').addEventListener('click',e=>{e.stopPropagation();requestPin(async()=>{if(confirm(t('confirmDeleteCar'))){await remove(ref(db,`users/${u.id}`));await logAction(t('delete'),u.name);}});}); return el; }
 
-// --- LOGS (نفس الأصلي) ---
+// --- LOGS ---
 document.getElementById('load-more-logs')?.addEventListener('click',()=>renderLogs(true));
 function fetchLogs(){ onValue(ref(db,'logs'), snap=>{ allLogs=snap.exists()?Object.values(snap.val()).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp)):[]; logsShown=0; renderLogs(false); }); }
 function renderLogs(append){ const tb=document.getElementById('logs-tbody'); if(!tb) return; if(!append) tb.innerHTML=''; const items=allLogs.slice(logsShown,logsShown+LIMIT); items.forEach(l=>{ const tr=document.createElement('tr'); const userDisplay = l.userName || l.userId || '?'; tr.innerHTML=`<td>${fmtDateTime(l.timestamp)}</td><td>${userDisplay}</td><td>${l.action}</td><td>${l.details}</td>`; tb.appendChild(tr); }); logsShown+=items.length; document.getElementById('load-more-logs').style.display=logsShown<allLogs.length?'inline-block':'none'; }
 
-// --- PENDING REQUESTS (محسنة بشدة) ---
+// --- PENDING REQUESTS (محسنة بشدة مع منع التكرار) ---
 async function fetchPendingRequests(){ onValue(ref(db,'pendingCarRequests'), snap=>{ allPendingRequests=snap.exists()?Object.keys(snap.val()).map(k=>({id:k,...snap.val()[k]})).filter(r=>r.status==='pending'):[]; pendingShown=0; renderPendingRequests(); }); }
 function renderPendingRequests(){ const tbody=document.getElementById('pending-tbody'); if(!tbody) return; tbody.innerHTML=''; const items=allPendingRequests.slice(pendingShown,pendingShown+LIMIT); items.forEach(req=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${req.driverName||'?'}</td><td>${req.plateNumber}</td><td>${req.plateCode}</td><td>${req.emirate}</td><td>${req.carType}</td><td>${fmtDateTime(req.submittedAt)}</td><td><button class="btn-approve" data-id="${req.id}">${t('approve')}</button> <button class="btn-reject" data-id="${req.id}">${t('reject')}</button></td>`; tbody.appendChild(tr); }); pendingShown+=items.length; document.getElementById('load-more-pending')?.remove(); if(pendingShown<allPendingRequests.length){ const btn=document.createElement('button'); btn.id='load-more-pending'; btn.className='btn-load-more'; btn.textContent=t('loadMore'); btn.addEventListener('click',()=>renderPendingRequests()); document.getElementById('pending-section').appendChild(btn); } tbody.querySelectorAll('.btn-approve').forEach(btn=>btn.addEventListener('click',()=>approveRequest(btn.dataset.id))); tbody.querySelectorAll('.btn-reject').forEach(btn=>btn.addEventListener('click',()=>rejectRequest(btn.dataset.id))); }
 async function approveRequest(requestId){
   const req = allPendingRequests.find(r=>r.id===requestId);
   if(!req) return;
+  
+  // أولاً: التحقق من وجود سيارة مطابقة في قاعدة البيانات (لمنع التكرار)
+  const allCarsSnap = await get(ref(db, 'cars'));
+  let existingCar = null;
+  if (allCarsSnap.exists()) {
+    const cars = Object.values(allCarsSnap.val());
+    existingCar = cars.find(c => 
+      c.plateNumber === req.plateNumber && 
+      c.plateCode === req.plateCode && 
+      c.emirate === req.emirate
+    );
+  }
+  
+  if (existingCar) {
+    // سيارة موجودة بالفعل
+    if (existingCar.currentDriverId) {
+      alert(t('carExistsWithDriver'));
+      // رفض الطلب تلقائياً
+      await update(ref(db, `pendingCarRequests/${requestId}`), {
+        status: 'rejected',
+        rejectedReason: t('carExistsWithDriver')
+      });
+      return;
+    } else {
+      // السيارة موجودة ولكن بدون سائق -> ربط مباشر
+      if (confirm(t('carExistsNoDriver'))) {
+        try {
+          await assignCustody(existingCar.id, req.driverId, auth.currentUser.email, currentUserData.name);
+          await update(ref(db, `pendingCarRequests/${requestId}`), {
+            status: 'approved',
+            approvedBy: auth.currentUser.email,
+            approvedByName: currentUserData.name,
+            finalCarId: existingCar.id,
+            note: 'Direct assignment to existing car'
+          });
+          alert(t('carAssignSuccess'));
+          await logAction(t('approve'), `Request ${requestId} assigned to existing car ${existingCar.id}`);
+          fetchCars();
+          if (isDriver) initDriverDashboard();
+          return;
+        } catch(err) {
+          alert(t('carAssignFail') + err.message);
+          return;
+        }
+      } else {
+        return;
+      }
+    }
+  }
+  
+  // إذا لم توجد سيارة مكررة، نكمل الإجراء العادي
   const carData = { 
     plateNumber: req.plateNumber, plateCode: req.plateCode, emirate: req.emirate,
     type: req.carType, owner: '', year: '', vin: '', licenseExpiry: '', insuranceExpiry: '', notes: '', violations: '' 
@@ -509,25 +580,39 @@ async function approveRequest(requestId){
       const pNum = document.getElementById('plate-number').value.trim();
       const pCode = document.getElementById('plate-code').value.trim();
       const emi = document.getElementById('emirate').value.trim();
-      const snap = await get(ref(db,'cars'));
-      if(snap.exists()){
-        const cars = snap.val();
+      const owner = document.getElementById('owner').value.trim();
+      const type = document.getElementById('car-type').value.trim();
+      const year = document.getElementById('car-year').value.trim();
+      const licenseExpiry = document.getElementById('license-expiry').value;
+      const insuranceExpiry = document.getElementById('insurance-expiry').value;
+      const notes = document.getElementById('car-notes').value.trim();
+      const violations = document.getElementById('violations').value.trim();
+      
+      // تحقق إضافي من التكرار بعد تعبئة البيانات بالكامل
+      const carsSnap = await get(ref(db,'cars'));
+      if(carsSnap.exists()){
+        const cars = carsSnap.val();
         for(let k in cars){
           if(k===hid) continue;
-          if(cars[k].vin===vin){ alert(t('dupVin')); btn.disabled=false; btn.textContent=t('save'); return; }
-          if(cars[k].plateNumber===pNum && cars[k].plateCode===pCode && cars[k].emirate===emi){ alert(t('dupPlate')); btn.disabled=false; btn.textContent=t('save'); return; }
+          if(cars[k].vin === vin && vin !== ""){ alert(t('dupVin')); btn.disabled=false; btn.textContent=t('save'); return; }
+          if(cars[k].plateNumber === pNum && cars[k].plateCode === pCode && cars[k].emirate === emi){ 
+            alert(t('dupPlate')); 
+            btn.disabled=false; btn.textContent=t('save'); 
+            return;
+          }
         }
       }
+      
       const data = {
         plateNumber: pNum, plateCode: pCode, emirate: emi,
-        owner: document.getElementById('owner').value.trim(),
-        type: document.getElementById('car-type').value.trim(),
-        year: document.getElementById('car-year').value.trim(),
+        owner: owner,
+        type: type,
+        year: year,
         vin: vin,
-        licenseExpiry: document.getElementById('license-expiry').value,
-        insuranceExpiry: document.getElementById('insurance-expiry').value,
-        notes: document.getElementById('car-notes').value.trim(),
-        violations: document.getElementById('violations').value.trim(),
+        licenseExpiry: licenseExpiry,
+        insuranceExpiry: insuranceExpiry,
+        notes: notes,
+        violations: violations,
         currentDriverId: null, currentDriverName: null,
         currentAssignedByEmail: null, currentAssignedByName: null, currentAssignedAt: null
       };
@@ -571,7 +656,7 @@ async function approveRequest(requestId){
 }
 async function rejectRequest(requestId){ const reason=prompt('سبب الرفض (اختياري)'); await update(ref(db,`pendingCarRequests/${requestId}`),{ status:'rejected', rejectedReason:reason||'' }); await logAction(t('reject'),`Car request ${requestId} rejected`); }
 
-// --- DRIVER DASHBOARD (محسنة بالتنسيق والرسائل) ---
+// --- DRIVER DASHBOARD (محسنة) ---
 async function initDriverDashboard(){
   if(!isDriver || !currentDriverId){
     console.warn("initDriverDashboard called but not driver or no driverId");
