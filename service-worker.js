@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fleetsys-cache-v10'; // تم الترقية إلى v10
+const CACHE_NAME = 'fleetsys-cache-v11';
 const urlsToCache = [
   '/',
   '/index.html',
