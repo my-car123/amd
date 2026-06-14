@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fleetsys-cache-v11';
+const CACHE_NAME = 'fleetsys-cache-v12';
 const urlsToCache = [
   '/',
   '/index.html',
