@@ -33,8 +33,8 @@ function fmtDateTime(d) { if (!d) return '-'; const date = getUaeTime(new Date(d
 
 // --- i18n ---
 const translations = {
-  ar: { loginTitle:"تسجيل الدخول", loginBtn:"دخول", navStats:"الإحصائيات", navCars:"السيارات", navDrivers:"السائقون", navMods:"المشرفون", navLogs:"السجل", navPending:"الطلبات", statActive:"سيارات سارية", statWarn:"قاربت على الانتهاء", statExp:"منتهية", statDrivers:"سائقين", statMods:"مشرفين", addCar:"إضافة سيارة", addDriver:"إضافة سائق", addMod:"إضافة مشرف", modManagement:"إدارة المشرفين", systemLogs:"سجل النظام الدقيق", pinTitle:"التحقق من الرمز السري", pinDesc:"أدخل رمز PIN للمتابعة", confirm:"تأكيد", loadMore:"عرض المزيد", searchCar:"بحث (لوحة، قاعدة، مالك)...", searchDriver:"بحث (اسم، هاتف)...", owner:"المالك", plateNumber:"رقم اللوحة", plateCode:"الرمز", emirate:"الإمارة", carType:"النوع", carYear:"سنة الصنع", vin:"رقم القاعدة (VIN)", licenseExpiry:"انتهاء الترخيص", insuranceExpiry:"انتهاء التأمين", notes:"ملاحظات", violations:"مخالفات", save:"حفظ", driverName:"اسم السائق", driverContact:"رقم الموبايل", assignCustody:"ربط عهدة", selectDriver:"اختر السائق", selectCar:"اختر السيارة (بدون عهدة)", confirmAssign:"تأكيد الربط", car:"السيارة", modName:"اسم المستخدم", email:"البريد الإلكتروني", password:"كلمة المرور", custodyHistory:"سجل العهدات", startTime:"البداية", endTime:"النهاية", logTime:"التوقيت", logUser:"المستخدم", logAction:"الإجراء", logDetails:"التفاصيل", active:"فعال", suspended:"معلق", assign:"ربط", unassign:"فك", edit:"تعديل", delete:"حذف", print:"طباعة", share:"مشاركة", history:"سجل", resetPass:"إعادة كلمة المرور", noDriver:"بدون سائق", noCar:"بدون سيارة", activeStatus:"سارية", warnStatus:"قاربت على الانتهاء", expiredStatus:"منتهية", currentlyWith:"مع", untilNow:"حتى الآن", loginError:"خطأ في الدخول", pinError:"رمز PIN خاطئ!", dupVin:"VIN مكرر!", dupPlate:"اللوحة مكررة!", dupDriver:"اسم السائق أو رقم الهاتف مسجل مسبقاً!", confirmDeleteCar:"حذف السيارة؟", confirmDeleteDriver:"حذف السائق؟", confirmUnassign:"فك الربط؟", unassignFirst:"افك العهدة أولاً", resetPassSent:"تم إرسال رابط إعادة التعيين للبريد", none:"لا توجد بيانات", copied:"تم النسخ!", footerRights:"جميع الحقوق محفوظة", moreCars:"سيارات أخرى", pendingRequests:"طلبات إضافة سيارات", submittedAt:"تاريخ الطلب", actions:"إجراءات", approve:"قبول", reject:"رفض", currentCars:"سياراتي الحالية", pastCars:"السيارات السابقة", addNewCar:"إضافة سيارة جديدة", changePass:"تغيير كلمة المرور", currentPass:"كلمة المرور الحالية", newPass:"كلمة المرور الجديدة", confirmNewPass:"تأكيد كلمة المرور", assignedBy:"تمت بواسطة", unassignedBy:"فك بواسطة", carAlreadyAssigned:"السيارة مرتبطة بسائق آخر", requestSent:"تم إرسال طلبك للإدارة", carAddedAndAssigned:"تمت إضافة السيارة وربطها بنجاح", loginErrorDetail:"فشل الدخول: تأكد من البريد وكلمة المرور", driverLoadError:"حدث خطأ في تحميل بيانات السائق" },
-  en: { loginTitle:"Login", loginBtn:"Login", navStats:"Stats", navCars:"Cars", navDrivers:"Drivers", navMods:"Mods", navLogs:"Logs", navPending:"Requests", statActive:"Active Cars", statWarn:"Warning", statExp:"Expired", statDrivers:"Drivers", statMods:"Mods", addCar:"Add Car", addDriver:"Add Driver", addMod:"Add Mod", modManagement:"Moderators", systemLogs:"System Logs", pinTitle:"PIN Verification", pinDesc:"Enter PIN to continue", confirm:"Confirm", loadMore:"Load More", searchCar:"Search (Plate, VIN, Owner)...", searchDriver:"Search (Name, Phone)...", owner:"Owner", plateNumber:"Plate Number", plateCode:"Code", emirate:"Emirate", carType:"Type", carYear:"Year", vin:"VIN", licenseExpiry:"License Expiry", insuranceExpiry:"Insurance Expiry", notes:"Notes", violations:"Violations", save:"Save", driverName:"Driver Name", driverContact:"Phone", assignCustody:"Assign Custody", selectDriver:"Select Driver", selectCar:"Select Car (No Custody)", confirmAssign:"Confirm Assign", car:"Car", modName:"Display Name", email:"Email", password:"Password", custodyHistory:"Custody History", startTime:"Start", endTime:"End", logTime:"Time", logUser:"User", logAction:"Action", logDetails:"Details", active:"Active", suspended:"Suspended", assign:"Assign", unassign:"Unassign", edit:"Edit", delete:"Delete", print:"Print", share:"Share", history:"History", resetPass:"Reset Pass", noDriver:"No Driver", noCar:"No Car", activeStatus:"Active", warnStatus:"Warning", expiredStatus:"Expired", currentlyWith:"With", untilNow:"Until Now", loginError:"Login Error", pinError:"Wrong PIN!", dupVin:"Duplicate VIN!", dupPlate:"Duplicate Plate!", dupDriver:"Driver Name or Phone already exists!", confirmDeleteCar:"Delete Car?", confirmDeleteDriver:"Delete Driver?", confirmUnassign:"Unassign?", unassignFirst:"Unassign first", resetPassSent:"Reset link sent to email", none:"No data", copied:"Copied!", footerRights:"All Rights Reserved", moreCars:"more cars", pendingRequests:"Pending Car Requests", submittedAt:"Submitted", actions:"Actions", approve:"Approve", reject:"Reject", currentCars:"My Current Cars", pastCars:"Past Cars", addNewCar:"Add New Car", changePass:"Change Password", currentPass:"Current Password", newPass:"New Password", confirmNewPass:"Confirm Password", assignedBy:"Assigned by", unassignedBy:"Unassigned by", carAlreadyAssigned:"Car is already assigned", requestSent:"Request sent to admin", carAddedAndAssigned:"Car added and assigned", loginErrorDetail:"Login failed. Check email/password", driverLoadError:"Error loading driver data" }
+  ar: { loginTitle:"تسجيل الدخول", loginBtn:"دخول", navStats:"الإحصائيات", navCars:"السيارات", navDrivers:"السائقون", navMods:"المشرفون", navLogs:"السجل", navPending:"الطلبات", statActive:"سيارات سارية", statWarn:"قاربت على الانتهاء", statExp:"منتهية", statDrivers:"سائقين", statMods:"مشرفين", addCar:"إضافة سيارة", addDriver:"إضافة سائق", addMod:"إضافة مشرف", modManagement:"إدارة المشرفين", systemLogs:"سجل النظام الدقيق", pinTitle:"التحقق من الرمز السري", pinDesc:"أدخل رمز PIN للمتابعة", confirm:"تأكيد", loadMore:"عرض المزيد", searchCar:"بحث (لوحة، قاعدة، مالك)...", searchDriver:"بحث (اسم، هاتف)...", owner:"المالك", plateNumber:"رقم اللوحة", plateCode:"الرمز", emirate:"الإمارة", carType:"النوع", carYear:"سنة الصنع", vin:"رقم القاعدة (VIN)", licenseExpiry:"انتهاء الترخيص", insuranceExpiry:"انتهاء التأمين", notes:"ملاحظات", violations:"مخالفات", save:"حفظ", driverName:"اسم السائق", driverContact:"رقم الموبايل", assignCustody:"ربط عهدة", selectDriver:"اختر السائق", selectCar:"اختر السيارة (بدون عهدة)", confirmAssign:"تأكيد الربط", car:"السيارة", modName:"اسم المستخدم", email:"البريد الإلكتروني", password:"كلمة المرور", custodyHistory:"سجل العهدات", startTime:"البداية", endTime:"النهاية", logTime:"التوقيت", logUser:"المستخدم", logAction:"الإجراء", logDetails:"التفاصيل", active:"فعال", suspended:"معلق", assign:"ربط", unassign:"فك", edit:"تعديل", delete:"حذف", print:"طباعة", share:"مشاركة", history:"سجل", resetPass:"إعادة كلمة المرور", noDriver:"بدون سائق", noCar:"بدون سيارة", activeStatus:"سارية", warnStatus:"قاربت على الانتهاء", expiredStatus:"منتهية", currentlyWith:"مع", untilNow:"حتى الآن", loginError:"خطأ في الدخول", pinError:"رمز PIN خاطئ!", dupVin:"VIN مكرر!", dupPlate:"اللوحة مكررة!", dupDriver:"اسم السائق أو رقم الهاتف مسجل مسبقاً!", confirmDeleteCar:"حذف السيارة؟", confirmDeleteDriver:"حذف السائق؟", confirmUnassign:"فك الربط؟", unassignFirst:"افك العهدة أولاً", resetPassSent:"تم إرسال رابط إعادة التعيين للبريد", none:"لا توجد بيانات", copied:"تم النسخ!", footerRights:"جميع الحقوق محفوظة", moreCars:"سيارات أخرى", pendingRequests:"طلبات إضافة سيارات", submittedAt:"تاريخ الطلب", actions:"إجراءات", approve:"قبول", reject:"رفض", currentCars:"سياراتي الحالية", pastCars:"السيارات السابقة", addNewCar:"إضافة سيارة جديدة", changePass:"تغيير كلمة المرور", currentPass:"كلمة المرور الحالية", newPass:"كلمة المرور الجديدة", confirmNewPass:"تأكيد كلمة المرور", assignedBy:"تمت بواسطة", unassignedBy:"فك بواسطة", carAlreadyAssigned:"السيارة مرتبطة بسائق آخر", requestSent:"تم إرسال طلبك للإدارة", carAddedAndAssigned:"تمت إضافة السيارة وربطها بنجاح", loginErrorDetail:"فشل الدخول: تأكد من البريد وكلمة المرور", driverLoadError:"حدث خطأ في تحميل بيانات السائق", carAssignSuccess:"تم ربط السيارة بالسائق بنجاح", carAssignFail:"فشل ربط السيارة: يرجى المحاولة مرة أخرى", generatingIdError:"خطأ في توليد معرف السيارة، يرجى المحاولة مرة أخرى" },
+  en: { loginTitle:"Login", loginBtn:"Login", navStats:"Stats", navCars:"Cars", navDrivers:"Drivers", navMods:"Mods", navLogs:"Logs", navPending:"Requests", statActive:"Active Cars", statWarn:"Warning", statExp:"Expired", statDrivers:"Drivers", statMods:"Mods", addCar:"Add Car", addDriver:"Add Driver", addMod:"Add Mod", modManagement:"Moderators", systemLogs:"System Logs", pinTitle:"PIN Verification", pinDesc:"Enter PIN to continue", confirm:"Confirm", loadMore:"Load More", searchCar:"Search (Plate, VIN, Owner)...", searchDriver:"Search (Name, Phone)...", owner:"Owner", plateNumber:"Plate Number", plateCode:"Code", emirate:"Emirate", carType:"Type", carYear:"Year", vin:"VIN", licenseExpiry:"License Expiry", insuranceExpiry:"Insurance Expiry", notes:"Notes", violations:"Violations", save:"Save", driverName:"Driver Name", driverContact:"Phone", assignCustody:"Assign Custody", selectDriver:"Select Driver", selectCar:"Select Car (No Custody)", confirmAssign:"Confirm Assign", car:"Car", modName:"Display Name", email:"Email", password:"Password", custodyHistory:"Custody History", startTime:"Start", endTime:"End", logTime:"Time", logUser:"User", logAction:"Action", logDetails:"Details", active:"Active", suspended:"Suspended", assign:"Assign", unassign:"Unassign", edit:"Edit", delete:"Delete", print:"Print", share:"Share", history:"History", resetPass:"Reset Pass", noDriver:"No Driver", noCar:"No Car", activeStatus:"Active", warnStatus:"Warning", expiredStatus:"Expired", currentlyWith:"With", untilNow:"Until Now", loginError:"Login Error", pinError:"Wrong PIN!", dupVin:"Duplicate VIN!", dupPlate:"Duplicate Plate!", dupDriver:"Driver Name or Phone already exists!", confirmDeleteCar:"Delete Car?", confirmDeleteDriver:"Delete Driver?", confirmUnassign:"Unassign?", unassignFirst:"Unassign first", resetPassSent:"Reset link sent to email", none:"No data", copied:"Copied!", footerRights:"All Rights Reserved", moreCars:"more cars", pendingRequests:"Pending Car Requests", submittedAt:"Submitted", actions:"Actions", approve:"Approve", reject:"Reject", currentCars:"My Current Cars", pastCars:"Past Cars", addNewCar:"Add New Car", changePass:"Change Password", currentPass:"Current Password", newPass:"New Password", confirmNewPass:"Confirm Password", assignedBy:"Assigned by", unassignedBy:"Unassigned by", carAlreadyAssigned:"Car is already assigned", requestSent:"Request sent to admin", carAddedAndAssigned:"Car added and assigned", loginErrorDetail:"Login failed. Check email/password", driverLoadError:"Error loading driver data", carAssignSuccess:"Car successfully assigned to driver", carAssignFail:"Failed to assign car, please try again", generatingIdError:"Error generating car ID, please try again" }
 };
 let currentLang = localStorage.getItem('fleetSysLang') || 'ar';
 function t(key) { return translations[currentLang][key] || key; }
@@ -57,12 +57,19 @@ async function logAction(action, details) {
   });
 }
 
-// --- ربط العهدة مع تخزين اسم المستخدم ---
+// --- ربط العهدة مع تخزين اسم المستخدم (نسخة محسنة) ---
 async function assignCustody(carId, driverId, assignedByEmail, assignedByName) {
-  const carData = allCars.find(c => c.id === carId);
-  const driverData = allDrivers.find(d => d.id === driverId);
-  if(!carData || !driverData) throw new Error('Invalid');
-  if(carData.currentDriverId) throw new Error('Car already assigned');
+  // جلب بيانات السيارة مباشرة بدلاً من الاعتماد على allCars
+  const carSnap = await get(ref(db, `cars/${carId}`));
+  if (!carSnap.exists()) throw new Error('Car not found');
+  const carData = carSnap.val();
+  
+  const driverSnap = await get(ref(db, `drivers/${driverId}`));
+  if (!driverSnap.exists()) throw new Error('Driver not found');
+  const driverData = driverSnap.val();
+  
+  if(carData.currentDriverId) throw new Error(t('carAlreadyAssigned'));
+  
   const now = new Date().toISOString();
   const snap = await get(ref(db,'custodyHistory'));
   let prevKey = null;
@@ -72,6 +79,7 @@ async function assignCustody(carId, driverId, assignedByEmail, assignedByName) {
     });
   }
   if(prevKey) await update(ref(db,`custodyHistory/${prevKey}`),{ endTime: now, unassignedByEmail: assignedByEmail, unassignedByName: assignedByName });
+  
   const newHistoryRef = push(ref(db,'custodyHistory'));
   await set(newHistoryRef, {
     carId, driverId, driverName: driverData.name,
@@ -81,6 +89,7 @@ async function assignCustody(carId, driverId, assignedByEmail, assignedByName) {
     assignedByName: assignedByName,
     unassignedByEmail: null, unassignedByName: null
   });
+  
   await update(ref(db,`cars/${carId}`),{
     currentDriverId: driverId,
     currentDriverName: driverData.name,
@@ -91,7 +100,7 @@ async function assignCustody(carId, driverId, assignedByEmail, assignedByName) {
   await logAction(t('assignCustody'), `${carId} -> ${driverData.name} by ${assignedByName}`);
 }
 
-// --- فك العهدة مع تخزين اسم المستخدم ---
+// --- فك العهدة مع تخزين اسم المستخدم (نفس الأصلي مع تحسين طفيف) ---
 async function unassignCar(car) {
   if(!confirm(t('confirmUnassign'))) return;
   const user = auth.currentUser;
@@ -111,6 +120,28 @@ async function unassignCar(car) {
     currentAssignedAt: null
   });
   await logAction(t('unassign'), `${car.id} by ${userName}`);
+}
+
+// --- توليد معرف سيارة آمن مع إعادة المحاولة ---
+async function generateCarId(retryCount = 0) {
+  try {
+    const result = await runTransaction(ref(db, 'counters/carsCount'), (current) => {
+      return (current || 0) + 1;
+    });
+    if (result.snapshot.exists() && typeof result.snapshot.val() === 'number') {
+      return `UAE_${String(result.snapshot.val()).padStart(3, '0')}`;
+    } else {
+      throw new Error('Transaction returned invalid value');
+    }
+  } catch (err) {
+    console.error('generateCarId transaction failed:', err);
+    if (retryCount < 2) {
+      await new Promise(resolve => setTimeout(resolve, 300));
+      return generateCarId(retryCount + 1);
+    } else {
+      throw new Error(t('generatingIdError'));
+    }
+  }
 }
 
 // --- Auth State (معالجة كاملة لجميع الأدوار) ---
@@ -135,7 +166,6 @@ onAuthStateChanged(auth, async user => {
           } else if(uData.role === 'driver') {
             isDriver = true; isAdmin = false; isModerator = false; currentUserRole = 'driver';
             currentDriverId = uData.driverId;
-            // جلب اسم السائق من جدول drivers (بعد تعديل القاعدة سيعمل)
             let driverName = user.email.split('@')[0];
             try {
               const driverSnap = await get(ref(db, `drivers/${currentDriverId}`));
@@ -265,7 +295,6 @@ function initApp() {
 document.getElementById('add-car-btn')?.addEventListener('click', () => openCarModal());
 document.getElementById('load-more-cars')?.addEventListener('click', () => renderCars(true));
 document.getElementById('search-car')?.addEventListener('input', () => { currentCarStatusFilter = 'all'; applyCarSearch(); });
-async function generateCarId() { const c = await runTransaction(ref(db,'counters/carsCount'), v => (v||0)+1); return `UAE_${String(c.snapshot.val()).padStart(3,'0')}`; }
 function openCarModal(data=null) { document.getElementById('car-form').reset(); document.getElementById('car-id-hidden').value = ''; document.getElementById('car-modal-title').textContent = data ? t('edit') : t('addCar'); if(data) { document.getElementById('car-id-hidden').value=data.id; document.getElementById('plate-number').value=data.plateNumber; document.getElementById('plate-code').value=data.plateCode; document.getElementById('emirate').value=data.emirate; document.getElementById('owner').value=data.owner; document.getElementById('car-type').value=data.type; document.getElementById('car-year').value=data.year; document.getElementById('vin').value=data.vin; document.getElementById('license-expiry').value=data.licenseExpiry; document.getElementById('insurance-expiry').value=data.insuranceExpiry; document.getElementById('car-notes').value=data.notes||''; document.getElementById('violations').value=data.violations||''; } document.getElementById('car-modal').style.display = 'block'; }
 document.getElementById('car-form').addEventListener('submit', async e => { e.preventDefault(); const btn=e.target.querySelector('button'); btn.disabled=true; btn.textContent="..."; const hid=document.getElementById('car-id-hidden').value, vin=document.getElementById('vin').value.trim(), pNum=document.getElementById('plate-number').value.trim(), pCode=document.getElementById('plate-code').value.trim(), emi=document.getElementById('emirate').value.trim(); try { const snap=await get(ref(db,'cars')); if(snap.exists()){ const cars=snap.val(); for(let k in cars){ if(k===hid)continue; if(cars[k].vin===vin){alert(t('dupVin'));btn.disabled=false;btn.textContent=t('save');return;} if(cars[k].plateNumber===pNum&&cars[k].plateCode===pCode&&cars[k].emirate===emi){alert(t('dupPlate'));btn.disabled=false;btn.textContent=t('save');return;} } } const data = { plateNumber:pNum, plateCode:pCode, emirate:emi, owner:document.getElementById('owner').value.trim(), type:document.getElementById('car-type').value.trim(), year:document.getElementById('car-year').value.trim(), vin:vin, licenseExpiry:document.getElementById('license-expiry').value, insuranceExpiry:document.getElementById('insurance-expiry').value, notes:document.getElementById('car-notes').value.trim(), violations:document.getElementById('violations').value.trim(), currentDriverId:null, currentDriverName:null, currentAssignedByEmail:null, currentAssignedByName:null, currentAssignedAt:null }; if(hid) { const ex=(await get(ref(db,`cars/${hid}`))).val(); data.currentDriverId=ex.currentDriverId||null; data.currentDriverName=ex.currentDriverName||null; data.currentAssignedByEmail=ex.currentAssignedByEmail||null; data.currentAssignedByName=ex.currentAssignedByName||null; data.currentAssignedAt=ex.currentAssignedAt||null; await update(ref(db,`cars/${hid}`),data); await logAction(t('edit'), hid); } else { const id=await generateCarId(); data.id=id; await set(ref(db,`cars/${id}`),data); await logAction(t('addCar'), id); } document.getElementById('car-modal').style.display='none'; } catch(err){alert(err.message)} finally {btn.disabled=false;btn.textContent=t('save');} });
 async function deleteCar(id) { if(confirm(t('confirmDeleteCar'))){ await remove(ref(db,`cars/${id}`)); await logAction(t('delete'), id); } }
@@ -350,7 +379,7 @@ document.getElementById('custody-form').addEventListener('submit', async e=>{
   else { driverId=sourceId; carId=document.getElementById('custody-car-select').value; if(!carId){alert(t('selectCar'));return;} }
   try {
     const carData = allCars.find(c=>c.id===carId);
-    if(carData.currentDriverId){alert('السيارة مرتبطة بالفعل');return;}
+    if(carData.currentDriverId){alert(t('carAlreadyAssigned'));return;}
     await assignCustody(carId, driverId, auth.currentUser.email, currentUserData.name);
     document.getElementById('custody-modal').style.display='none';
   } catch(err){alert(err.message)}
@@ -396,13 +425,90 @@ document.getElementById('load-more-logs')?.addEventListener('click',()=>renderLo
 function fetchLogs(){ onValue(ref(db,'logs'), snap=>{ allLogs=snap.exists()?Object.values(snap.val()).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp)):[]; logsShown=0; renderLogs(false); }); }
 function renderLogs(append){ const tb=document.getElementById('logs-tbody'); if(!tb) return; if(!append) tb.innerHTML=''; const items=allLogs.slice(logsShown,logsShown+LIMIT); items.forEach(l=>{ const tr=document.createElement('tr'); const userDisplay = l.userName || l.userId || '?'; tr.innerHTML=`<td>${fmtDateTime(l.timestamp)}</td><td>${userDisplay}</td><td>${l.action}</td><td>${l.details}</td>`; tb.appendChild(tr); }); logsShown+=items.length; document.getElementById('load-more-logs').style.display=logsShown<allLogs.length?'inline-block':'none'; }
 
-// --- PENDING REQUESTS ---
+// --- PENDING REQUESTS (نسخة محسنة مع معالجة الأخطاء) ---
 async function fetchPendingRequests(){ onValue(ref(db,'pendingCarRequests'), snap=>{ allPendingRequests=snap.exists()?Object.keys(snap.val()).map(k=>({id:k,...snap.val()[k]})).filter(r=>r.status==='pending'):[]; pendingShown=0; renderPendingRequests(); }); }
 function renderPendingRequests(){ const tbody=document.getElementById('pending-tbody'); if(!tbody) return; tbody.innerHTML=''; const items=allPendingRequests.slice(pendingShown,pendingShown+LIMIT); items.forEach(req=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${req.driverName||'?'}</td><td>${req.plateNumber}</td><td>${req.plateCode}</td><td>${req.emirate}</td><td>${req.carType}</td><td>${fmtDateTime(req.submittedAt)}</td><td><button class="btn-approve" data-id="${req.id}">${t('approve')}</button> <button class="btn-reject" data-id="${req.id}">${t('reject')}</button></td>`; tbody.appendChild(tr); }); pendingShown+=items.length; document.getElementById('load-more-pending')?.remove(); if(pendingShown<allPendingRequests.length){ const btn=document.createElement('button'); btn.id='load-more-pending'; btn.className='btn-load-more'; btn.textContent=t('loadMore'); btn.addEventListener('click',()=>renderPendingRequests()); document.getElementById('pending-section').appendChild(btn); } tbody.querySelectorAll('.btn-approve').forEach(btn=>btn.addEventListener('click',()=>approveRequest(btn.dataset.id))); tbody.querySelectorAll('.btn-reject').forEach(btn=>btn.addEventListener('click',()=>rejectRequest(btn.dataset.id))); }
-async function approveRequest(requestId){ const req=allPendingRequests.find(r=>r.id===requestId); if(!req) return; const carData={ plateNumber:req.plateNumber, plateCode:req.plateCode, emirate:req.emirate, type:req.carType, owner:'', year:'', vin:'', licenseExpiry:'', insuranceExpiry:'', notes:'', violations:'' }; openCarModal(carData); const originalSubmit=document.getElementById('car-form').onsubmit; document.getElementById('car-form').onsubmit=async (e)=>{ e.preventDefault(); const btn=e.target.querySelector('button'); btn.disabled=true; const hid=document.getElementById('car-id-hidden').value; const vin=document.getElementById('vin').value.trim(); const pNum=document.getElementById('plate-number').value.trim(); const pCode=document.getElementById('plate-code').value.trim(); const emi=document.getElementById('emirate').value.trim(); try { const snap=await get(ref(db,'cars')); if(snap.exists()){ const cars=snap.val(); for(let k in cars){ if(cars[k].vin===vin && (!hid||k!==hid)){alert(t('dupVin'));btn.disabled=false;return;} if(cars[k].plateNumber===pNum&&cars[k].plateCode===pCode&&cars[k].emirate===emi && (!hid||k!==hid)){alert(t('dupPlate'));btn.disabled=false;return;} } } const data={ plateNumber:pNum, plateCode:pCode, emirate:emi, owner:document.getElementById('owner').value.trim(), type:document.getElementById('car-type').value.trim(), year:document.getElementById('car-year').value.trim(), vin:vin, licenseExpiry:document.getElementById('license-expiry').value, insuranceExpiry:document.getElementById('insurance-expiry').value, notes:document.getElementById('car-notes').value.trim(), violations:document.getElementById('violations').value.trim(), currentDriverId:null, currentDriverName:null, currentAssignedByEmail:null, currentAssignedByName:null, currentAssignedAt:null }; let carId; if(hid){ carId=hid; await update(ref(db,`cars/${carId}`),data); } else { carId=await generateCarId(); data.id=carId; await set(ref(db,`cars/${carId}`),data); } await assignCustody(carId, req.driverId, auth.currentUser.email, currentUserData.name); await update(ref(db,`pendingCarRequests/${requestId}`),{ status:'approved', approvedBy:auth.currentUser.email, approvedByName:currentUserData.name, finalCarId:carId }); await logAction(t('approve'),`Car request ${requestId} approved, car ${carId} assigned`); document.getElementById('car-modal').style.display='none'; document.getElementById('car-form').onsubmit=originalSubmit; } catch(err){alert(err.message)} finally{btn.disabled=false;btn.textContent=t('save');} }; document.getElementById('car-modal').style.display='block'; }
+async function approveRequest(requestId){
+  const req = allPendingRequests.find(r=>r.id===requestId);
+  if(!req) return;
+  const carData = { 
+    plateNumber: req.plateNumber, plateCode: req.plateCode, emirate: req.emirate,
+    type: req.carType, owner: '', year: '', vin: '', licenseExpiry: '', insuranceExpiry: '', notes: '', violations: '' 
+  };
+  openCarModal(carData);
+  const originalSubmit = document.getElementById('car-form').onsubmit;
+  document.getElementById('car-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button');
+    btn.disabled = true;
+    btn.textContent = "...";
+    try {
+      const hid = document.getElementById('car-id-hidden').value;
+      const vin = document.getElementById('vin').value.trim();
+      const pNum = document.getElementById('plate-number').value.trim();
+      const pCode = document.getElementById('plate-code').value.trim();
+      const emi = document.getElementById('emirate').value.trim();
+      const snap = await get(ref(db,'cars'));
+      if(snap.exists()){
+        const cars = snap.val();
+        for(let k in cars){
+          if(k===hid) continue;
+          if(cars[k].vin===vin){ alert(t('dupVin')); btn.disabled=false; btn.textContent=t('save'); return; }
+          if(cars[k].plateNumber===pNum && cars[k].plateCode===pCode && cars[k].emirate===emi){ alert(t('dupPlate')); btn.disabled=false; btn.textContent=t('save'); return; }
+        }
+      }
+      const data = {
+        plateNumber: pNum, plateCode: pCode, emirate: emi,
+        owner: document.getElementById('owner').value.trim(),
+        type: document.getElementById('car-type').value.trim(),
+        year: document.getElementById('car-year').value.trim(),
+        vin: vin,
+        licenseExpiry: document.getElementById('license-expiry').value,
+        insuranceExpiry: document.getElementById('insurance-expiry').value,
+        notes: document.getElementById('car-notes').value.trim(),
+        violations: document.getElementById('violations').value.trim(),
+        currentDriverId: null, currentDriverName: null,
+        currentAssignedByEmail: null, currentAssignedByName: null, currentAssignedAt: null
+      };
+      let carId;
+      if(hid){
+        carId = hid;
+        await update(ref(db,`cars/${carId}`), data);
+      } else {
+        carId = await generateCarId();
+        data.id = carId;
+        await set(ref(db,`cars/${carId}`), data);
+      }
+      // الانتظار لثانية للتأكد من أن قاعدة البيانات حدّثت (تجنب مشاكل التزامن)
+      await new Promise(resolve => setTimeout(resolve, 500));
+      // ربط العهدة باستخدام الدالة المحسّنة
+      await assignCustody(carId, req.driverId, auth.currentUser.email, currentUserData.name);
+      await update(ref(db, `pendingCarRequests/${requestId}`), {
+        status: 'approved',
+        approvedBy: auth.currentUser.email,
+        approvedByName: currentUserData.name,
+        finalCarId: carId
+      });
+      await logAction(t('approve'), `Car request ${requestId} approved, car ${carId} assigned`);
+      alert(t('carAssignSuccess'));
+      document.getElementById('car-modal').style.display = 'none';
+      // تحديث الواجهات
+      if(isDriver) await initDriverDashboard();
+      else fetchCars();
+    } catch(err) {
+      console.error("Error approving request:", err);
+      alert(t('carAssignFail') + ": " + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = t('save');
+      document.getElementById('car-form').onsubmit = originalSubmit;
+    }
+  };
+  document.getElementById('car-modal').style.display = 'block';
+}
 async function rejectRequest(requestId){ const reason=prompt('سبب الرفض (اختياري)'); await update(ref(db,`pendingCarRequests/${requestId}`),{ status:'rejected', rejectedReason:reason||'' }); await logAction(t('reject'),`Car request ${requestId} rejected`); }
 
-// --- DRIVER DASHBOARD ---
+// --- DRIVER DASHBOARD (محسّن مع try-catch) ---
 async function initDriverDashboard(){
   if(!isDriver || !currentDriverId){
     console.warn("initDriverDashboard called but not driver or no driverId");
@@ -413,11 +519,11 @@ async function initDriverDashboard(){
     if(!driverSnap.exists()){
       console.error("Driver not found in drivers:", currentDriverId);
       document.getElementById('driver-name-display').textContent = currentUserData.name;
-      document.getElementById('driver-contact-display').textContent = "غير متوفر";
+      document.getElementById('driver-contact-display').textContent = t('none');
     } else {
       const driver=driverSnap.val();
       document.getElementById('driver-name-display').textContent = driver.name || currentUserData.name;
-      document.getElementById('driver-contact-display').textContent = driver.contact || "غير متوفر";
+      document.getElementById('driver-contact-display').textContent = driver.contact || t('none');
     }
     document.getElementById('driver-email-display').textContent = currentUserData.email;
     const custodySnap=await get(ref(db,'custodyHistory'));
