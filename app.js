@@ -1,9 +1,7 @@
-// Import Firebase SDKs
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
-// Your Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDBHHGY_gVpm3NlXThqsC6ojTL9Je4xQ9w",
   authDomain: "car-moving-8b59e.firebaseapp.com",
@@ -14,7 +12,6 @@ const firebaseConfig = {
   appId: "1:332747318494:web:d5d61cd53f322a182f0e4f"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -26,14 +23,18 @@ const loginEmail = document.getElementById('loginEmail');
 const loginPassword = document.getElementById('loginPassword');
 const loginBtn = document.getElementById('loginBtn');
 const loginError = document.getElementById('loginError');
-const sidebarNav = document.getElementById('sidebarNav');
 const mainPanel = document.getElementById('mainPanel');
 const logoutBtn = document.getElementById('logoutBtn');
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const navMenu = document.getElementById('navMenu');
+const userMgmtBtn = document.getElementById('userMgmtBtn');
 
 let currentUser = null;
 let currentUserDoc = null;
+let currentView = 'profile'; // default
+let unsubUsers = null; // to unsubscribe from users snapshot
 
-// Auth state observer
+// Auth observer
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
@@ -48,9 +49,8 @@ onAuthStateChanged(auth, async (user) => {
       }
       showDashboard();
     } else {
-      // No profile found, log out
       await signOut(auth);
-      showLoginError('Account not configured properly.');
+      showLoginError('Account not configured.');
     }
   } else {
     currentUser = null;
@@ -67,7 +67,8 @@ function showLogin() {
 function showDashboard() {
   loginSection.classList.add('hidden');
   dashboardSection.classList.remove('hidden');
-  renderSidebar();
+  updateNavVisibility();
+  // Default view
   showMyProfile();
 }
 
@@ -75,7 +76,7 @@ function showLoginError(msg) {
   loginError.textContent = msg;
 }
 
-// Login handler
+// Login
 loginBtn.addEventListener('click', async () => {
   const email = loginEmail.value.trim();
   const password = loginPassword.value;
@@ -93,29 +94,53 @@ loginBtn.addEventListener('click', async () => {
 // Logout
 logoutBtn.addEventListener('click', () => signOut(auth));
 
-// Sidebar rendering based on role
-function renderSidebar() {
-  const role = currentUserDoc.role;
-  let html = '';
-  html += `<button class="nav-btn active" data-view="profile">👤 My Membership</button>`;
-  if (role === 'admin' || role === 'supervisor') {
-    html += `<button class="nav-btn" data-view="users">👥 User Management</button>`;
-  }
-  sidebarNav.innerHTML = html;
+// Hamburger toggle
+hamburgerBtn.addEventListener('click', () => {
+  navMenu.classList.toggle('open');
+});
 
-  document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-      const view = this.dataset.view;
-      if (view === 'profile') showMyProfile();
-      else if (view === 'users') showUserManagement();
-    });
-  });
+// Navigation clicks (delegation)
+navMenu.addEventListener('click', (e) => {
+  const btn = e.target.closest('.nav-link');
+  if (!btn) return;
+  const view = btn.dataset.view;
+  if (view === 'profile') {
+    setActiveNav('profile');
+    showMyProfile();
+  } else if (view === 'users') {
+    setActiveNav('users');
+    showUserManagement();
+  }
+  // Close mobile menu
+  navMenu.classList.remove('open');
+});
+
+function setActiveNav(view) {
+  currentView = view;
+  document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+  if (view === 'profile') {
+    document.querySelector('.nav-link[data-view="profile"]').classList.add('active');
+  } else if (view === 'users') {
+    document.querySelector('.nav-link[data-view="users"]').classList.add('active');
+  }
 }
 
-// My Profile view (folded card)
+function updateNavVisibility() {
+  if (currentUserDoc && (currentUserDoc.role === 'admin' || currentUserDoc.role === 'supervisor')) {
+    userMgmtBtn.classList.remove('hidden');
+  } else {
+    userMgmtBtn.classList.add('hidden');
+  }
+}
+
+// Profile view
 function showMyProfile() {
+  // Clear any users listener
+  if (unsubUsers) {
+    unsubUsers();
+    unsubUsers = null;
+  }
+
   const data = currentUserDoc;
   mainPanel.innerHTML = `
     <h2 style="color:#1e3c72; margin-bottom:20px;">My Membership Card</h2>
@@ -142,8 +167,14 @@ function showMyProfile() {
   });
 }
 
-// User Management view (for admin/supervisor)
+// User management view
 function showUserManagement() {
+  // Clear previous listener
+  if (unsubUsers) {
+    unsubUsers();
+    unsubUsers = null;
+  }
+
   const role = currentUserDoc.role;
   mainPanel.innerHTML = `
     <h2 style="color:#1e3c72;">User Management</h2>
@@ -158,7 +189,7 @@ function showUserManagement() {
         <button id="addUserBtn">Add</button>
       </div>
     </div>
-    <div class="card" id="usersListContainer">
+    <div class="card">
       <h3>Existing Users</h3>
       <table class="users-table" id="usersTable">
         <thead><tr><th>Username</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
@@ -167,16 +198,31 @@ function showUserManagement() {
     </div>
   `;
 
+  // Add event listener for Add button
   document.getElementById('addUserBtn').addEventListener('click', addNewUser);
+
+  // Load users
   loadUsersList();
 }
 
 async function addNewUser() {
-  const email = document.getElementById('newEmail').value.trim();
-  const password = document.getElementById('newPassword').value;
-  const username = document.getElementById('newUsername').value.trim();
-  const phone = document.getElementById('newPhone').value.trim();
-  const newRole = document.getElementById('newRole').value;
+  const newEmailEl = document.getElementById('newEmail');
+  const newPasswordEl = document.getElementById('newPassword');
+  const newUsernameEl = document.getElementById('newUsername');
+  const newPhoneEl = document.getElementById('newPhone');
+  const newRoleEl = document.getElementById('newRole');
+
+  // Ensure elements exist
+  if (!newEmailEl || !newPasswordEl || !newUsernameEl || !newPhoneEl || !newRoleEl) {
+    alert('Form not available. Please refresh the management view.');
+    return;
+  }
+
+  const email = newEmailEl.value.trim();
+  const password = newPasswordEl.value;
+  const username = newUsernameEl.value.trim();
+  const phone = newPhoneEl.value.trim();
+  const newRole = newRoleEl.value;
 
   if (!email || !password || !username || !phone) {
     alert('All fields are required');
@@ -200,10 +246,11 @@ async function addNewUser() {
       createdAt: new Date()
     });
     alert('User added successfully');
-    document.getElementById('newEmail').value = '';
-    document.getElementById('newPassword').value = '';
-    document.getElementById('newUsername').value = '';
-    document.getElementById('newPhone').value = '';
+    // Clear form safely
+    newEmailEl.value = '';
+    newPasswordEl.value = '';
+    newUsernameEl.value = '';
+    newPhoneEl.value = '';
   } catch (e) {
     alert('Error: ' + e.message.replace('Firebase: ', ''));
   }
@@ -211,6 +258,8 @@ async function addNewUser() {
 
 function loadUsersList() {
   const usersTableBody = document.querySelector('#usersTable tbody');
+  if (!usersTableBody) return;
+
   const role = currentUserDoc.role;
   let q;
   if (role === 'admin') {
@@ -219,12 +268,14 @@ function loadUsersList() {
     q = query(collection(db, 'users'), where('createdBy', '==', currentUser.uid));
   }
 
-  onSnapshot(q, (snapshot) => {
+  // Unsubscribe previous if any
+  if (unsubUsers) unsubUsers();
+  unsubUsers = onSnapshot(q, (snapshot) => {
     usersTableBody.innerHTML = '';
     snapshot.forEach(docSnap => {
       const user = docSnap.data();
       const uid = docSnap.id;
-      if (uid === currentUser.uid) return;
+      if (uid === currentUser.uid) return; // skip self
 
       const canEdit = (role === 'admin' && user.role !== 'admin') || (role === 'supervisor' && user.role === 'user');
       const canDelete = canEdit;
@@ -246,15 +297,18 @@ function loadUsersList() {
       usersTableBody.appendChild(row);
     });
 
+    // Attach events
     document.querySelectorAll('.editBtn').forEach(btn => {
-      btn.addEventListener('click', (e) => editUser(e.target.dataset.uid));
+      btn.onclick = () => editUser(btn.dataset.uid);
     });
     document.querySelectorAll('.suspendBtn').forEach(btn => {
-      btn.addEventListener('click', (e) => toggleSuspend(e.target.dataset.uid, e.target.dataset.status));
+      btn.onclick = () => toggleSuspend(btn.dataset.uid, btn.dataset.status);
     });
     document.querySelectorAll('.deleteBtn').forEach(btn => {
-      btn.addEventListener('click', (e) => deleteUser(e.target.dataset.uid));
+      btn.onclick = () => deleteUser(btn.dataset.uid);
     });
+  }, (error) => {
+    console.error('Users listener error:', error);
   });
 }
 
@@ -268,7 +322,6 @@ async function editUser(uid) {
   }
   try {
     await updateDoc(doc(db, 'users', uid), { username: newUsername, phone: newPhone });
-    alert('User updated');
   } catch (e) {
     alert('Error: ' + e.message);
   }
@@ -287,7 +340,6 @@ async function deleteUser(uid) {
   if (!confirm('Delete this user?')) return;
   try {
     await deleteDoc(doc(db, 'users', uid));
-    alert('User deleted');
   } catch (e) {
     alert('Error: ' + e.message);
   }
