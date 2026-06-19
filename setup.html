@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Setup</title>
+    <title>Admin Setup (Complete)</title>
     <script type="module">
-        // نفس إعدادات Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
         import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
@@ -24,74 +23,68 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // البيانات التي أدخلتها
+        // بيانات المدير (عدّل كلمة المرور ورقم الهاتف فقط إن أردت)
         const ADMIN_EMAIL = "saad323m@gmail.com";
-        const ADMIN_PASSWORD = "2020@2020@80"; // غيّر كلمة المرور هنا كما تريد (قوية)
-        const ADMIN_UID = "7iNXLMSODvXbspKZfdZOtMwtrZs2"; // UID الذي ذكرته
+        const ADMIN_PASSWORD = "2020@2020@80";   // غيّرها إلى كلمة مرور قوية
+        const ADMIN_UID = "ZUIkgUJOA1ObyKYEgul3GCjQKRA2";
         const ADMIN_USERNAME = "MOHAMED SAAD";
-        const ADMIN_PHONE = "0505965099"; // غيّر إلى رقم حقيقي
+        const ADMIN_PHONE = "0505965099";        // غيّر إلى رقم حقيقي
 
-        const statusDiv = document.getElementById('status');
+        const log = (msg) => {
+            document.getElementById('log').innerText += msg + "\n";
+        };
 
-        async function setupAdmin() {
+        window.runSetup = async function() {
+            document.getElementById('log').innerText = "";
             try {
-                statusDiv.innerText = "⏳ جاري إنشاء حساب المصادقة...";
-                // نحاول إنشاء المستخدم في Authentication أولاً
+                log("⏳ بدء الإعداد...");
+
+                // الخطوة 1: إنشاء المستخدم في Authentication
+                let uidToUse = ADMIN_UID;
                 try {
                     const userCred = await createUserWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_PASSWORD);
-                    statusDiv.innerText += "\n✅ تم إنشاء المستخدم في المصادقة.";
-                    // UID سيكون من userCred.user.uid، قد لا يطابق ما أدخلته، لذا نأخذه من هنا
-                    const actualUid = userCred.user.uid;
-                    statusDiv.innerText += "\n📌 UID الفعلي: " + actualUid;
-
-                    // إنشاء وثيقة Firestore بهذا UID
-                    await setDoc(doc(db, "users", actualUid), {
-                        email: ADMIN_EMAIL,
-                        username: ADMIN_USERNAME,
-                        phone: ADMIN_PHONE,
-                        role: "admin",
-                        status: "active",
-                        createdBy: actualUid,
-                        createdAt: new Date()
-                    });
-                    statusDiv.innerText += "\n✅ تم إنشاء الوثيقة في Firestore بنجاح.";
-                } catch (createError) {
-                    // إذا كان المستخدم موجوداً مسبقاً في المصادقة، نستخدم UID الذي أدخلته
-                    if (createError.code === "auth/email-already-in-use") {
-                        statusDiv.innerText += "\n⚠️ المستخدم موجود مسبقاً، سنحاول تسجيل الدخول...";
-                        const userCred = await signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_PASSWORD);
-                        statusDiv.innerText += "\n✅ تم تسجيل الدخول، جاري إنشاء وثيقة Firestore...";
-                        await setDoc(doc(db, "users", ADMIN_UID), {
-                            email: ADMIN_EMAIL,
-                            username: ADMIN_USERNAME,
-                            phone: ADMIN_PHONE,
-                            role: "admin",
-                            status: "active",
-                            createdBy: ADMIN_UID,
-                            createdAt: new Date()
-                        });
-                        statusDiv.innerText += "\n✅ تم إنشاء الوثيقة (استخدمت UID المدخل).";
+                    log("✅ تم إنشاء حساب المصادقة بنجاح.");
+                    uidToUse = userCred.user.uid; // استخدام UID الحقيقي من Auth
+                    log("📌 UID من المصادقة: " + uidToUse);
+                } catch (authError) {
+                    if (authError.code === "auth/email-already-in-use") {
+                        log("⚠️ الحساب موجود مسبقًا في المصادقة، نستخدم UID المدخل: " + ADMIN_UID);
+                        // نتأكد من صحة كلمة المرور بتجربة الدخول
+                        await signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_PASSWORD);
+                        log("✅ كلمة المرور صحيحة.");
+                        uidToUse = ADMIN_UID;
                     } else {
-                        throw createError;
+                        throw authError;
                     }
                 }
-                statusDiv.innerText += "\n\n🎉 كل شيء جاهز! يمكنك الآن الانتقال إلى index.html وتسجيل الدخول باستخدام:\n" +
-                    "📧 " + ADMIN_EMAIL + "\n🔑 " + ADMIN_PASSWORD;
+
+                // الخطوة 2: إنشاء وثيقة Firestore في مجموعة users
+                log("📝 جاري إنشاء وثيقة Firestore...");
+                const userData = {
+                    email: ADMIN_EMAIL,
+                    username: ADMIN_USERNAME,
+                    phone: ADMIN_PHONE,
+                    role: "admin",
+                    status: "active",
+                    createdBy: uidToUse,
+                    createdAt: new Date()
+                };
+                await setDoc(doc(db, "users", uidToUse), userData);
+                log("✅ تم إنشاء وثيقة المستخدم في Firestore بنجاح.");
+                log("🎉 جاهز! يمكنك الآن تسجيل الدخول إلى index.html بالبيانات أعلاه.");
             } catch (error) {
-                statusDiv.innerText += "\n❌ خطأ: " + error.message;
-                if (error.code === "auth/invalid-credential") {
-                    statusDiv.innerText += "\n💡 كلمة المرور غير صحيحة. عدّل قيمة ADMIN_PASSWORD في الكود وحاول مجدداً.";
+                log("❌ خطأ: " + error.message);
+                if (error.code === "permission-denied") {
+                    log("🚫 السبب: قواعد Firestore تمنع الكتابة. تأكد من تعديل القواعد كما هو موضح في التعليمات.");
                 }
             }
-        }
-
-        document.getElementById('startBtn').addEventListener('click', setupAdmin);
+        };
     </script>
 </head>
 <body style="font-family: sans-serif; padding: 20px; background: #f0f7ff; text-align: center;">
-    <h1>⚙️ إعداد المدير مرة واحدة</h1>
-    <p>تأكد من تعديل كلمة المرور في الكود (السطر 16) قبل التشغيل.</p>
-    <button id="startBtn" style="padding: 15px 30px; font-size: 18px; background: #1e3c72; color: white; border: none; border-radius: 8px;">ابدأ الإعداد</button>
-    <pre id="status" style="background: white; padding: 20px; margin-top: 20px; text-align: left; border-radius: 8px; border: 1px solid #b8d8fc; white-space: pre-wrap;"></pre>
+    <h1>⚙️ إعداد المدير - شامل</h1>
+    <p>تأكد من تعديل قواعد Firestore (الخطوة 1 في الشرح) ثم اضغط الزر أدناه.</p>
+    <button onclick="runSetup()" style="padding: 15px 30px; font-size: 18px; background: #1e3c72; color: white; border: none; border-radius: 8px;">تشغيل الإعداد</button>
+    <pre id="log" style="background: white; padding: 20px; margin-top: 20px; text-align: left; border-radius: 8px; border: 1px solid #b8d8fc; white-space: pre-wrap; min-height: 200px;"></pre>
 </body>
 </html>
