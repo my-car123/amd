@@ -11,7 +11,7 @@
     <!-- Login Section -->
     <div id="loginSection" class="login-container">
       <div class="login-card">
-        <img src="logo.png" alt="Logo" class="logo" id="loginLogo">
+        <img src="logo.png" alt="Logo" class="logo">
         <h2>Member Login</h2>
         <input type="email" id="loginEmail" placeholder="Email" autocomplete="email">
         <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
@@ -20,14 +20,21 @@
       </div>
     </div>
 
-    <!-- Dashboard Section (hidden by default) -->
-    <div id="dashboardSection" class="dashboard hidden">
-      <div class="sidebar">
-        <img src="logo.png" alt="Logo" class="logo-small">
-        <nav id="sidebarNav"></nav>
-        <button class="logout-btn" id="logoutBtn">Logout</button>
-      </div>
-      <div class="main-panel" id="mainPanel"></div>
+    <!-- Dashboard Section -->
+    <div id="dashboardSection" class="hidden">
+      <header class="navbar">
+        <div class="navbar-brand">
+          <img src="logo.png" alt="Logo" class="logo-small">
+          <span class="brand-text">Portal</span>
+        </div>
+        <button class="hamburger" id="hamburgerBtn">☰</button>
+        <nav id="navMenu" class="nav-menu">
+          <button class="nav-link active" data-view="profile">👤 My Membership</button>
+          <button class="nav-link" data-view="users" id="userMgmtBtn">👥 User Management</button>
+          <button class="nav-link logout-btn" id="logoutBtn">🚪 Logout</button>
+        </nav>
+      </header>
+      <main class="main-panel" id="mainPanel"></main>
     </div>
   </div>
 
