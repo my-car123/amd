@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Setup</title>
+    <script type="module">
+        // نفس إعدادات Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDBHHGY_gVpm3NlXThqsC6ojTL9Je4xQ9w",
+            authDomain: "car-moving-8b59e.firebaseapp.com",
+            databaseURL: "https://car-moving-8b59e-default-rtdb.firebaseio.com",
+            projectId: "car-moving-8b59e",
+            storageBucket: "car-moving-8b59e.firebasestorage.app",
+            messagingSenderId: "332747318494",
+            appId: "1:332747318494:web:d5d61cd53f322a182f0e4f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // البيانات التي أدخلتها
+        const ADMIN_EMAIL = "saad323m@gmail.com";
+        const ADMIN_PASSWORD = "2020@2020@80"; // غيّر كلمة المرور هنا كما تريد (قوية)
+        const ADMIN_UID = "7iNXLMSODvXbspKZfdZOtMwtrZs2"; // UID الذي ذكرته
+        const ADMIN_USERNAME = "MOHAMED SAAD";
+        const ADMIN_PHONE = "0505965099"; // غيّر إلى رقم حقيقي
+
+        const statusDiv = document.getElementById('status');
+
+        async function setupAdmin() {
+            try {
+                statusDiv.innerText = "⏳ جاري إنشاء حساب المصادقة...";
+                // نحاول إنشاء المستخدم في Authentication أولاً
+                try {
+                    const userCred = await createUserWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_PASSWORD);
+                    statusDiv.innerText += "\n✅ تم إنشاء المستخدم في المصادقة.";
+                    // UID سيكون من userCred.user.uid، قد لا يطابق ما أدخلته، لذا نأخذه من هنا
+                    const actualUid = userCred.user.uid;
+                    statusDiv.innerText += "\n📌 UID الفعلي: " + actualUid;
+
+                    // إنشاء وثيقة Firestore بهذا UID
+                    await setDoc(doc(db, "users", actualUid), {
+                        email: ADMIN_EMAIL,
+                        username: ADMIN_USERNAME,
+                        phone: ADMIN_PHONE,
+                        role: "admin",
+                        status: "active",
+                        createdBy: actualUid,
+                        createdAt: new Date()
+                    });
+                    statusDiv.innerText += "\n✅ تم إنشاء الوثيقة في Firestore بنجاح.";
+                } catch (createError) {
+                    // إذا كان المستخدم موجوداً مسبقاً في المصادقة، نستخدم UID الذي أدخلته
+                    if (createError.code === "auth/email-already-in-use") {
+                        statusDiv.innerText += "\n⚠️ المستخدم موجود مسبقاً، سنحاول تسجيل الدخول...";
+                        const userCred = await signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_PASSWORD);
+                        statusDiv.innerText += "\n✅ تم تسجيل الدخول، جاري إنشاء وثيقة Firestore...";
+                        await setDoc(doc(db, "users", ADMIN_UID), {
+                            email: ADMIN_EMAIL,
+                            username: ADMIN_USERNAME,
+                            phone: ADMIN_PHONE,
+                            role: "admin",
+                            status: "active",
+                            createdBy: ADMIN_UID,
+                            createdAt: new Date()
+                        });
+                        statusDiv.innerText += "\n✅ تم إنشاء الوثيقة (استخدمت UID المدخل).";
+                    } else {
+                        throw createError;
+                    }
+                }
+                statusDiv.innerText += "\n\n🎉 كل شيء جاهز! يمكنك الآن الانتقال إلى index.html وتسجيل الدخول باستخدام:\n" +
+                    "📧 " + ADMIN_EMAIL + "\n🔑 " + ADMIN_PASSWORD;
+            } catch (error) {
+                statusDiv.innerText += "\n❌ خطأ: " + error.message;
+                if (error.code === "auth/invalid-credential") {
+                    statusDiv.innerText += "\n💡 كلمة المرور غير صحيحة. عدّل قيمة ADMIN_PASSWORD في الكود وحاول مجدداً.";
+                }
+            }
+        }
+
+        document.getElementById('startBtn').addEventListener('click', setupAdmin);
+    </script>
+</head>
+<body style="font-family: sans-serif; padding: 20px; background: #f0f7ff; text-align: center;">
+    <h1>⚙️ إعداد المدير مرة واحدة</h1>
+    <p>تأكد من تعديل كلمة المرور في الكود (السطر 16) قبل التشغيل.</p>
+    <button id="startBtn" style="padding: 15px 30px; font-size: 18px; background: #1e3c72; color: white; border: none; border-radius: 8px;">ابدأ الإعداد</button>
+    <pre id="status" style="background: white; padding: 20px; margin-top: 20px; text-align: left; border-radius: 8px; border: 1px solid #b8d8fc; white-space: pre-wrap;"></pre>
+</body>
+</html>
