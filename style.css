@@ -1,50 +1,8 @@
-/* style.css */
-body {
-    background-color: #f8fafc;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    font-family: Arial, sans-serif;
-}
-
-.login-card {
-    background: white;
-    padding: 2rem;
-    width: 100%;
-    max-width: 400px;
-    border: 2px solid #bae6fd;
-    border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    text-align: center;
-}
-
-.logo {
-    width: 100px;
-    margin-bottom: 20px;
-}
-
-input {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    box-sizing: border-box;
-}
-
-button {
-    width: 100%;
-    padding: 12px;
-    background-color: #3b82f6;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-button:hover {
-    background-color: #2563eb;
-}
+body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; padding: 20px; color: #334155; }
+.card { background: white; border: 2px solid #bae6fd; border-radius: 15px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+.accordion { border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 10px; overflow: hidden; background: white; }
+.accordion-header { background: #f1f5f9; padding: 15px; cursor: pointer; font-weight: bold; display: flex; justify-content: space-between; }
+.accordion-content { padding: 15px; display: none; border-top: 1px solid #e2e8f0; }
+input, select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
+button { padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; margin-top: 5px; }
+button.delete { background: #ef4444; }
