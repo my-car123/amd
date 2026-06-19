@@ -14,6 +14,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 // استبدل الايميل والباسورد بما تريد استخدامه في الدخول
-createUserWithEmailAndPassword(auth, "myemail@example.com", "12345678")
+createUserWithEmailAndPassword(auth, "saad323m@gmail.com", "2020@2020@80")
     .then(() => alert("تم إنشاء المستخدم بنجاح! الآن يمكنك تسجيل الدخول."))
     .catch((e) => alert("خطأ: " + e.message));
