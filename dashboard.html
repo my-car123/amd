@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="card">
+        <h1>Admin Dashboard</h1>
+        <p>UAE Time: <span id="time"></span></p>
+    </div>
+
+    <div class="card">
+        <h3>Add New Member</h3>
+        <input type="text" id="name" placeholder="Full Name">
+        <input type="text" id="phone" placeholder="Phone (e.g. 0500000000)">
+        <select id="role"><option value="user">User</option><option value="moderator">Moderator</option></select>
+        <button id="addUserBtn">Add Member</button>
+    </div>
+
+    <div id="membersList"></div>
+
+    <script type="module" src="admin.js"></script>
+    <script>
+        document.getElementById('time').innerText = new Date().toLocaleString("en-US", {timeZone: "Asia/Dubai"});
+    </script>
+</body>
+</html>
