@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Admin Setup</title>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDBHHGY_gVpm3NlXThqsC6ojTL9Je4xQ9w",
+            authDomain: "car-moving-8b59e.firebaseapp.com",
+            databaseURL: "https://car-moving-8b59e-default-rtdb.firebaseio.com",
+            projectId: "car-moving-8b59e",
+            storageBucket: "car-moving-8b59e.firebasestorage.app",
+            messagingSenderId: "332747318494",
+            appId: "1:332747318494:web:d5d61cd53f322a182f0e4f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // بيانات الدخول (غيّر كلمة المرور ورقم الهاتف فقط)
+        const ADMIN_EMAIL = "saad323m@gmail.com";
+        const ADMIN_PASSWORD = "2020@2020@80";   // تأكد من كلمة المرور الصحيحة
+        const ADMIN_USERNAME = "MOHAMED SAAD";
+        const ADMIN_PHONE = "0505965099";        // غيّر لرقم حقيقي إن أردت
+
+        const log = (msg) => {
+            const el = document.getElementById('log');
+            el.innerText += msg + "\n";
+            el.scrollTop = el.scrollHeight;
+        };
+
+        window.runFinalSetup = async function() {
+            document.getElementById('log').innerText = "";
+            try {
+                log("⏳ تسجيل الدخول...");
+                const userCred = await signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_PASSWORD);
+                const actualUid = userCred.user.uid;
+                log("✅ تم تسجيل الدخول. UID الحقيقي: " + actualUid);
+
+                log("📝 جاري إنشاء/تحديث وثيقة المستخدم في Firestore...");
+                const userDocRef = doc(db, "users", actualUid);
+                const userData = {
+                    email: ADMIN_EMAIL,
+                    username: ADMIN_USERNAME,
+                    phone: ADMIN_PHONE,
+                    role: "admin",
+                    status: "active",
+                    createdBy: actualUid,
+                    createdAt: new Date()
+                };
+                await setDoc(userDocRef, userData, { merge: true }); // merge لتجنب خطأ إذا كانت موجودة
+                log("✅ تم إنشاء وثيقة Firestore بنجاح.");
+
+                // تأكيد إضافي: قراءة الوثيقة
+                const checkSnap = await getDoc(userDocRef);
+                if (checkSnap.exists()) {
+                    log("🔍 التأكيد: الوثيقة موجودة وتحتوي:");
+                    const data = checkSnap.data();
+                    log("    - email: " + data.email);
+                    log("    - username: " + data.username);
+                    log("    - role: " + data.role);
+                    log("    - status: " + data.status);
+                } else {
+                    log("❌ خطأ: الوثيقة لم تُحفظ. تأكد من قواعد Firestore.");
+                }
+
+                log("\n🎉 الإعداد اكتمل! يمكنك الآن فتح index.html وتسجيل الدخول.");
+            } catch (error) {
+                log("❌ خطأ: " + error.message);
+                if (error.code === "permission-denied") {
+                    log("🚫 السبب: قواعد Firestore تمنع الكتابة. راجع الخطوة 1 من تعليماتي السابقة وعدّلها إلى allow read, write: if true;");
+                } else if (error.code === "auth/invalid-credential") {
+                    log("🔑 كلمة المرور غير صحيحة. تحقق منها وجرب مرة أخرى.");
+                } else if (error.code === "auth/user-not-found") {
+                    log("👤 هذا البريد غير موجود في Authentication. تأكد من إنشاء الحساب أولاً.");
+                }
+            }
+        };
+    </script>
+</head>
+<body style="font-family: sans-serif; padding: 20px; background: #f0f7ff; text-align: center;">
+    <h1>⚙️ إعداد المدير - الإصدار النهائي</h1>
+    <p>تأكد أن قواعد Firestore تسمح بالكتابة (allow read, write: if true;) ثم اضغط الزر.</p>
+    <button onclick="runFinalSetup()" style="padding: 15px 30px; font-size: 18px; background: #1e3c72; color: white; border: none; border-radius: 8px;">تشغيل الإعداد النهائي</button>
+    <pre id="log" style="background: white; padding: 20px; margin-top: 20px; text-align: left; border-radius: 8px; border: 1px solid #b8d8fc; white-space: pre-wrap; min-height: 250px;"></pre>
+</body>
+</html>
