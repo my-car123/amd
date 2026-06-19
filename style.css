@@ -195,10 +195,14 @@ body {
   align-items: center;
   justify-content: center;
 }
+.users-table-wrap {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
 .users-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 1rem;
+  min-width: 650px;
 }
 .users-table th, .users-table td {
   padding: 12px;
@@ -227,6 +231,9 @@ body {
   border: 1px solid #ccc;
   background: white;
   cursor: pointer;
+}
+.action-buttons button:hover {
+  background: #f0f0f0;
 }
 .add-user-form input, .add-user-form select {
   width: 100%;
