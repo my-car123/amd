@@ -31,8 +31,7 @@ const userMgmtBtn = document.getElementById('userMgmtBtn');
 
 let currentUser = null;
 let currentUserDoc = null;
-let currentView = 'profile'; // default
-let unsubUsers = null; // to unsubscribe from users snapshot
+let unsubUsers = null;
 
 // Auth observer
 onAuthStateChanged(auth, async (user) => {
@@ -68,7 +67,6 @@ function showDashboard() {
   loginSection.classList.add('hidden');
   dashboardSection.classList.remove('hidden');
   updateNavVisibility();
-  // Default view
   showMyProfile();
 }
 
@@ -99,7 +97,7 @@ hamburgerBtn.addEventListener('click', () => {
   navMenu.classList.toggle('open');
 });
 
-// Navigation clicks (delegation)
+// Navigation
 navMenu.addEventListener('click', (e) => {
   const btn = e.target.closest('.nav-link');
   if (!btn) return;
@@ -111,18 +109,13 @@ navMenu.addEventListener('click', (e) => {
     setActiveNav('users');
     showUserManagement();
   }
-  // Close mobile menu
   navMenu.classList.remove('open');
 });
 
 function setActiveNav(view) {
-  currentView = view;
   document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
-  if (view === 'profile') {
-    document.querySelector('.nav-link[data-view="profile"]').classList.add('active');
-  } else if (view === 'users') {
-    document.querySelector('.nav-link[data-view="users"]').classList.add('active');
-  }
+  const activeBtn = document.querySelector(`.nav-link[data-view="${view}"]`);
+  if (activeBtn) activeBtn.classList.add('active');
 }
 
 function updateNavVisibility() {
@@ -135,7 +128,6 @@ function updateNavVisibility() {
 
 // Profile view
 function showMyProfile() {
-  // Clear any users listener
   if (unsubUsers) {
     unsubUsers();
     unsubUsers = null;
@@ -169,7 +161,6 @@ function showMyProfile() {
 
 // User management view
 function showUserManagement() {
-  // Clear previous listener
   if (unsubUsers) {
     unsubUsers();
     unsubUsers = null;
@@ -186,73 +177,78 @@ function showUserManagement() {
         <input type="text" id="newUsername" placeholder="Username" required>
         <input type="tel" id="newPhone" placeholder="Phone (10 digits, starts with 0)" pattern="0[0-9]{9}" required>
         ${role === 'admin' ? '<select id="newRole"><option value="supervisor">Supervisor</option><option value="user">User</option></select>' : '<input type="hidden" id="newRole" value="user">'}
+        <input type="password" id="adminPasswordConfirm" placeholder="Your (admin) password to confirm" required>
         <button id="addUserBtn">Add</button>
       </div>
     </div>
     <div class="card">
       <h3>Existing Users</h3>
-      <table class="users-table" id="usersTable">
-        <thead><tr><th>Username</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
-        <tbody></tbody>
-      </table>
+      <div class="users-table-wrap">
+        <table class="users-table" id="usersTable">
+          <thead><tr><th>Username</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
   `;
 
-  // Add event listener for Add button
   document.getElementById('addUserBtn').addEventListener('click', addNewUser);
-
-  // Load users
   loadUsersList();
 }
 
 async function addNewUser() {
-  const newEmailEl = document.getElementById('newEmail');
-  const newPasswordEl = document.getElementById('newPassword');
-  const newUsernameEl = document.getElementById('newUsername');
-  const newPhoneEl = document.getElementById('newPhone');
-  const newRoleEl = document.getElementById('newRole');
+  const newEmail = document.getElementById('newEmail').value.trim();
+  const newPassword = document.getElementById('newPassword').value;
+  const newUsername = document.getElementById('newUsername').value.trim();
+  const newPhone = document.getElementById('newPhone').value.trim();
+  const newRole = document.getElementById('newRole').value;
+  const adminPass = document.getElementById('adminPasswordConfirm').value;
 
-  // Ensure elements exist
-  if (!newEmailEl || !newPasswordEl || !newUsernameEl || !newPhoneEl || !newRoleEl) {
-    alert('Form not available. Please refresh the management view.');
+  if (!newEmail || !newPassword || !newUsername || !newPhone || !adminPass) {
+    alert('All fields are required, including your admin password.');
     return;
   }
-
-  const email = newEmailEl.value.trim();
-  const password = newPasswordEl.value;
-  const username = newUsernameEl.value.trim();
-  const phone = newPhoneEl.value.trim();
-  const newRole = newRoleEl.value;
-
-  if (!email || !password || !username || !phone) {
-    alert('All fields are required');
-    return;
-  }
-  if (!/^0[0-9]{9}$/.test(phone)) {
+  if (!/^0[0-9]{9}$/.test(newPhone)) {
     alert('Phone must be 10 digits starting with 0');
     return;
   }
 
   try {
-    const userCred = await createUserWithEmailAndPassword(auth, email, password);
-    const uid = userCred.user.uid;
-    await setDoc(doc(db, 'users', uid), {
-      email,
-      username,
-      phone,
+    // إنشاء حساب المستخدم الجديد (سيتم تسجيل دخوله تلقائياً)
+    const userCred = await createUserWithEmailAndPassword(auth, newEmail, newPassword);
+    const newUid = userCred.user.uid;
+
+    // حفظ بياناته في Firestore
+    await setDoc(doc(db, 'users', newUid), {
+      email: newEmail,
+      username: newUsername,
+      phone: newPhone,
       role: newRole,
       status: 'active',
       createdBy: currentUser.uid,
       createdAt: new Date()
     });
-    alert('User added successfully');
-    // Clear form safely
-    newEmailEl.value = '';
-    newPasswordEl.value = '';
-    newUsernameEl.value = '';
-    newPhoneEl.value = '';
+
+    // الآن الخروج من حساب المستخدم الجديد والعودة إلى حساب المدير
+    await signOut(auth);
+    await signInWithEmailAndPassword(auth, currentUser.email, adminPass);
+    alert('User added successfully. You are logged back in as admin.');
+
+    // إعادة عرض صفحة إدارة المستخدمين (لأن محتوى الصفحة قد اختفى بعد الخروج/الدخول)
+    showUserManagement();
   } catch (e) {
     alert('Error: ' + e.message.replace('Firebase: ', ''));
+    // محاولة العودة إلى المدير إذا حدث خطأ بعد إنشاء المستخدم
+    try {
+      if (auth.currentUser && auth.currentUser.uid !== currentUser.uid) {
+        await signOut(auth);
+        await signInWithEmailAndPassword(auth, currentUser.email, adminPass);
+        showUserManagement();
+      }
+    } catch (innerE) {
+      // فشل العودة، سيبقى في حالة تسجيل الدخول الحالية
+      console.error('Failed to restore admin session:', innerE);
+    }
   }
 }
 
@@ -268,7 +264,6 @@ function loadUsersList() {
     q = query(collection(db, 'users'), where('createdBy', '==', currentUser.uid));
   }
 
-  // Unsubscribe previous if any
   if (unsubUsers) unsubUsers();
   unsubUsers = onSnapshot(q, (snapshot) => {
     usersTableBody.innerHTML = '';
@@ -283,10 +278,10 @@ function loadUsersList() {
 
       const row = document.createElement('tr');
       row.innerHTML = `
-        <td>${user.username}</td>
+        <td class="cell-username">${user.username}</td>
         <td>${user.email}</td>
-        <td>${user.phone}</td>
-        <td><span class="badge badge-${user.role}">${user.role}</span></td>
+        <td class="cell-phone">${user.phone}</td>
+        <td class="cell-role">${user.role}</td>
         <td><span class="badge badge-${user.status}">${user.status}</span></td>
         <td class="action-buttons">
           ${canEdit ? `<button class="editBtn" data-uid="${uid}">Edit</button>` : ''}
@@ -297,34 +292,115 @@ function loadUsersList() {
       usersTableBody.appendChild(row);
     });
 
-    // Attach events
-    document.querySelectorAll('.editBtn').forEach(btn => {
-      btn.onclick = () => editUser(btn.dataset.uid);
-    });
-    document.querySelectorAll('.suspendBtn').forEach(btn => {
-      btn.onclick = () => toggleSuspend(btn.dataset.uid, btn.dataset.status);
-    });
-    document.querySelectorAll('.deleteBtn').forEach(btn => {
-      btn.onclick = () => deleteUser(btn.dataset.uid);
-    });
-  }, (error) => {
-    console.error('Users listener error:', error);
+    attachRowEvents();
+  });
+}
+
+function attachRowEvents() {
+  document.querySelectorAll('.editBtn').forEach(btn => {
+    btn.onclick = function(e) {
+      const uid = this.dataset.uid;
+      const row = this.closest('tr');
+      enableRowEditing(row, uid);
+    };
+  });
+
+  document.querySelectorAll('.suspendBtn').forEach(btn => {
+    btn.onclick = function(e) {
+      toggleSuspend(this.dataset.uid, this.dataset.status);
+    };
+  });
+
+  document.querySelectorAll('.deleteBtn').forEach(btn => {
+    btn.onclick = function(e) {
+      deleteUser(this.dataset.uid);
+    };
+  });
+}
+
+function enableRowEditing(row, uid) {
+  const cells = row.querySelectorAll('td');
+  const usernameCell = row.querySelector('.cell-username');
+  const phoneCell = row.querySelector('.cell-phone');
+  const roleCell = row.querySelector('.cell-role');
+  const actionsCell = row.querySelector('.action-buttons');
+
+  const oldUsername = usernameCell.innerText;
+  const oldPhone = phoneCell.innerText;
+  const oldRole = roleCell.innerText;
+
+  usernameCell.innerHTML = `<input type="text" value="${oldUsername}" class="edit-username" style="width:100%">`;
+  phoneCell.innerHTML = `<input type="text" value="${oldPhone}" class="edit-phone" style="width:100%" pattern="0[0-9]{9}">`;
+
+  // Role dropdown
+  let roleOptions = '';
+  if (currentUserDoc.role === 'admin') {
+    roleOptions = `<select class="edit-role">
+      <option value="supervisor" ${oldRole === 'supervisor' ? 'selected' : ''}>Supervisor</option>
+      <option value="user" ${oldRole === 'user' ? 'selected' : ''}>User</option>
+    </select>`;
+  } else if (currentUserDoc.role === 'supervisor') {
+    // can only have user role
+    roleOptions = `<select class="edit-role">
+      <option value="user" selected>User</option>
+    </select>`;
+  }
+  roleCell.innerHTML = roleOptions;
+
+  actionsCell.innerHTML = `
+    <button class="saveEditBtn" data-uid="${uid}">Save</button>
+    <button class="cancelEditBtn">Cancel</button>
+  `;
+
+  // إخفاء الأزرار الأخرى مؤقتاً (suspend, delete) عن طريق عدم إدراجها
+
+  document.querySelector('.saveEditBtn').addEventListener('click', async () => {
+    const newUsername = document.querySelector('.edit-username').value.trim();
+    const newPhone = document.querySelector('.edit-phone').value.trim();
+    const newRole = document.querySelector('.edit-role').value;
+
+    if (!newUsername || !newPhone) {
+      alert('Username and phone are required.');
+      return;
+    }
+    if (!/^0[0-9]{9}$/.test(newPhone)) {
+      alert('Phone must be 10 digits starting with 0');
+      return;
+    }
+
+    try {
+      await updateDoc(doc(db, 'users', uid), {
+        username: newUsername,
+        phone: newPhone,
+        role: newRole
+      });
+      // No need to reload manually, onSnapshot will update
+    } catch (e) {
+      alert('Error updating: ' + e.message);
+    }
+  });
+
+  document.querySelector('.cancelEditBtn').addEventListener('click', () => {
+    // just revert back by letting onSnapshot update; we can force a refresh
+    // But easier: just re-enable editing by recalling loadUsersList? Actually onSnapshot will automatically replace the row.
+    // So we just need to let the snapshot run again; it will overwrite.
+    // We can force by temporarily unsub/sub, but snapshot will update if data unchanged? If cancelled without save, we want old data.
+    // We'll manually restore the row with old data.
+    usernameCell.innerText = oldUsername;
+    phoneCell.innerText = oldPhone;
+    roleCell.innerText = oldRole;
+    actionsCell.innerHTML = `
+      <button class="editBtn" data-uid="${uid}">Edit</button>
+      <button class="suspendBtn" data-uid="${uid}" data-status="${row.querySelector('.badge')?.innerText}">${row.querySelector('.badge')?.innerText === 'active' ? 'Suspend' : 'Activate'}</button>
+      <button class="deleteBtn" data-uid="${uid}">Delete</button>
+    `;
+    attachRowEvents(); // re-attach
   });
 }
 
 async function editUser(uid) {
-  const newUsername = prompt('New username:');
-  if (!newUsername) return;
-  const newPhone = prompt('New phone (10 digits, 0...):');
-  if (!newPhone || !/^0[0-9]{9}$/.test(newPhone)) {
-    alert('Invalid phone');
-    return;
-  }
-  try {
-    await updateDoc(doc(db, 'users', uid), { username: newUsername, phone: newPhone });
-  } catch (e) {
-    alert('Error: ' + e.message);
-  }
+  // This function is no longer used directly; kept for compatibility if needed.
+  // We'll implement inline editing instead.
 }
 
 async function toggleSuspend(uid, currentStatus) {
