@@ -19,6 +19,8 @@ body {
 .hidden {
   display: none !important;
 }
+
+/* Login */
 .login-container {
   display: flex;
   justify-content: center;
@@ -78,59 +80,77 @@ body {
   margin-top: 10px;
   font-size: 14px;
 }
-.dashboard {
-  display: flex;
-  min-height: 80vh;
-}
-.sidebar {
-  width: 240px;
+
+/* Navbar */
+.navbar {
   background: #f0f7ff;
-  border-right: 1px solid #c5d9f5;
-  padding: 1.5rem 1rem;
-  border-radius: 12px 0 0 12px;
+  border: 1px solid #c5d9f5;
+  border-radius: 12px 12px 0 0;
+  padding: 0.8rem 1.5rem;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
 }
-.sidebar .logo-small {
-  width: 80px;
-  margin: 0 auto 1.5rem;
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-.sidebar nav button {
-  display: block;
-  width: 100%;
-  padding: 12px;
-  margin: 6px 0;
+.logo-small {
+  width: 40px;
+}
+.brand-text {
+  font-weight: 600;
+  color: #1e3c72;
+}
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #1e3c72;
+}
+.nav-menu {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.nav-link {
   background: transparent;
   border: none;
+  padding: 10px 16px;
   border-radius: 8px;
-  color: #1e3c72;
-  font-size: 15px;
-  text-align: left;
   cursor: pointer;
+  font-size: 15px;
+  color: #1e3c72;
   transition: 0.2s;
 }
-.sidebar nav button:hover, .sidebar nav button.active {
+.nav-link:hover, .nav-link.active {
   background: #d4e6ff;
 }
-.sidebar .logout-btn {
-  margin-top: auto;
+.logout-btn {
   background: #fce8e6;
   color: #c5221f;
   border: none;
+  padding: 10px 16px;
   border-radius: 8px;
-  padding: 12px;
   cursor: pointer;
   font-weight: 500;
 }
+
+/* Main panel */
 .main-panel {
-  flex: 1;
-  padding: 2rem;
   background: white;
-  border-radius: 0 12px 12px 0;
   border: 1px solid #d0e2ff;
-  border-left: none;
-  overflow-y: auto;
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  padding: 2rem;
+  min-height: 70vh;
 }
+
+/* Cards and tables */
 .card {
   background: #f9fcff;
   border: 1px solid #b8d8fc;
@@ -222,4 +242,27 @@ body {
   padding: 10px 20px;
   border-radius: 8px;
   cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hamburger {
+    display: block;
+  }
+  .nav-menu {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 10px;
+  }
+  .nav-menu.open {
+    display: flex;
+  }
+  .nav-link {
+    width: 100%;
+    text-align: left;
+  }
+  .main-panel {
+    padding: 1rem;
+  }
 }
