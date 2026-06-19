@@ -1,43 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Membership Portal</title>
+  <title>نظام إدارة العضوية</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="app">
-    <!-- Login Section -->
-    <div id="loginSection" class="login-container">
-      <div class="login-card">
-        <img src="logo.png" alt="Logo" class="logo">
-        <h2>Member Login</h2>
-        <input type="email" id="loginEmail" placeholder="Email" autocomplete="email">
-        <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
-        <button id="loginBtn">Sign In</button>
-        <div id="loginError" class="error"></div>
-      </div>
     </div>
-
-    <!-- Dashboard Section -->
-    <div id="dashboardSection" class="hidden">
-      <header class="navbar">
-        <div class="navbar-brand">
-          <img src="logo.png" alt="Logo" class="logo-small">
-          <span class="brand-text">Portal</span>
-        </div>
-        <button class="hamburger" id="hamburgerBtn">☰</button>
-        <nav id="navMenu" class="nav-menu">
-          <button class="nav-link active" data-view="profile">👤 My Membership</button>
-          <button class="nav-link" data-view="users" id="userMgmtBtn">👥 User Management</button>
-          <button class="nav-link logout-btn" id="logoutBtn">🚪 Logout</button>
-        </nav>
-      </header>
-      <main class="main-panel" id="mainPanel"></main>
-    </div>
-  </div>
-
-  <script type="module" src="app.js"></script>
+  
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>
