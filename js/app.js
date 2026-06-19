@@ -1,40 +1,41 @@
-import { listenToAuthChanges, logoutUser } from "./auth.js";
-import { fetchUsers, updateDashboardUI } from "./ui.js";
+import { auth, db } from "./firebase-config.js";
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+import { collection, query, limit, getDocs, startAfter, orderBy } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
-const appContainer = document.getElementById('app');
+let lastVisible = null;
+const loginSec = document.getElementById('loginSection');
+const dashSec = document.getElementById('dashboardSection');
 
-listenToAuthChanges(async (state) => {
-  if (state.user) {
-    renderDashboard();
-  } else {
-    renderLogin();
-  }
+onAuthStateChanged(auth, user => {
+    if (user) {
+        loginSec.classList.add('hidden');
+        dashSec.classList.remove('hidden');
+        loadUsers();
+    } else {
+        loginSec.classList.remove('hidden');
+        dashSec.classList.add('hidden');
+    }
 });
 
-async function renderDashboard() {
-  appContainer.innerHTML = `
-    <div class="navbar">...</div>
-    <main class="main-panel">
-      <div id="usersList"></div>
-      <button id="loadMoreBtn">تحميل المزيد</button>
-    </main>
-  `;
-
-  const users = await fetchUsers(false);
-  updateDashboardUI('usersList', users);
-
-  document.getElementById('loadMoreBtn').addEventListener('click', async () => {
-    const nextUsers = await fetchUsers(true);
-    updateDashboardUI('usersList', nextUsers, true);
-  });
+async function loadUsers() {
+    const q = query(collection(db, "users"), orderBy("name"), limit(10));
+    const snap = await getDocs(q);
+    lastVisible = snap.docs[snap.docs.length - 1];
+    displayUsers(snap);
 }
 
-function renderLogin() {
-  appContainer.innerHTML = `
-    <div class="login-container">
-      <input type="email" id="email" placeholder="Email">
-      <input type="password" id="pass" placeholder="Password">
-      <button id="loginBtn">دخول</button>
-    </div>
-  `;
+function displayUsers(snap) {
+    const list = document.getElementById('usersList');
+    snap.forEach(doc => {
+        const d = doc.data();
+        list.innerHTML += `<div class="card"><h3>${d.name}</h3><p>${d.email}</p></div>`;
+    });
 }
+
+document.getElementById('loginBtn').addEventListener('click', async () => {
+    const email = document.getElementById('email').value;
+    const pass = document.getElementById('pass').value;
+    await signInWithEmailAndPassword(auth, email, pass);
+});
+
+document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
